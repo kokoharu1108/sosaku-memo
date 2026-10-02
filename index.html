@@ -171,6 +171,8 @@ a { color: var(--accent-ink); }
 .card-sum { font-size: 13.5px; color: var(--ink-2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .card-sum mark { background: var(--accent-soft); color: var(--accent-ink); border-radius: 3px; padding: 0 1px; }
 .card-foot { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.list-tag.link { background: none; font-family: inherit; cursor: pointer; }
+.list-tag.link:hover { border-color: var(--accent); color: var(--accent-ink); }
 .list-tag { font-size: 12px; color: var(--ink-2); border: 1px dashed var(--line); border-radius: 6px; padding: 0 7px; }
 .att-count { font-size: 12px; color: var(--ink-3); }
 
@@ -181,6 +183,13 @@ a { color: var(--accent-ink); }
 .genre.none { background: var(--surface-2); color: var(--ink-3); }
 
 .list-rows { display: grid; gap: 8px; }
+.genre-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.gf-label { font-size: 12px; color: var(--ink-3); margin-right: 2px; }
+.gf { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 12px; font-size: 13px; color: var(--ink-2); }
+.gf[aria-pressed="true"].all { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); }
+.gf[aria-pressed="true"].g-体験 { background: var(--g-exp); color: var(--g-exp-ink); border-color: var(--g-exp-ink); }
+.gf[aria-pressed="true"].g-学び { background: var(--g-learn); color: var(--g-learn-ink); border-color: var(--g-learn-ink); }
+.gf[aria-pressed="true"].g-アイデア { background: var(--g-idea); color: var(--g-idea-ink); border-color: var(--g-idea-ink); }
 .list-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; }
 .list-head-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--accent-ink); }
 .list-head-name { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
@@ -273,7 +282,15 @@ a { color: var(--accent-ink); }
 .ai-out { background: var(--accent-soft); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }
 .ai-out.err { background: var(--ng); color: var(--ng-ink); }
 .ai-out ul { margin: 4px 0; padding-left: 1.2em; }
-.sel-ask { position: fixed; z-index: 40; transform: translate(-50%, -110%); }
+.sel-ask { position: fixed; z-index: 40; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100vw - 32px); box-shadow: var(--shadow); border-radius: 999px; padding: 10px 18px; font-size: 15px; }
+.sel-word { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14em; }
+.view-screen { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); bottom: env(safe-area-inset-bottom, 0px); min-height: 0; }
+.view-screen .topbar { position: relative; top: 0; }
+.view-screen .view-shell { min-height: 0; overflow: hidden; }
+.view-screen .view-main { height: 100%; overscroll-behavior: contain; }
+.view-screen .ai-panel { height: 100%; }
+.ai-clip { overflow: hidden; height: 100%; min-width: 0; }
+.ai-panel[data-closed="true"] .ai-clip { display: none; }
 
 /* ---------- edit screen ---------- */
 .field { margin-bottom: 18px; }
@@ -651,7 +668,8 @@ function resolveBodyHtml(html, attachments) {
    ========================================================= */
 const UI = {
   stack: [{ name: "search" }],
-  search: { q: "", committed: "", tab: "memos", order: "desc", listFilter: null },
+  search: { q: "", committed: "", tab: "memos", order: "desc", genres: [] },
+  listView: { order: "desc", genres: [] },
   readSize: lsGet("sm.readSize", 17),
   aiWidth: 0, aiLog: [],
 };
@@ -715,6 +733,7 @@ function render() {
   if (s.name === "search") app.append(renderSearch());
   else if (s.name === "view") { if (!Manager.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderView(s)); }
   else if (s.name === "edit") app.append(renderEdit(s));
+  else if (s.name === "list") { if (!Manager.lists.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderListScreen(s)); }
 }
 
 /* ---------- メモ検索画面 ---------- */
@@ -752,32 +771,21 @@ function renderSearch() {
     fab.setAttribute("aria-label", fabLabel.textContent);
     if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
 
-    let items = Manager.sorted;
-    if (st.listFilter) items = items.filter(m => (m.listIds || []).includes(st.listFilter));
+    let items = filterByGenre(Manager.sorted, st.genres);
     const terms = st.committed.toLowerCase().split(/\s+/).filter(Boolean);
     if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
     if (st.order === "asc") items = [...items].reverse();
 
+    results.append(genreFilterBar(st, drawResults));
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
-    const openList = st.listFilter && Manager.lists.get(st.listFilter);
-    if (st.listFilter && !openList) st.listFilter = null;
-    if (openList) results.append(h("div", { class: "list-head" },
-      h("div", { style: "flex:1;min-width:0" }, h("div", { class: "list-head-label" }, "リスト"), h("div", { class: "list-head-name" }, openList.name)),
-      h("button", { class: "btn primary", onclick: () => pickMemosForList(openList, drawResults) }, "＋ 保存済みのメモを入れる"),
-      h("button", { class: "btn ghost", onclick: () => { st.listFilter = null; st.tab = "lists"; drawResults(); } }, "リスト一覧へ")));
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
-    metaRow.append(h("span", { class: "result-meta" }, terms.length ? `${items.length}件見つかりました` : `全${items.length}件`));
+    metaRow.append(h("span", { class: "result-meta" }, (terms.length || st.genres.length) ? `${items.length}件見つかりました` : `全${items.length}件`));
     results.append(metaRow);
 
     if (!items.length) {
-      if (openList && !terms.length) {
-        results.append(h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
-          Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書いたメモはこのリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。"));
-        return;
-      }
       results.append(Manager.memos.size === 0
         ? h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「新規メモ」から、行った場所や思いついたことを書き留めましょう。")
-        : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
+        : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), st.genres.length ? "ジャンルの絞り込みを外すか、別のキーワードで試してください。" : "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
       return;
     }
     const list = h("div", { class: "memo-list" });
@@ -787,8 +795,8 @@ function renderSearch() {
 
   fabLabel = h("span", {}, "新規メモ");
   fab = h("button", { class: "fab", onclick: () => {
-    if (st.tab === "lists") createList(drawResults);
-    else go({ name: "edit", id: null, presetList: st.listFilter || null });
+    if (st.tab === "lists") createList();
+    else go({ name: "edit", id: null });
   } }, svgIcon('<path d="M12 5v14M5 12h14"/>'), fabLabel);
   const lastB = Manager.meta.lastBackup;
   const storeNote = Storage.mode === "memory"
@@ -847,21 +855,62 @@ function renderLists(redraw) {
   for (const l of lists) {
     const count = Manager.sorted.filter(m => (m.listIds || []).includes(l.id)).length;
     rows.append(h("div", { class: "list-row" },
-      h("button", { class: "open", onclick: () => { st.listFilter = l.id; st.tab = "memos"; redraw(); } },
+      h("button", { class: "open", onclick: () => go({ name: "list", id: l.id }) },
         h("div", { class: "list-name" }, l.name),
         h("div", { class: "list-sub" }, `${count}件 ・ ${fmtDate(l.updatedAt)}`)),
       h("button", { class: "icon-btn", title: "名前を変更", "aria-label": "名前を変更", onclick: () => renameList(l, redraw) }, "✎"),
       h("button", { class: "icon-btn", title: "リストを削除", "aria-label": "リストを削除", onclick: async () => {
         const ok = await modal({ title: "本当に削除しますか？", message: `リスト「${l.name}」を削除します。中のメモは削除されません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
         if (!ok) return;
-        try { await Manager.deleteList(l.id); if (st.listFilter === l.id) st.listFilter = null; toast("リストを削除しました"); redraw(); }
+        try { await Manager.deleteList(l.id); toast("リストを削除しました"); redraw(); }
         catch { toast("リストを削除できませんでした。", true); }
       } }, "🗑")));
   }
   wrap.append(rows);
   return wrap;
 }
-async function createList(redraw) {
+function filterByGenre(items, genres) { return genres.length ? items.filter(m => (m.genres || []).some(g => genres.includes(g))) : items; }
+function genreFilterBar(state, redraw) {
+  return h("div", { class: "genre-filter", role: "group", "aria-label": "ジャンルで絞り込み" },
+    h("span", { class: "gf-label" }, "ジャンル"),
+    h("button", { type: "button", class: "gf all", "aria-pressed": String(!state.genres.length), onclick: () => { state.genres = []; redraw(); } }, "すべて"),
+    GENRES.map(g => h("button", { type: "button", class: "gf g-" + g, "aria-pressed": String(state.genres.includes(g)), onclick: () => {
+      state.genres = state.genres.includes(g) ? state.genres.filter(x => x !== g) : [...state.genres, g]; redraw();
+    } }, g)));
+}
+
+/* ---------- リスト画面 ---------- */
+function renderListScreen(s) {
+  const l = Manager.lists.get(s.id);
+  const st = UI.listView;
+  const body = h("div");
+  const draw = () => {
+    const members = Manager.sorted.filter(m => (m.listIds || []).includes(l.id));
+    let items = filterByGenre(members, st.genres);
+    if (st.order === "asc") items = [...items].reverse();
+    body.replaceChildren(
+      h("div", { class: "toolbar-row", style: "margin-top:0" },
+        h("button", { class: "btn primary", onclick: () => pickMemosForList(l, draw) }, "＋ 保存済みのメモを入れる"),
+        h("span", { class: "spacer" }),
+        h("button", { class: "btn ghost", onclick: () => { st.order = st.order === "desc" ? "asc" : "desc"; draw(); } }, st.order === "desc" ? "新しい順 ↓" : "古い順 ↑")),
+      members.length ? genreFilterBar(st, draw) : "",
+      h("div", { class: "result-meta", style: "margin-bottom:8px" }, st.genres.length ? `${items.length}件（全${members.length}件中）` : `全${members.length}件 ・ 更新 ${fmtDate(l.updatedAt)}`),
+      !members.length
+        ? h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
+            Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書くと、このリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。")
+        : !items.length ? h("div", { class: "empty" }, h("b", {}, "このジャンルのメモはありません"), "ジャンルの絞り込みを外してください。")
+        : h("div", { class: "memo-list" }, items.map(m => memoCard(m))));
+  };
+  draw();
+  return h("div", { class: "screen" },
+    h("header", { class: "topbar" }, h("div", { class: "topbar-in" },
+      h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
+      h("div", { style: "flex:1;min-width:0" }, h("div", { class: "list-head-label" }, "リスト"), h("h1", { style: "line-height:1.3" }, l.name)),
+      h("button", { class: "icon-btn", title: "名前を変更", "aria-label": "リスト名を変更", onclick: () => renameList(l, render) }, "✎"))),
+    h("main", { class: "wrap" }, body),
+    h("button", { class: "fab", onclick: () => go({ name: "edit", id: null, presetList: l.id }) }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "新規メモ")));
+}
+async function createList() {
   const name = await modal({ title: "新しいリスト", body: (close) => {
     const inp = h("input", { id: "newlist", class: "text-input", placeholder: "リスト名（例：京都旅行2026）", maxlength: "60" });
     return h("form", { onsubmit: (e) => { e.preventDefault(); const v = inp.value.trim(); if (v) close(v); else inp.focus(); } }, inp,
@@ -872,8 +921,8 @@ async function createList(redraw) {
   try { l = await Manager.saveList({ id: uid("l"), name }); }
   catch { toast("リストを作成できませんでした。もう一度お試しください。", true); return; }
   toast("リストを作成しました");
-  UI.search.listFilter = l.id; UI.search.tab = "memos"; redraw();
-  if (Manager.memos.size) pickMemosForList(l, redraw);
+  go({ name: "list", id: l.id });
+  if (Manager.memos.size) pickMemosForList(l, render);
 }
 async function pickMemosForList(list, redraw) {
   const picked = new Set(Manager.sorted.filter(m => (m.listIds || []).includes(list.id)).map(m => m.id));
@@ -920,7 +969,7 @@ function renderView(s) {
       try { await Manager.deleteMemo(m.id); toast("メモを削除しました"); resetTo(); }
       catch { toast("削除できませんでした。通信状態を確認してもう一度お試しください。", true); }
     } }, "🗑 削除"));
-  const menuBtn = h("button", { class: "icon-btn", "aria-label": "メニュー", onclick: (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; } }, "⋯");
+  const menuBtn = h("button", { class: "icon-btn menu-btn", "aria-label": "編集・削除のメニュー", onclick: (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; } }, "⋯");
   const closeMenu = () => { menu.hidden = true; };
   document.addEventListener("click", closeMenu); cleanupFns.push(() => document.removeEventListener("click", closeMenu));
 
@@ -933,7 +982,8 @@ function renderView(s) {
     h("div", { class: "view-meta" }, h("span", {}, "作成日時 " + fmtDate(m.updatedAt)), h("span", { class: "spacer" }),
       h("div", { class: "zoom", role: "group", "aria-label": "文字サイズ" }, h("button", { onclick: () => setSize(-1), "aria-label": "文字を小さく" }, "A−"), h("button", { onclick: () => setSize(1), "aria-label": "文字を大きく" }, "A＋"))),
     h("h2", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
-    h("div", { class: "view-meta" }, genreChips(m), listNames(m).map(n => h("span", { class: "list-tag" }, "▸ " + n))),
+    h("div", { class: "view-meta" }, genreChips(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
+      h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name))),
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
     m.attachments.length ? [h("div", { class: "section-h" }, "添付ファイル"), attGrid(m.attachments, false)] : null,
     m.links.length ? [h("div", { class: "section-h" }, "参照メモ"), h("div", { class: "ref-list" }, m.links.map(id => Manager.get(id)).filter(Boolean).map(r =>
@@ -943,24 +993,28 @@ function renderView(s) {
   const ai = renderAI(m, main);
 
   // selection → AIで調べる
+  // 選択した言葉を調べる: スマホのコピー等のメニューと重ならないよう画面下部に出す
+  let lastSel = "";
+  const selWord = h("span", { class: "sel-word" });
   const selBtn = h("button", { class: "btn primary sel-ask", hidden: true, onmousedown: (e) => e.preventDefault(), onclick: () => {
-    const t = String(window.getSelection()).trim().slice(0, 200); selBtn.hidden = true; if (t) ai.ask(t, true);
-  } }, "この言葉を調べる");
+    const t = (String(window.getSelection()).trim() || lastSel).slice(0, 200); selBtn.hidden = true; lastSel = "";
+    try { window.getSelection().removeAllRanges(); } catch {}
+    if (t) ai.ask(t, true);
+  } }, "🔍 「", selWord, "」を調べる");
   const onSel = () => {
     const sel = window.getSelection();
-    if (!sel || sel.isCollapsed || !body.contains(sel.anchorNode)) { selBtn.hidden = true; return; }
-    const r = sel.getRangeAt(0).getBoundingClientRect();
-    selBtn.style.left = Math.min(window.innerWidth - 70, Math.max(70, r.left + r.width / 2)) + "px";
-    selBtn.style.top = Math.max(60, r.top) + "px";
+    const t = sel ? String(sel).trim() : "";
+    if (!t || !body.contains(sel.anchorNode)) { selBtn.hidden = true; return; }
+    lastSel = t;
+    selWord.textContent = t.length > 12 ? t.slice(0, 12) + "…" : t;
     selBtn.hidden = false;
   };
   document.addEventListener("selectionchange", onSel); cleanupFns.push(() => document.removeEventListener("selectionchange", onSel));
 
-  return h("div", { class: "screen", style: "height:100%" },
+  return h("div", { class: "screen view-screen" },
     h("header", { class: "topbar" }, h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("h1", {}, "メモを読む"),
-      h("button", { class: "btn", onclick: () => go({ name: "edit", id: m.id }) }, "編集"),
       h("div", { class: "menu-wrap" }, menuBtn, menu))),
     h("div", { class: "view-shell" }, main, ai.el), selBtn);
 }
@@ -1004,7 +1058,7 @@ function renderAI(memo, mainEl) {
       h("button", { class: "btn", onclick: () => setWidth(0, true), "aria-label": "閉じる" }, "閉じる")),
     h("form", { class: "ai-form", onsubmit: (e) => { e.preventDefault(); ask(qIn.value); } }, qIn, h("button", { class: "btn primary", type: "submit" }, "調べる")),
     hint, log);
-  const clip = h("div", { style: "overflow:hidden;height:100%;min-width:0" }, inner);
+  const clip = h("div", { class: "ai-clip" }, inner);
   panel.append(handle, clip);
 
   // drag to resize
@@ -1107,7 +1161,7 @@ function renderAI(memo, mainEl) {
     const box = h("div", { class: "ai-a" }, "Wikipediaを調べています…");
     const card = h("div", { class: "lookup" }, h("div", { class: "ai-q" }, q), box);
     log.append(card);
-    card.scrollIntoView({ block: "start" });
+    log.scrollTop = card.offsetTop - log.offsetTop;
     if (!navigator.onLine) { box.classList.add("err"); box.textContent = "オフラインのため調べられません。電波のある場所でもう一度お試しください。"; return; }
     const tools = h("div", { class: "lookup-tools" }, extLinks(q));
     if (getAiConf().key) { const aiBtn = h("button", { class: "btn primary", type: "button", onclick: () => askAI(q, card, aiBtn) }, "AIに聞く"); tools.append(aiBtn); }
