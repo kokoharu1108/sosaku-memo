@@ -181,6 +181,9 @@ a { color: var(--accent-ink); }
 .genre.none { background: var(--surface-2); color: var(--ink-3); }
 
 .list-rows { display: grid; gap: 8px; }
+.list-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; }
+.list-head-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--accent-ink); }
+.list-head-name { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
 .list-row { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 4px 4px 4px 0; }
 .list-row > button.open { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 8px 14px; color: inherit; }
 .list-name { font-weight: 700; overflow-wrap: anywhere; }
@@ -258,6 +261,18 @@ a { color: var(--accent-ink); }
 .ai-a ul { margin: 4px 0; padding-left: 1.2em; }
 .ai-a .web { display: inline-block; margin-top: 6px; font-size: 12px; }
 .ai-hint { font-size: 12.5px; color: var(--ink-3); }
+.lookup { display: flex; flex-direction: column; gap: 8px; }
+.lookup-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.ext-links { display: contents; }
+.ext-links .btn, .lookup-tools .btn { padding: 4px 10px; font-size: 13px; text-decoration: none; }
+.wiki-title { font-weight: 700; font-size: 15px; }
+.wiki-desc { font-size: 12px; color: var(--ink-3); margin-bottom: 4px; }
+.wiki-thumb { display: block; max-width: 100%; max-height: 200px; border-radius: 8px; margin: 6px 0; cursor: zoom-in; }
+.wiki-src { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
+.wiki-cands { display: flex; flex-wrap: wrap; gap: 6px; }
+.ai-out { background: var(--accent-soft); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }
+.ai-out.err { background: var(--ng); color: var(--ng-ink); }
+.ai-out ul { margin: 4px 0; padding-left: 1.2em; }
 .sel-ask { position: fixed; z-index: 40; transform: translate(-50%, -110%); }
 
 /* ---------- edit screen ---------- */
@@ -334,8 +349,6 @@ a { color: var(--accent-ink); }
 }
 @media (max-width: 520px) {
   .brand small { display: none; }
-  .fab span { display: none; }
-  .fab { width: 56px; padding: 0; justify-content: center; }
   .view-doc { padding-inline: 16px 22px; }
 }
 .settings-sec { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; display: grid; gap: 8px; }
@@ -550,6 +563,22 @@ const Manager = {
     this.reindex();
     return l;
   },
+  /* リストに入れるメモをまとめて更新 */
+  async setListMembers(listId, memoIds) {
+    const want = new Set(memoIds);
+    const changed = [];
+    for (const m of this.memos.values()) {
+      const has = (m.listIds || []).includes(listId);
+      if (has === want.has(m.id)) continue;
+      m.listIds = has ? m.listIds.filter(x => x !== listId) : [...(m.listIds || []), listId];
+      changed.push(m);
+    }
+    if (!changed.length) return 0;
+    for (const m of changed) await Storage.putMemo(stripRuntime(m));
+    const l = this.lists.get(listId); if (l) { l.updatedAt = Date.now(); await Storage.putList(l); }
+    this.reindex();
+    return changed.length;
+  },
   async deleteList(id) {
     const prev = this.lists.get(id);
     this.lists.delete(id);
@@ -707,6 +736,7 @@ function renderSearch() {
   input.addEventListener("blur", () => setTimeout(() => { histBox.hidden = true; }, 120));
   function commit() { st.committed = st.q.trim(); st.tab = "memos"; if (st.committed) Manager.pushHistory(st.committed); histBox.hidden = true; drawResults(); }
 
+  let fab, fabLabel;
   const results = h("div");
   const toolbar = h("div", { class: "toolbar-row" });
   function drawResults() {
@@ -718,6 +748,8 @@ function renderSearch() {
       st.order === "desc" ? "新しい順 ↓" : "古い順 ↑");
     toolbar.append(tabs, h("span", { class: "spacer" }), orderBtn);
 
+    fabLabel.textContent = st.tab === "lists" ? "新規リスト" : "新規メモ";
+    fab.setAttribute("aria-label", fabLabel.textContent);
     if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
 
     let items = Manager.sorted;
@@ -727,12 +759,22 @@ function renderSearch() {
     if (st.order === "asc") items = [...items].reverse();
 
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
-    if (st.listFilter && Manager.lists.get(st.listFilter)) metaRow.append(h("span", { class: "filter-chip" }, "リスト: " + Manager.lists.get(st.listFilter).name, h("button", { "aria-label": "絞り込みを解除", onclick: () => { st.listFilter = null; drawResults(); } }, "✕")));
+    const openList = st.listFilter && Manager.lists.get(st.listFilter);
+    if (st.listFilter && !openList) st.listFilter = null;
+    if (openList) results.append(h("div", { class: "list-head" },
+      h("div", { style: "flex:1;min-width:0" }, h("div", { class: "list-head-label" }, "リスト"), h("div", { class: "list-head-name" }, openList.name)),
+      h("button", { class: "btn primary", onclick: () => pickMemosForList(openList, drawResults) }, "＋ 保存済みのメモを入れる"),
+      h("button", { class: "btn ghost", onclick: () => { st.listFilter = null; st.tab = "lists"; drawResults(); } }, "リスト一覧へ")));
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
     metaRow.append(h("span", { class: "result-meta" }, terms.length ? `${items.length}件見つかりました` : `全${items.length}件`));
     results.append(metaRow);
 
     if (!items.length) {
+      if (openList && !terms.length) {
+        results.append(h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
+          Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書いたメモはこのリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。"));
+        return;
+      }
       results.append(Manager.memos.size === 0
         ? h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「新規メモ」から、行った場所や思いついたことを書き留めましょう。")
         : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
@@ -743,7 +785,11 @@ function renderSearch() {
     results.append(list);
   }
 
-  const fab = h("button", { class: "fab", onclick: () => go({ name: "edit", id: null }) }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "新規メモ"));
+  fabLabel = h("span", {}, "新規メモ");
+  fab = h("button", { class: "fab", onclick: () => {
+    if (st.tab === "lists") createList(drawResults);
+    else go({ name: "edit", id: null, presetList: st.listFilter || null });
+  } }, svgIcon('<path d="M12 5v14M5 12h14"/>'), fabLabel);
   const lastB = Manager.meta.lastBackup;
   const storeNote = Storage.mode === "memory"
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
@@ -756,7 +802,7 @@ function renderSearch() {
       h("div", { class: "brand" }, h("b", {}, "創作メモ帳"), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       themeSwitch(),
-      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定（AI検索・バックアップ）", onclick: openSettings }, "⚙"))),
+      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定（バックアップ・AI）", onclick: openSettings }, "⚙"))),
     h("main", { class: "wrap" },
       storeNote,
       h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
@@ -794,17 +840,9 @@ function memoCard(m, terms = []) {
 function renderLists(redraw) {
   const st = UI.search;
   const wrap = h("div");
-  const nameIn = h("input", { id: "newlist", class: "text-input", placeholder: "新しいリスト名（例：京都旅行2026）", maxlength: "60" });
-  const addBtn = h("button", { class: "btn primary", type: "submit" }, "作成");
-  wrap.append(h("form", { class: "new-list", onsubmit: async (e) => {
-    e.preventDefault(); const name = nameIn.value.trim(); if (!name) return;
-    addBtn.disabled = true;
-    try { await Manager.saveList({ id: uid("l"), name }); toast("リストを作成しました"); redraw(); }
-    catch (err) { toast("リストを作成できませんでした。もう一度お試しください。", true); addBtn.disabled = false; }
-  } }, nameIn, addBtn));
   let lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
   if (st.order === "asc") lists.reverse();
-  if (!lists.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "リストはまだありません"), "旅行やイベントごとにリストを作ると、メモをプレイリストのようにまとめられます。")); return wrap; }
+  if (!lists.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "リストはまだありません"), "右下の「新規リスト」から、旅行やイベントごとのリストを作ると、メモをプレイリストのようにまとめられます。")); return wrap; }
   const rows = h("div", { class: "list-rows" });
   for (const l of lists) {
     const count = Manager.sorted.filter(m => (m.listIds || []).includes(l.id)).length;
@@ -822,6 +860,43 @@ function renderLists(redraw) {
   }
   wrap.append(rows);
   return wrap;
+}
+async function createList(redraw) {
+  const name = await modal({ title: "新しいリスト", body: (close) => {
+    const inp = h("input", { id: "newlist", class: "text-input", placeholder: "リスト名（例：京都旅行2026）", maxlength: "60" });
+    return h("form", { onsubmit: (e) => { e.preventDefault(); const v = inp.value.trim(); if (v) close(v); else inp.focus(); } }, inp,
+      h("div", { class: "modal-actions", style: "margin-top:14px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"), h("button", { class: "btn primary", type: "submit" }, "作成")));
+  } });
+  if (!name) return;
+  let l;
+  try { l = await Manager.saveList({ id: uid("l"), name }); }
+  catch { toast("リストを作成できませんでした。もう一度お試しください。", true); return; }
+  toast("リストを作成しました");
+  UI.search.listFilter = l.id; UI.search.tab = "memos"; redraw();
+  if (Manager.memos.size) pickMemosForList(l, redraw);
+}
+async function pickMemosForList(list, redraw) {
+  const picked = new Set(Manager.sorted.filter(m => (m.listIds || []).includes(list.id)).map(m => m.id));
+  const ok = await modal({ wide: true, title: `「${list.name}」に入れるメモ`, body: (close) => {
+    const q = h("input", { id: "listpickq", class: "text-input", placeholder: "題名や本文で絞り込み" });
+    const countEl = h("span", { class: "result-meta", style: "margin-right:auto" });
+    const listEl = h("div", { class: "picker-list" });
+    const draw = () => {
+      const t = q.value.trim().toLowerCase();
+      const items = Manager.sorted.filter(m => !t || m._search.includes(t));
+      countEl.textContent = `${picked.size}件を選択中`;
+      listEl.replaceChildren(...(items.length ? items.map(m => h("button", { class: "ref-item", type: "button", "aria-pressed": String(picked.has(m.id)), onclick: () => { picked.has(m.id) ? picked.delete(m.id) : picked.add(m.id); draw(); } },
+        h("span", {}, picked.has(m.id) ? "☑" : "☐"), h("span", { class: "t" }, m.title || "無題のメモ"), h("span", { class: "d" }, fmtDate(m.updatedAt))))
+        : [h("p", { class: "ai-hint" }, Manager.memos.size ? "一致するメモがありません。" : "保存済みのメモがありません。")]));
+    };
+    q.addEventListener("input", draw); draw();
+    return h("div", { style: "display:flex;flex-direction:column;min-height:0;flex:1" }, q, listEl,
+      h("div", { class: "modal-actions", style: "align-items:center" }, countEl, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"),
+        h("button", { class: "btn primary", type: "button", onclick: () => close(true) }, "決定")));
+  } });
+  if (!ok) return;
+  try { const n = await Manager.setListMembers(list.id, [...picked]); if (n) toast("リストを更新しました"); redraw(); }
+  catch { toast("リストを更新できませんでした。もう一度お試しください。", true); }
 }
 async function renameList(l, redraw) {
   const name = await modal({ title: "リスト名を変更", body: (close) => {
@@ -870,7 +945,7 @@ function renderView(s) {
   // selection → AIで調べる
   const selBtn = h("button", { class: "btn primary sel-ask", hidden: true, onmousedown: (e) => e.preventDefault(), onclick: () => {
     const t = String(window.getSelection()).trim().slice(0, 200); selBtn.hidden = true; if (t) ai.ask(t, true);
-  } }, "AIで調べる");
+  } }, "この言葉を調べる");
   const onSel = () => {
     const sel = window.getSelection();
     if (!sel || sel.isCollapsed || !body.contains(sel.anchorNode)) { selBtn.hidden = true; return; }
@@ -903,11 +978,11 @@ function attGrid(atts, editable, onRemove) {
 
 /* AI検索ウィンドウ (right edge, slide to resize) */
 function renderAI(memo, mainEl) {
-  const panel = h("aside", { class: "ai-panel", "aria-label": "AI検索" });
-  const handle = h("button", { class: "ai-handle", "aria-label": "AI検索を開く・幅を調整", title: "タップで開閉／左右にスライドで幅を調整" }, h("span", { class: "arrow" }, "◀"), h("span", { class: "lbl" }, "AI検索"));
-  const qIn = h("input", { id: "aiq", class: "text-input", placeholder: "気になる言葉や質問", enterkeyhint: "search" });
+  const panel = h("aside", { class: "ai-panel", "aria-label": "調べもの" });
+  const handle = h("button", { class: "ai-handle", "aria-label": "調べものウィンドウを開く・幅を調整", title: "タップで開閉／左右にスライドで幅を調整" }, h("span", { class: "arrow" }, "◀"), h("span", { class: "lbl" }, "調べる"));
+  const qIn = h("input", { id: "aiq", class: "text-input", placeholder: "気になる言葉", enterkeyhint: "search" });
   const log = h("div", { class: "ai-log" });
-  const hint = h("p", { class: "ai-hint" }, "本文の言葉を選択すると「AIで調べる」が出ます。ここに直接入力しても調べられます。");
+  const hint = h("p", { class: "ai-hint" }, "本文の言葉を選択すると「この言葉を調べる」が出ます。ここに直接入力しても調べられます。Wikipediaの要約をここに表示し、Google・画像・辞書は別画面で開きます。");
   let pending = null;
 
   const setWidth = (pct, animate) => {
@@ -923,7 +998,7 @@ function renderAI(memo, mainEl) {
   // the handle sits outside the panel's left edge
   panel.style.overflow = "visible";
   const inner = h("div", { class: "ai-inner" },
-    h("div", { class: "ai-head" }, h("b", {}, "AI検索"),
+    h("div", { class: "ai-head" }, h("b", {}, "調べもの"),
       h("button", { class: "btn", onclick: () => setWidth(50, true) }, "半分"),
       h("button", { class: "btn", onclick: () => setWidth(100, true) }, "全画面"),
       h("button", { class: "btn", onclick: () => setWidth(0, true), "aria-label": "閉じる" }, "閉じる")),
@@ -972,33 +1047,84 @@ function renderAI(memo, mainEl) {
       el.append(h("div", {}, fmt(line.replace(/^#+\s*/, ""))));
     }
   };
-  async function ask(q, open) {
-    q = (q || "").trim(); if (!q) return;
-    if (open && UI.aiWidth < 4) setWidth(window.innerWidth < 640 ? 60 : 40, true);
-    qIn.value = "";
-    hint.hidden = true;
-    const a = h("div", { class: "ai-a" }, "考えています…");
-    const web = h("a", { class: "web", href: "https://www.google.com/search?q=" + encodeURIComponent(q), target: "_blank", rel: "noopener" }, "Webでも検索する ↗");
-    log.append(h("div", { class: "ai-q" }, q), a);
-    log.scrollTop = log.scrollHeight;
+  const enc = encodeURIComponent;
+  const extLinks = (q) => h("div", { class: "ext-links" },
+    h("a", { class: "btn", href: "https://www.google.com/search?q=" + enc(q), target: "_blank", rel: "noopener" }, "Google ↗"),
+    h("a", { class: "btn", href: "https://www.google.com/search?tbm=isch&q=" + enc(q), target: "_blank", rel: "noopener" }, "画像 ↗"),
+    h("a", { class: "btn", href: "https://www.weblio.jp/content/" + enc(q), target: "_blank", rel: "noopener" }, "辞書 ↗"));
+  async function wikiSummary(title, signal) {
+    const res = await fetch("https://ja.wikipedia.org/api/rest_v1/page/summary/" + enc(title.replace(/ /g, "_")) + "?redirect=true", { signal });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error("wiki " + res.status);
+    const d = await res.json();
+    return d && d.type !== "disambiguation" && d.extract ? d : null;
+  }
+  async function wikiSearch(q, signal) {
+    const res = await fetch("https://ja.wikipedia.org/w/api.php?action=query&list=search&srlimit=6&format=json&origin=*&srsearch=" + enc(q), { signal });
+    if (!res.ok) throw new Error("wiki " + res.status);
+    const d = await res.json();
+    return ((d.query && d.query.search) || []).map(x => x.title);
+  }
+  function drawWiki(box, d) {
+    const url = d.content_urls && (d.content_urls.mobile || d.content_urls.desktop) && (d.content_urls.mobile || d.content_urls.desktop).page;
+    box.classList.remove("err");
+    box.replaceChildren(...[
+      h("div", { class: "wiki-title" }, d.title),
+      d.description ? h("div", { class: "wiki-desc" }, d.description) : null,
+      d.thumbnail ? h("img", { class: "wiki-thumb", src: d.thumbnail.source, alt: d.title, loading: "lazy", onclick: () => lightbox((d.originalimage || d.thumbnail).source) }) : null,
+      h("div", {}, d.extract),
+      url ? h("a", { class: "web", href: url, target: "_blank", rel: "noopener" }, "Wikipediaで続きを読む ↗") : null,
+      h("div", { class: "wiki-src" }, "出典: Wikipedia（CC BY-SA）")].filter(Boolean));
+  }
+  async function askAI(q, box, btn) {
+    btn.disabled = true;
+    const out = h("div", { class: "ai-out" }, "AIが考えています…");
+    box.append(out);
     if (pending) pending.abort();
     const ctrl = new AbortController(); pending = ctrl;
     const ctx = (memo.bodyText || "").slice(0, 600);
     const prompt = `あなたは創作（小説・シナリオ・イラスト）の資料調べを手伝うアシスタントです。\nユーザーが自分の創作メモを読みながら、次の語句・質問を調べています。\n\n【調べたいこと】${q}\n\n【メモの題名】${memo.title || "（無題）"}\n【メモ本文の抜粋】${ctx}\n\n日本語で、まず一言で要点、次に創作の参考になる具体的な情報（由来・特徴・見た目・時代背景など該当するもの）を箇条書きで3〜6点、合計400字以内で答えてください。不確かな点はそう明記してください。`;
     try {
       const text = await aiAsk(prompt, ctrl.signal);
-      drawAnswer(a, text || "（回答が空でした）"); a.append(web);
+      out.replaceChildren(h("div", { class: "wiki-desc" }, "AIの回答"));
+      const body = h("div"); drawAnswer(body, text || "（回答が空でした）"); out.append(body);
     } catch (e) {
-      if (e && e.name === "AbortError") { a.replaceChildren("（中断しました）"); return; }
-      a.classList.add("err");
+      if (e && e.name === "AbortError") { out.replaceChildren("（中断しました）"); btn.disabled = false; return; }
+      out.classList.add("err");
       const code = e && e.code;
-      if (code === "offline") { a.replaceChildren("オフラインのためAI検索は使えません。電波のある場所でもう一度お試しください。"); return; }
-      if (code === "no_key") { a.replaceChildren("AI検索を使うには、検索画面右上の「設定」でAPIキーを登録してください。"); a.append(h("br"), web); return; }
-      a.replaceChildren(code === "rate_limited" ? "利用回数の上限に達しました。少し待ってからもう一度お試しください。"
-        : code === "api_error" ? "AI検索に失敗しました（" + (e.message || "エラー") + "）。設定のAPIキーとモデル名を確認してください。"
-        : "AI検索に失敗しました。通信状態を確認してもう一度お試しください。");
-      a.append(h("br"), web);
-    } finally { if (pending === ctrl) pending = null; log.scrollTop = log.scrollHeight; }
+      out.textContent = code === "offline" ? "オフラインのためAIは使えません。"
+        : code === "rate_limited" ? "利用回数の上限に達しました。少し待ってからもう一度お試しください。"
+        : code === "api_error" ? "AIへの問い合わせに失敗しました（" + (e.message || "エラー") + "）。設定のAPIキーとモデル名を確認してください。"
+        : "AIへの問い合わせに失敗しました。通信状態を確認してもう一度お試しください。";
+      btn.disabled = false;
+    } finally { if (pending === ctrl) pending = null; }
+  }
+  async function ask(q, open) {
+    q = (q || "").trim(); if (!q) return;
+    if (open && UI.aiWidth < 4) setWidth(window.innerWidth < 640 ? 60 : 40, true);
+    qIn.value = "";
+    hint.hidden = true;
+    const box = h("div", { class: "ai-a" }, "Wikipediaを調べています…");
+    const card = h("div", { class: "lookup" }, h("div", { class: "ai-q" }, q), box);
+    log.append(card);
+    card.scrollIntoView({ block: "start" });
+    if (!navigator.onLine) { box.classList.add("err"); box.textContent = "オフラインのため調べられません。電波のある場所でもう一度お試しください。"; return; }
+    const tools = h("div", { class: "lookup-tools" }, extLinks(q));
+    if (getAiConf().key) { const aiBtn = h("button", { class: "btn primary", type: "button", onclick: () => askAI(q, card, aiBtn) }, "AIに聞く"); tools.append(aiBtn); }
+    try {
+      const d = await wikiSummary(q);
+      if (d) drawWiki(box, d);
+      else {
+        const titles = await wikiSearch(q);
+        if (!titles.length) box.replaceChildren(h("div", {}, "Wikipediaに該当する記事が見つかりませんでした。下のボタンから検索できます。"));
+        else box.replaceChildren(h("div", { class: "wiki-desc" }, "Wikipediaの候補（タップで表示）"), h("div", { class: "wiki-cands" }, titles.map(t => h("button", { class: "chip-btn", type: "button", onclick: async () => {
+          box.textContent = "読み込んでいます…";
+          try { const s2 = await wikiSummary(t); if (s2) drawWiki(box, s2); else box.textContent = "この記事の要約を表示できませんでした。"; }
+          catch { box.textContent = "Wikipediaを読み込めませんでした。"; }
+        } }, t))));
+      }
+    } catch { box.classList.add("err"); box.textContent = "Wikipediaを読み込めませんでした。通信状態を確認してください。"; }
+    card.insertBefore(tools, box.nextSibling);
   }
   setWidth(UI.aiWidth, false);
   cleanupFns.push(() => { if (pending) pending.abort(); });
@@ -1015,7 +1141,7 @@ function renderEdit(s) {
     id: base ? base.id : uid("m"), isNew,
     title: base ? base.title : "", genres: base ? [...base.genres] : [],
     bodyHtml: base ? base.bodyHtml : "", attachments: base ? base.attachments.map(a => ({ ...a })) : [],
-    links: base ? [...base.links] : [], listIds: base ? [...base.listIds] : [],
+    links: base ? [...base.links] : [], listIds: base ? [...base.listIds] : (s.presetList && Manager.lists.has(s.presetList) ? [s.presetList] : []),
     savedOnce: !isNew, dirty: false,
   });
   const markDirty = () => { d.dirty = true; dirtyEl.textContent = "未保存の変更があります"; };
@@ -1050,6 +1176,51 @@ function renderEdit(s) {
   const keepRange = () => { const sel = window.getSelection(); if (sel.rangeCount && editor.contains(sel.anchorNode)) savedRange = sel.getRangeAt(0).cloneRange(); };
   editor.addEventListener("keyup", keepRange); editor.addEventListener("mouseup", keepRange); editor.addEventListener("blur", keepRange);
   const restoreRange = () => { editor.focus(); if (savedRange) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); } };
+  /* 箇条書き: カーソルが点の行にあれば解除、なければ追加 */
+  const caretLi = () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+    const n = sel.anchorNode; const el = n && (n.nodeType === 1 ? n : n.parentElement);
+    const li = el && el.closest("li");
+    return li && editor.contains(li) ? li : null;
+  };
+  const placeCaret = (node) => { const r = document.createRange(); r.setStart(node, 0); r.collapse(true); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); keepRange(); };
+  const unwrapLi = (li) => {
+    const list = li.parentElement;
+    const items = [...list.children];
+    const after = items.slice(items.indexOf(li) + 1);
+    const line = document.createElement("div");
+    while (li.firstChild) line.append(li.firstChild);
+    if (!line.textContent && !line.querySelector("img, br")) line.append(document.createElement("br"));
+    list.after(line);
+    if (after.length) { const rest = document.createElement(list.tagName); after.forEach(x => rest.append(x)); line.after(rest); }
+    li.remove();
+    if (!list.children.length) list.remove();
+    placeCaret(line);
+    markDirty();
+  };
+  const toggleBullet = () => {
+    restoreRange();
+    const li = caretLi();
+    if (li) { unwrapLi(li); return; }
+    exec("insertUnorderedList");
+  };
+  const caretAtLiStart = (li) => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount || !sel.isCollapsed) return false;
+    const r = document.createRange(); r.selectNodeContents(li); r.setEnd(sel.anchorNode, sel.anchorOffset);
+    return r.toString() === "" && !r.cloneContents().querySelector("img");
+  };
+  const onBackspace = (e) => {
+    const li = caretLi();
+    if (li && caretAtLiStart(li)) { e.preventDefault(); unwrapLi(li); return true; }
+    return false;
+  };
+  let handledByBefore = false;
+  editor.addEventListener("beforeinput", (e) => { if (e.inputType === "deleteContentBackward" && !e.isComposing) handledByBefore = onBackspace(e); });
+  editor.addEventListener("keydown", (e) => {
+    if (e.key === "Backspace" && !e.isComposing) { if (!handledByBefore) onBackspace(e); handledByBefore = false; }
+  });
   const exec = (cmd, val) => { restoreRange(); try { document.execCommand("styleWithCSS", false, true); } catch {} document.execCommand(cmd, false, val); keepRange(); markDirty(); };
 
   const boxWrap = h("div", { style: "position:relative" });
@@ -1101,7 +1272,7 @@ function renderEdit(s) {
         closePop();
       } }, url, sel ? null : txt, h("div", { class: "modal-actions" }, h("button", { class: "btn primary", type: "submit" }, "リンクを挿入"))));
     }),
-    tb("•", "箇条書き", () => exec("insertUnorderedList")),
+    tb("•", "箇条書き（もう一度押すと解除）", () => toggleBullet()),
     tb("📎", "添付ファイルを本文に挿入", (e) => {
       if (!d.attachments.length) { toast("先に下の「添付ファイル」から追加してください", true); return; }
       showPop(e.currentTarget, h("div", { class: "attach-pick" }, d.attachments.map(a => h("button", { type: "button", onmousedown: (ev) => ev.preventDefault(), onclick: () => {
@@ -1110,8 +1281,7 @@ function renderEdit(s) {
         else exec("insertHTML", `<a data-att="${a.id}" href="${url}">📄 ${a.name.replace(/[<>&"]/g, "")}</a>&nbsp;`);
         closePop();
       } }, ((a.type || "").startsWith("image/") ? "🖼 " : "📄 ") + a.name))));
-    }),
-    tb("⌫", "書式をクリア", () => exec("removeFormat")));
+    }));
   boxWrap.append(h("div", { class: "editor-box" }, fmtBar, editor));
   const bodyField = h("div", { class: "field" }, h("div", { class: "label" }, "本文"), boxWrap);
 
@@ -1277,7 +1447,7 @@ async function storeFile(file) {
 /* =========================================================
    AI検索 (Claude / Gemini API — キーはこの端末にだけ保存)
    ========================================================= */
-const AI_DEFAULTS = { claude: "claude-haiku-4-5-20251001", gemini: "gemini-2.5-flash" };
+const AI_DEFAULTS = { claude: "claude-haiku-4-5-20251001", gemini: "gemini-3.8-flash" };
 const getAiConf = () => ({ provider: "claude", key: "", model: "", ...lsGet("sm.ai", {}) });
 async function aiAsk(prompt, signal) {
   const c = getAiConf();
@@ -1319,8 +1489,8 @@ function openSettings() {
     const impIn = h("input", { id: "importfile", type: "file", accept: "application/json,.json", hidden: true, onchange: async (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) { close(true); await importBackup(f); } } });
     return h("div", { style: "overflow:auto;min-height:0" },
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
-        h("h4", {}, "AI検索"),
-        h("p", { class: "ai-hint", style: "margin:0" }, "閲覧画面のAI検索に使うAPIキーです。キーはこの端末の中にだけ保存され、AIサービス以外には送られません。"),
+        h("h4", {}, "AIに聞く（任意）"),
+        h("p", { class: "ai-hint", style: "margin:0" }, "登録すると、調べものウィンドウに「AIに聞く」ボタンが表示されます。登録しなくても、Wikipediaと外部検索は使えます。キーはこの端末の中にだけ保存され、AIサービス以外には送られません。"),
         h("div", { class: "row" }, prov), key, model,
         h("div", { class: "row" }, h("button", { class: "btn primary", type: "button", onclick: () => {
           lsSet("sm.ai", { provider: prov.value, key: key.value.trim(), model: model.value.trim() }); toast("AI検索の設定を保存しました");
