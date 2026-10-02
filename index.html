@@ -183,6 +183,10 @@ a { color: var(--accent-ink); }
 .genre.none { background: var(--surface-2); color: var(--ink-3); }
 
 .list-rows { display: grid; gap: 8px; }
+.toolbar-row { column-gap: 6px; }
+.toolbar-row > .btn.ghost { padding-inline: 6px; }
+.genre-select { height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); padding: 0 8px; font-size: 13.5px; max-width: 100%; }
+.genre-select.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
 .genre-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .gf-label { font-size: 12px; color: var(--ink-3); margin-right: 2px; }
 .gf { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 12px; font-size: 13px; color: var(--ink-2); }
@@ -190,6 +194,14 @@ a { color: var(--accent-ink); }
 .gf[aria-pressed="true"].g-体験 { background: var(--g-exp); color: var(--g-exp-ink); border-color: var(--g-exp-ink); }
 .gf[aria-pressed="true"].g-学び { background: var(--g-learn); color: var(--g-learn-ink); border-color: var(--g-learn-ink); }
 .gf[aria-pressed="true"].g-アイデア { background: var(--g-idea); color: var(--g-idea-ink); border-color: var(--g-idea-ink); }
+.crumbs { display: flex; align-items: center; gap: 4px; padding: 0 16px 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; font-size: 12.5px; max-width: 760px; margin: 0 auto; }
+.crumbs.wide { max-width: none; }
+.crumbs::-webkit-scrollbar { display: none; }
+.crumb { border: 0; background: none; padding: 2px 4px; border-radius: 6px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; flex: 0 0 auto; }
+.crumb.home { font-family: var(--font-title); font-weight: 700; text-decoration: none; }
+.crumb.current { color: var(--ink-2); text-decoration: none; font-weight: 700; }
+.crumb-sep { color: var(--ink-3); flex: 0 0 auto; }
+button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
 .list-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; }
 .list-head-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--accent-ink); }
 .list-head-name { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
@@ -221,10 +233,15 @@ a { color: var(--accent-ink); }
 .view-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .view-body { margin-top: 18px; font-size: var(--read-size, 17px); line-height: 1.9; overflow-wrap: anywhere; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 .view-body img, .editor img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 8px 0; cursor: zoom-in; }
+.editor img { cursor: pointer; }
+.editor img.img-selected { outline: 3px solid var(--accent); outline-offset: 2px; }
+.img-size { display: grid; gap: 8px; width: min(300px, calc(100vw - 48px)); }
+.img-size .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.img-size .row .btn { padding: 4px 10px; font-size: 13px; }
+.img-size .row .btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); }
+.img-size input[type=range] { width: 100%; accent-color: var(--accent); }
+.img-size .cap { font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; }
 .view-body p, .editor p { margin: 0 0 .6em; }
-.zoom { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-.zoom button { border: 0; background: var(--surface); width: 36px; height: 32px; color: var(--ink-2); }
-.zoom button + button { border-left: 1px solid var(--line); }
 .section-h { font-size: 12px; letter-spacing: .08em; color: var(--ink-3); margin: 28px 0 8px; font-weight: 700; }
 .att-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
 .att-tile { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; position: relative; }
@@ -246,51 +263,11 @@ a { color: var(--accent-ink); }
 .menu button.danger { color: var(--ng-ink); }
 
 /* AI panel */
-.ai-panel { position: relative; flex: 0 0 auto; background: var(--surface); border-left: 1px solid var(--line); display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
-.ai-panel[data-closed="true"] { border-left: 0; }
-.ai-handle {
-  position: absolute; top: 50%; transform: translateY(-50%); z-index: 12;
-  width: 30px; height: 96px; border: 1px solid var(--line); border-right: 0;
-  border-radius: 12px 0 0 12px; background: var(--accent-soft); color: var(--accent-ink);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  touch-action: none; cursor: ew-resize; font-size: 11px; font-weight: 700; padding: 0;
-  user-select: none; -webkit-user-select: none;
-}
-.ai-handle .arrow { font-size: 14px; line-height: 1; }
-.ai-handle .lbl { writing-mode: vertical-rl; letter-spacing: .1em; }
-.ai-inner { display: flex; flex-direction: column; height: 100%; min-width: 0; padding: 12px 12px 12px 18px; gap: 10px; }
-.ai-head { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.ai-head b { flex: 1; font-size: 14px; }
-.ai-head .btn { padding: 4px 9px; font-size: 12px; }
-.ai-form { display: flex; gap: 6px; }
-.ai-log { flex: 1; overflow: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
-.ai-q { align-self: flex-end; background: var(--accent-soft); color: var(--accent-ink); border-radius: 12px 12px 2px 12px; padding: 6px 12px; font-size: 14px; max-width: 90%; overflow-wrap: anywhere; }
-.ai-a { background: var(--surface-2); border-radius: 12px 12px 12px 2px; padding: 10px 12px; font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }
-.ai-a.err { background: var(--ng); color: var(--ng-ink); }
-.ai-a ul { margin: 4px 0; padding-left: 1.2em; }
-.ai-a .web { display: inline-block; margin-top: 6px; font-size: 12px; }
 .ai-hint { font-size: 12.5px; color: var(--ink-3); }
-.lookup { display: flex; flex-direction: column; gap: 8px; }
-.lookup-tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.ext-links { display: contents; }
-.ext-links .btn, .lookup-tools .btn { padding: 4px 10px; font-size: 13px; text-decoration: none; }
-.wiki-title { font-weight: 700; font-size: 15px; }
-.wiki-desc { font-size: 12px; color: var(--ink-3); margin-bottom: 4px; }
-.wiki-thumb { display: block; max-width: 100%; max-height: 200px; border-radius: 8px; margin: 6px 0; cursor: zoom-in; }
-.wiki-src { font-size: 11px; color: var(--ink-3); margin-top: 6px; }
-.wiki-cands { display: flex; flex-wrap: wrap; gap: 6px; }
-.ai-out { background: var(--accent-soft); border-radius: 12px; padding: 10px 12px; font-size: 14px; line-height: 1.75; overflow-wrap: anywhere; }
-.ai-out.err { background: var(--ng); color: var(--ng-ink); }
-.ai-out ul { margin: 4px 0; padding-left: 1.2em; }
-.sel-ask { position: fixed; z-index: 40; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); max-width: calc(100vw - 32px); box-shadow: var(--shadow); border-radius: 999px; padding: 10px 18px; font-size: 15px; }
-.sel-word { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 14em; }
 .view-screen { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); bottom: env(safe-area-inset-bottom, 0px); min-height: 0; }
 .view-screen .topbar { position: relative; top: 0; }
 .view-screen .view-shell { min-height: 0; overflow: hidden; }
 .view-screen .view-main { height: 100%; overscroll-behavior: contain; }
-.view-screen .ai-panel { height: 100%; }
-.ai-clip { overflow: hidden; height: 100%; min-width: 0; }
-.ai-panel[data-closed="true"] .ai-clip { display: none; }
 
 /* ---------- edit screen ---------- */
 .field { margin-bottom: 18px; }
@@ -356,7 +333,10 @@ a { color: var(--accent-ink); }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .picker-list { overflow: auto; display: grid; gap: 6px; margin-block: 10px; min-height: 0; flex: 1; }
 .lightbox { position: fixed; inset: 0; z-index: 95; background: rgba(10,10,14,.9); display: grid; place-items: center; padding: 16px; }
-.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; }
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; cursor: zoom-in; }
+.lightbox.actual { display: block; overflow: auto; padding: 56px 0 40px; }
+.lightbox.actual img { max-width: none; max-height: none; cursor: zoom-out; border-radius: 0; }
+.lb-hint { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); color: #fff; background: rgba(255,255,255,.14); border-radius: 999px; padding: 4px 14px; font-size: 12.5px; white-space: nowrap; pointer-events: none; }
 .lightbox button { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; background: rgba(255,255,255,.15); color: #fff; border: 0; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -440,10 +420,12 @@ function sanitize(html) {
         if (child.dataset.att) keep["data-att"] = child.dataset.att;
         else { const s = child.getAttribute("src") || ""; if (/^https?:/i.test(s)) keep.src = s; }
         keep.alt = child.getAttribute("alt") || "";
+        const w = (child.style && child.style.width) || "";
+        if (/^\d{1,3}(\.\d+)?%$/.test(w) && parseFloat(w) > 0 && parseFloat(w) <= 100) keep.style = "width:" + w;
       }
-      if (child.tagName === "FONT" && okColor(child.getAttribute("color"))) keep.style = "color:" + child.getAttribute("color");
+      if (child.tagName !== "IMG" && child.tagName === "FONT" && okColor(child.getAttribute("color"))) keep.style = "color:" + child.getAttribute("color");
       const col = child.style && child.style.color;
-      if (col && okColor(col)) keep.style = "color:" + col;
+      if (child.tagName !== "IMG" && col && okColor(col)) keep.style = "color:" + col;
       for (const a of [...child.attributes]) child.removeAttribute(a.name);
       for (const [k, v] of Object.entries(keep)) child.setAttribute(k, v);
       if (child.tagName === "IMG" && !keep.src && !keep["data-att"]) { child.remove(); continue; }
@@ -668,15 +650,79 @@ function resolveBodyHtml(html, attachments) {
    ========================================================= */
 const UI = {
   stack: [{ name: "search" }],
-  search: { q: "", committed: "", tab: "memos", order: "desc", genres: [] },
-  listView: { order: "desc", genres: [] },
-  readSize: lsGet("sm.readSize", 17),
-  aiWidth: 0, aiLog: [],
+  search: { q: "", committed: "", tab: "memos", order: "desc", genre: "" },
+  listView: { order: "desc", genre: "" },
 };
 const current = () => UI.stack[UI.stack.length - 1];
-function go(screen) { UI.stack.push(screen); render(); window.scrollTo(0, 0); }
-function back() { if (UI.stack.length > 1) UI.stack.pop(); render(); }
-function resetTo(screen) { UI.stack = [{ name: "search" }]; if (screen && screen.name !== "search") UI.stack.push(screen); render(); window.scrollTo(0, 0); }
+/* 画面の履歴をブラウザの履歴と連動させ、スマホの「戻る」操作でも1つ前の画面に戻れるようにする */
+const historyOk = (() => { try { return typeof history.pushState === "function"; } catch { return false; } })();
+const atDepth = () => historyOk && history.state && history.state.depth === UI.stack.length;
+function go(screen) {
+  UI.stack.push(screen);
+  if (historyOk) try { history.pushState({ depth: UI.stack.length }, ""); } catch {}
+  render(); window.scrollTo(0, 0);
+}
+function back() {
+  if (UI.stack.length <= 1) return;
+  if (atDepth()) { history.back(); return; } // popstate で戻る
+  UI.stack.pop(); render();
+}
+function backTo(depth) {
+  const steps = UI.stack.length - depth;
+  if (steps <= 0) return;
+  if (atDepth()) { history.go(-steps); return; }
+  UI.stack.length = depth; render();
+}
+/* 「創作メモ帳」をタップ → 最初の画面（検索条件もリセット） */
+function goHome() {
+  Object.assign(UI.search, { q: "", committed: "", tab: "memos", genre: "" });
+  if (UI.stack.length > 1) resetTo(); else { render(); window.scrollTo(0, 0); }
+}
+let pendingReset = null;
+function resetTo(screen) {
+  const steps = UI.stack.length - 1;
+  if (steps > 0 && atDepth()) { pendingReset = { screen: screen || null }; history.go(-steps); return; }
+  UI.stack = [{ name: "search" }]; render(); window.scrollTo(0, 0);
+  if (screen && screen.name !== "search") go(screen);
+}
+window.addEventListener("popstate", (e) => {
+  const depth = (e.state && e.state.depth) || 1;
+  if (pendingReset) {
+    const p = pendingReset; pendingReset = null;
+    UI.stack = [UI.stack[0]]; render(); window.scrollTo(0, 0);
+    if (p.screen && p.screen.name !== "search") go(p.screen);
+    return;
+  }
+  if (depth >= UI.stack.length) return;
+  // 画像の拡大表示や確認ウィンドウが開いていれば、まずそれを閉じる
+  const overlay = [...document.querySelectorAll(".lightbox, .modal-scrim")].pop();
+  if (overlay) { try { history.pushState({ depth: UI.stack.length }, ""); } catch {} overlay.__close ? overlay.__close() : overlay.remove(); return; }
+  // 編集中の未保存の変更があれば確認
+  if (UI.leaveGuard && UI.leaveGuard()) { try { history.pushState({ depth: UI.stack.length }, ""); } catch {} return; }
+  UI.stack.length = Math.max(1, depth); render();
+});
+
+/* 現在地のパス表示（例：創作メモ帳 › リスト「京都」 › 鞍馬の火祭） */
+const clip = (t, n = 14) => (t.length > n ? t.slice(0, n) + "…" : t);
+function crumbLabel(sc) {
+  if (sc.name === "search") return "創作メモ帳";
+  if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "リスト「" + clip(l ? l.name : "削除済み", 10) + "」"; }
+  if (sc.name === "view") { const m = Manager.get(sc.id); return clip(m ? (m.title || "無題のメモ") : "削除済み"); }
+  if (sc.name === "edit") { if (!sc.id) return "新しいメモ"; const m = Manager.get(sc.id); return "編集：" + clip(m ? (m.title || "無題のメモ") : "", 10); }
+  return "";
+}
+function crumbBar() {
+  const items = [];
+  UI.stack.forEach((sc, i) => {
+    const last = i === UI.stack.length - 1;
+    if (i) items.push(h("span", { class: "crumb-sep", "aria-hidden": "true" }, "›"));
+    items.push(last ? h("span", { class: "crumb current", "aria-current": "page" }, crumbLabel(sc))
+      : h("button", { class: "crumb" + (i === 0 ? " home" : ""), type: "button", onclick: () => (i === 0 ? goHome() : backTo(i + 1)) }, crumbLabel(sc)));
+  });
+  const bar = h("nav", { class: "crumbs", "aria-label": "現在地" }, items);
+  requestAnimationFrame(() => { bar.scrollLeft = bar.scrollWidth; });
+  return bar;
+}
 
 function toast(msg, ng) {
   const t = h("div", { class: "toast" + (ng ? " ng" : ""), role: "status" }, msg);
@@ -693,6 +739,7 @@ function modal({ title, message, buttons, wide, body }) {
       body ? body(close) : null,
       buttons ? h("div", { class: "modal-actions" }, buttons.map(b => h("button", { class: "btn " + (b.cls || ""), onclick: () => close(b.value) }, b.label))) : null);
     const scrim = h("div", { class: "modal-scrim", onclick: (e) => { if (e.target === scrim) close(null); } }, box);
+    scrim.__close = () => close(null);
     document.body.append(scrim);
     document.addEventListener("keydown", onKey);
     const f = box.querySelector("input, .btn.primary, .btn"); if (f) f.focus();
@@ -702,7 +749,14 @@ const confirmDelete = () => modal({ title: "本当に削除しますか？", but
 function lightbox(src) {
   const close = () => { lb.remove(); document.removeEventListener("keydown", k); };
   const k = (e) => { if (e.key === "Escape") close(); };
-  const lb = h("div", { class: "lightbox", onclick: close }, h("img", { src, alt: "" }), h("button", { "aria-label": "閉じる" }, "✕"));
+  const hint = h("div", { class: "lb-hint" }, "画像をタップすると原寸で表示");
+  const img = h("img", { src, alt: "", onclick: (e) => {
+    e.stopPropagation();
+    lb.classList.toggle("actual");
+    hint.textContent = lb.classList.contains("actual") ? "原寸表示中（タップで画面に合わせる）" : "画像をタップすると原寸で表示";
+  } });
+  const lb = h("div", { class: "lightbox", onclick: (e) => { if (e.target === lb) close(); } }, img, h("button", { "aria-label": "閉じる", onclick: close }, "✕"), hint);
+  lb.__close = close;
   document.body.append(lb); document.addEventListener("keydown", k);
 }
 
@@ -765,27 +819,26 @@ function renderSearch() {
       h("button", { role: "tab", "aria-selected": String(st.tab === "lists"), onclick: () => { st.tab = "lists"; drawResults(); } }, "リスト"));
     const orderBtn = h("button", { class: "btn ghost", onclick: () => { st.order = st.order === "desc" ? "asc" : "desc"; drawResults(); }, title: "作成日時で並び替え" },
       st.order === "desc" ? "新しい順 ↓" : "古い順 ↑");
-    toolbar.append(tabs, h("span", { class: "spacer" }), orderBtn);
+    toolbar.append(tabs, h("span", { class: "spacer" }), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null, orderBtn);
 
     fabLabel.textContent = st.tab === "lists" ? "新規リスト" : "新規メモ";
     fab.setAttribute("aria-label", fabLabel.textContent);
     if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
 
-    let items = filterByGenre(Manager.sorted, st.genres);
+    let items = filterByGenre(Manager.sorted, st.genre);
     const terms = st.committed.toLowerCase().split(/\s+/).filter(Boolean);
     if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
     if (st.order === "asc") items = [...items].reverse();
 
-    results.append(genreFilterBar(st, drawResults));
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
-    metaRow.append(h("span", { class: "result-meta" }, (terms.length || st.genres.length) ? `${items.length}件見つかりました` : `全${items.length}件`));
+    metaRow.append(h("span", { class: "result-meta" }, (terms.length || st.genre) ? `${items.length}件見つかりました` : `全${items.length}件`));
     results.append(metaRow);
 
     if (!items.length) {
       results.append(Manager.memos.size === 0
         ? h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「新規メモ」から、行った場所や思いついたことを書き留めましょう。")
-        : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), st.genres.length ? "ジャンルの絞り込みを外すか、別のキーワードで試してください。" : "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
+        : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), st.genre ? "ジャンルを「全ジャンル」に戻すか、別のキーワードで試してください。" : "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
       return;
     }
     const list = h("div", { class: "memo-list" });
@@ -807,10 +860,10 @@ function renderSearch() {
 
   const scr = h("div", { class: "screen" },
     h("header", { class: "topbar" }, h("div", { class: "topbar-in" },
-      h("div", { class: "brand" }, h("b", {}, "創作メモ帳"), h("small", {}, "体験・学び・アイデアの記録")),
+      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "創作メモ帳"), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       themeSwitch(),
-      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定（バックアップ・AI）", onclick: openSettings }, "⚙"))),
+      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定（バックアップ）", onclick: openSettings }, "⚙"))),
     h("main", { class: "wrap" },
       storeNote,
       h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
@@ -869,14 +922,12 @@ function renderLists(redraw) {
   wrap.append(rows);
   return wrap;
 }
-function filterByGenre(items, genres) { return genres.length ? items.filter(m => (m.genres || []).some(g => genres.includes(g))) : items; }
-function genreFilterBar(state, redraw) {
-  return h("div", { class: "genre-filter", role: "group", "aria-label": "ジャンルで絞り込み" },
-    h("span", { class: "gf-label" }, "ジャンル"),
-    h("button", { type: "button", class: "gf all", "aria-pressed": String(!state.genres.length), onclick: () => { state.genres = []; redraw(); } }, "すべて"),
-    GENRES.map(g => h("button", { type: "button", class: "gf g-" + g, "aria-pressed": String(state.genres.includes(g)), onclick: () => {
-      state.genres = state.genres.includes(g) ? state.genres.filter(x => x !== g) : [...state.genres, g]; redraw();
-    } }, g)));
+function filterByGenre(items, genre) { return genre ? items.filter(m => (m.genres || []).includes(genre)) : items; }
+function genreSelect(state, redraw, id) {
+  const sel = h("select", { id, class: "genre-select" + (state.genre ? " on" : ""), "aria-label": "ジャンルで絞り込み", onchange: () => { state.genre = sel.value; redraw(); } },
+    h("option", { value: "" }, "全ジャンル"), GENRES.map(g => h("option", { value: g }, g)));
+  sel.value = state.genre;
+  return sel;
 }
 
 /* ---------- リスト画面 ---------- */
@@ -886,19 +937,19 @@ function renderListScreen(s) {
   const body = h("div");
   const draw = () => {
     const members = Manager.sorted.filter(m => (m.listIds || []).includes(l.id));
-    let items = filterByGenre(members, st.genres);
+    let items = filterByGenre(members, st.genre);
     if (st.order === "asc") items = [...items].reverse();
     body.replaceChildren(
       h("div", { class: "toolbar-row", style: "margin-top:0" },
         h("button", { class: "btn primary", onclick: () => pickMemosForList(l, draw) }, "＋ 保存済みのメモを入れる"),
         h("span", { class: "spacer" }),
+        members.length ? genreSelect(st, draw, "genre-list") : "",
         h("button", { class: "btn ghost", onclick: () => { st.order = st.order === "desc" ? "asc" : "desc"; draw(); } }, st.order === "desc" ? "新しい順 ↓" : "古い順 ↑")),
-      members.length ? genreFilterBar(st, draw) : "",
-      h("div", { class: "result-meta", style: "margin-bottom:8px" }, st.genres.length ? `${items.length}件（全${members.length}件中）` : `全${members.length}件 ・ 更新 ${fmtDate(l.updatedAt)}`),
+      h("div", { class: "result-meta", style: "margin-bottom:8px" }, st.genre ? `${items.length}件（全${members.length}件中）` : `全${members.length}件 ・ 更新 ${fmtDate(l.updatedAt)}`),
       !members.length
         ? h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
             Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書くと、このリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。")
-        : !items.length ? h("div", { class: "empty" }, h("b", {}, "このジャンルのメモはありません"), "ジャンルの絞り込みを外してください。")
+        : !items.length ? h("div", { class: "empty" }, h("b", {}, "このジャンルのメモはありません"), "ジャンルを「全ジャンル」に戻してください。")
         : h("div", { class: "memo-list" }, items.map(m => memoCard(m))));
   };
   draw();
@@ -906,7 +957,7 @@ function renderListScreen(s) {
     h("header", { class: "topbar" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("div", { style: "flex:1;min-width:0" }, h("div", { class: "list-head-label" }, "リスト"), h("h1", { style: "line-height:1.3" }, l.name)),
-      h("button", { class: "icon-btn", title: "名前を変更", "aria-label": "リスト名を変更", onclick: () => renameList(l, render) }, "✎"))),
+      h("button", { class: "icon-btn", title: "名前を変更", "aria-label": "リスト名を変更", onclick: () => renameList(l, render) }, "✎")), crumbBar()),
     h("main", { class: "wrap" }, body),
     h("button", { class: "fab", onclick: () => go({ name: "edit", id: null, presetList: l.id }) }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "新規メモ")));
 }
@@ -974,13 +1025,10 @@ function renderView(s) {
   document.addEventListener("click", closeMenu); cleanupFns.push(() => document.removeEventListener("click", closeMenu));
 
   const body = h("div", { class: "view-body", html: resolveBodyHtml(m.bodyHtml, m.attachments) });
-  body.style.setProperty("--read-size", UI.readSize + "px");
   body.addEventListener("click", (e) => { if (e.target.tagName === "IMG") lightbox(e.target.src); });
-  const setSize = (d) => { UI.readSize = Math.min(28, Math.max(13, UI.readSize + d)); lsSet("sm.readSize", UI.readSize); body.style.setProperty("--read-size", UI.readSize + "px"); };
 
   const doc = h("article", { class: "view-doc" },
-    h("div", { class: "view-meta" }, h("span", {}, "作成日時 " + fmtDate(m.updatedAt)), h("span", { class: "spacer" }),
-      h("div", { class: "zoom", role: "group", "aria-label": "文字サイズ" }, h("button", { onclick: () => setSize(-1), "aria-label": "文字を小さく" }, "A−"), h("button", { onclick: () => setSize(1), "aria-label": "文字を大きく" }, "A＋"))),
+    h("div", { class: "view-meta" }, h("span", {}, "作成日時 " + fmtDate(m.updatedAt))),
     h("h2", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
     h("div", { class: "view-meta" }, genreChips(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
       h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name))),
@@ -990,33 +1038,12 @@ function renderView(s) {
       h("button", { class: "ref-item", onclick: () => go({ name: "view", id: r.id }) }, h("span", { class: "t" }, r.title || "無題のメモ"), h("span", { class: "d" }, fmtDate(r.updatedAt)), "›")))] : null);
 
   const main = h("div", { class: "view-main" }, doc);
-  const ai = renderAI(m, main);
-
-  // selection → AIで調べる
-  // 選択した言葉を調べる: スマホのコピー等のメニューと重ならないよう画面下部に出す
-  let lastSel = "";
-  const selWord = h("span", { class: "sel-word" });
-  const selBtn = h("button", { class: "btn primary sel-ask", hidden: true, onmousedown: (e) => e.preventDefault(), onclick: () => {
-    const t = (String(window.getSelection()).trim() || lastSel).slice(0, 200); selBtn.hidden = true; lastSel = "";
-    try { window.getSelection().removeAllRanges(); } catch {}
-    if (t) ai.ask(t, true);
-  } }, "🔍 「", selWord, "」を調べる");
-  const onSel = () => {
-    const sel = window.getSelection();
-    const t = sel ? String(sel).trim() : "";
-    if (!t || !body.contains(sel.anchorNode)) { selBtn.hidden = true; return; }
-    lastSel = t;
-    selWord.textContent = t.length > 12 ? t.slice(0, 12) + "…" : t;
-    selBtn.hidden = false;
-  };
-  document.addEventListener("selectionchange", onSel); cleanupFns.push(() => document.removeEventListener("selectionchange", onSel));
-
   return h("div", { class: "screen view-screen" },
     h("header", { class: "topbar" }, h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("h1", {}, "メモを読む"),
-      h("div", { class: "menu-wrap" }, menuBtn, menu))),
-    h("div", { class: "view-shell" }, main, ai.el), selBtn);
+      h("div", { class: "menu-wrap" }, menuBtn, menu)), crumbBar()),
+    h("div", { class: "view-shell" }, main));
 }
 function attGrid(atts, editable, onRemove) {
   return h("div", { class: "att-grid" }, atts.map(a => {
@@ -1028,161 +1055,6 @@ function attGrid(atts, editable, onRemove) {
     const name = (!isImg && url && !url.startsWith("data:")) ? h("a", { class: "name", href: url, target: "_blank", rel: "noopener" }, a.name) : h("div", { class: "name", title: a.name }, a.name);
     return h("div", { class: "att-tile" }, thumb, name, editable ? h("button", { class: "rm", "aria-label": a.name + " を外す", onclick: () => onRemove(a) }, "✕") : null);
   }));
-}
-
-/* AI検索ウィンドウ (right edge, slide to resize) */
-function renderAI(memo, mainEl) {
-  const panel = h("aside", { class: "ai-panel", "aria-label": "調べもの" });
-  const handle = h("button", { class: "ai-handle", "aria-label": "調べものウィンドウを開く・幅を調整", title: "タップで開閉／左右にスライドで幅を調整" }, h("span", { class: "arrow" }, "◀"), h("span", { class: "lbl" }, "調べる"));
-  const qIn = h("input", { id: "aiq", class: "text-input", placeholder: "気になる言葉", enterkeyhint: "search" });
-  const log = h("div", { class: "ai-log" });
-  const hint = h("p", { class: "ai-hint" }, "本文の言葉を選択すると「この言葉を調べる」が出ます。ここに直接入力しても調べられます。Wikipediaの要約をここに表示し、Google・画像・辞書は別画面で開きます。");
-  let pending = null;
-
-  const setWidth = (pct, animate) => {
-    UI.aiWidth = Math.max(0, Math.min(100, pct));
-    const closed = UI.aiWidth < 4;
-    panel.dataset.closed = String(closed);
-    panel.style.transition = animate ? "flex-basis .2s ease, width .2s ease" : "none";
-    panel.style.width = closed ? "0px" : UI.aiWidth + "%";
-    mainEl.style.display = UI.aiWidth > 97 ? "none" : "";
-    handle.querySelector(".arrow").textContent = closed ? "◀" : "▶";
-    handle.style.left = "-30px";
-  };
-  // the handle sits outside the panel's left edge
-  panel.style.overflow = "visible";
-  const inner = h("div", { class: "ai-inner" },
-    h("div", { class: "ai-head" }, h("b", {}, "調べもの"),
-      h("button", { class: "btn", onclick: () => setWidth(50, true) }, "半分"),
-      h("button", { class: "btn", onclick: () => setWidth(100, true) }, "全画面"),
-      h("button", { class: "btn", onclick: () => setWidth(0, true), "aria-label": "閉じる" }, "閉じる")),
-    h("form", { class: "ai-form", onsubmit: (e) => { e.preventDefault(); ask(qIn.value); } }, qIn, h("button", { class: "btn primary", type: "submit" }, "調べる")),
-    hint, log);
-  const clip = h("div", { class: "ai-clip" }, inner);
-  panel.append(handle, clip);
-
-  // drag to resize
-  let drag = null;
-  handle.addEventListener("pointerdown", (e) => {
-    const shell = panel.parentElement; if (!shell) return;
-    drag = { x: e.clientX, moved: false, rect: shell.getBoundingClientRect() };
-    handle.setPointerCapture(e.pointerId);
-  });
-  handle.addEventListener("pointermove", (e) => {
-    if (!drag) return;
-    if (Math.abs(e.clientX - drag.x) > 4) drag.moved = true;
-    if (!drag.moved) return;
-    const pct = (drag.rect.right - e.clientX) / drag.rect.width * 100;
-    setWidth(pct, false);
-  });
-  handle.addEventListener("pointerup", () => {
-    if (!drag) return;
-    const moved = drag.moved; drag = null;
-    if (!moved) { setWidth(UI.aiWidth < 4 ? (window.innerWidth < 640 ? 60 : 40) : 0, true); if (UI.aiWidth) qIn.focus(); return; }
-    if (UI.aiWidth > 92) setWidth(100, true); else if (UI.aiWidth < 8) setWidth(0, true);
-  });
-  handle.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") { setWidth(UI.aiWidth + 10, true); e.preventDefault(); }
-    if (e.key === "ArrowRight") { setWidth(UI.aiWidth - 10, true); e.preventDefault(); }
-  });
-  handle.addEventListener("click", (e) => { if (e.detail === 0) setWidth(UI.aiWidth < 4 ? 40 : 0, true); });
-
-  const drawAnswer = (el, text) => {
-    el.replaceChildren();
-    const lines = text.split("\n");
-    let ul = null;
-    for (const raw of lines) {
-      const line = raw.trimEnd();
-      const li = line.match(/^\s*[-・*]\s+(.*)/);
-      const fmt = (s) => { const f = document.createDocumentFragment(); s.split(/\*\*(.+?)\*\*/g).forEach((p, i) => f.append(i % 2 ? h("b", {}, p) : p)); return f; };
-      if (li) { if (!ul) { ul = h("ul"); el.append(ul); } ul.append(h("li", {}, fmt(li[1]))); continue; }
-      ul = null;
-      if (!line.trim()) continue;
-      el.append(h("div", {}, fmt(line.replace(/^#+\s*/, ""))));
-    }
-  };
-  const enc = encodeURIComponent;
-  const extLinks = (q) => h("div", { class: "ext-links" },
-    h("a", { class: "btn", href: "https://www.google.com/search?q=" + enc(q), target: "_blank", rel: "noopener" }, "Google ↗"),
-    h("a", { class: "btn", href: "https://www.google.com/search?tbm=isch&q=" + enc(q), target: "_blank", rel: "noopener" }, "画像 ↗"),
-    h("a", { class: "btn", href: "https://www.weblio.jp/content/" + enc(q), target: "_blank", rel: "noopener" }, "辞書 ↗"));
-  async function wikiSummary(title, signal) {
-    const res = await fetch("https://ja.wikipedia.org/api/rest_v1/page/summary/" + enc(title.replace(/ /g, "_")) + "?redirect=true", { signal });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error("wiki " + res.status);
-    const d = await res.json();
-    return d && d.type !== "disambiguation" && d.extract ? d : null;
-  }
-  async function wikiSearch(q, signal) {
-    const res = await fetch("https://ja.wikipedia.org/w/api.php?action=query&list=search&srlimit=6&format=json&origin=*&srsearch=" + enc(q), { signal });
-    if (!res.ok) throw new Error("wiki " + res.status);
-    const d = await res.json();
-    return ((d.query && d.query.search) || []).map(x => x.title);
-  }
-  function drawWiki(box, d) {
-    const url = d.content_urls && (d.content_urls.mobile || d.content_urls.desktop) && (d.content_urls.mobile || d.content_urls.desktop).page;
-    box.classList.remove("err");
-    box.replaceChildren(...[
-      h("div", { class: "wiki-title" }, d.title),
-      d.description ? h("div", { class: "wiki-desc" }, d.description) : null,
-      d.thumbnail ? h("img", { class: "wiki-thumb", src: d.thumbnail.source, alt: d.title, loading: "lazy", onclick: () => lightbox((d.originalimage || d.thumbnail).source) }) : null,
-      h("div", {}, d.extract),
-      url ? h("a", { class: "web", href: url, target: "_blank", rel: "noopener" }, "Wikipediaで続きを読む ↗") : null,
-      h("div", { class: "wiki-src" }, "出典: Wikipedia（CC BY-SA）")].filter(Boolean));
-  }
-  async function askAI(q, box, btn) {
-    btn.disabled = true;
-    const out = h("div", { class: "ai-out" }, "AIが考えています…");
-    box.append(out);
-    if (pending) pending.abort();
-    const ctrl = new AbortController(); pending = ctrl;
-    const ctx = (memo.bodyText || "").slice(0, 600);
-    const prompt = `あなたは創作（小説・シナリオ・イラスト）の資料調べを手伝うアシスタントです。\nユーザーが自分の創作メモを読みながら、次の語句・質問を調べています。\n\n【調べたいこと】${q}\n\n【メモの題名】${memo.title || "（無題）"}\n【メモ本文の抜粋】${ctx}\n\n日本語で、まず一言で要点、次に創作の参考になる具体的な情報（由来・特徴・見た目・時代背景など該当するもの）を箇条書きで3〜6点、合計400字以内で答えてください。不確かな点はそう明記してください。`;
-    try {
-      const text = await aiAsk(prompt, ctrl.signal);
-      out.replaceChildren(h("div", { class: "wiki-desc" }, "AIの回答"));
-      const body = h("div"); drawAnswer(body, text || "（回答が空でした）"); out.append(body);
-    } catch (e) {
-      if (e && e.name === "AbortError") { out.replaceChildren("（中断しました）"); btn.disabled = false; return; }
-      out.classList.add("err");
-      const code = e && e.code;
-      out.textContent = code === "offline" ? "オフラインのためAIは使えません。"
-        : code === "rate_limited" ? "利用回数の上限に達しました。少し待ってからもう一度お試しください。"
-        : code === "api_error" ? "AIへの問い合わせに失敗しました（" + (e.message || "エラー") + "）。設定のAPIキーとモデル名を確認してください。"
-        : "AIへの問い合わせに失敗しました。通信状態を確認してもう一度お試しください。";
-      btn.disabled = false;
-    } finally { if (pending === ctrl) pending = null; }
-  }
-  async function ask(q, open) {
-    q = (q || "").trim(); if (!q) return;
-    if (open && UI.aiWidth < 4) setWidth(window.innerWidth < 640 ? 60 : 40, true);
-    qIn.value = "";
-    hint.hidden = true;
-    const box = h("div", { class: "ai-a" }, "Wikipediaを調べています…");
-    const card = h("div", { class: "lookup" }, h("div", { class: "ai-q" }, q), box);
-    log.append(card);
-    log.scrollTop = card.offsetTop - log.offsetTop;
-    if (!navigator.onLine) { box.classList.add("err"); box.textContent = "オフラインのため調べられません。電波のある場所でもう一度お試しください。"; return; }
-    const tools = h("div", { class: "lookup-tools" }, extLinks(q));
-    if (getAiConf().key) { const aiBtn = h("button", { class: "btn primary", type: "button", onclick: () => askAI(q, card, aiBtn) }, "AIに聞く"); tools.append(aiBtn); }
-    try {
-      const d = await wikiSummary(q);
-      if (d) drawWiki(box, d);
-      else {
-        const titles = await wikiSearch(q);
-        if (!titles.length) box.replaceChildren(h("div", {}, "Wikipediaに該当する記事が見つかりませんでした。下のボタンから検索できます。"));
-        else box.replaceChildren(h("div", { class: "wiki-desc" }, "Wikipediaの候補（タップで表示）"), h("div", { class: "wiki-cands" }, titles.map(t => h("button", { class: "chip-btn", type: "button", onclick: async () => {
-          box.textContent = "読み込んでいます…";
-          try { const s2 = await wikiSummary(t); if (s2) drawWiki(box, s2); else box.textContent = "この記事の要約を表示できませんでした。"; }
-          catch { box.textContent = "Wikipediaを読み込めませんでした。"; }
-        } }, t))));
-      }
-    } catch { box.classList.add("err"); box.textContent = "Wikipediaを読み込めませんでした。通信状態を確認してください。"; }
-    card.insertBefore(tools, box.nextSibling);
-  }
-  setWidth(UI.aiWidth, false);
-  cleanupFns.push(() => { if (pending) pending.abort(); });
-  return { el: panel, ask };
 }
 
 /* ---------- メモ画面 (追加・編集) ---------- */
@@ -1280,16 +1152,44 @@ function renderEdit(s) {
   const boxWrap = h("div", { style: "position:relative" });
   let openPop = null;
   const closePop = () => { if (openPop) { openPop.remove(); openPop = null; } };
-  const showPop = (anchor, content) => {
+  const showPop = (anchor, content, onTop) => {
     closePop();
     const pop = h("div", { class: "pop" }, content);
     const r = anchor.getBoundingClientRect(), br = boxWrap.getBoundingClientRect();
-    pop.style.top = (r.bottom - br.top + 6) + "px";
+    pop.style.top = (onTop ? Math.max(0, r.top - br.top + 8) : (r.bottom - br.top + 6)) + "px";
     pop.style.left = Math.max(0, Math.min(r.left - br.left, br.width - 290)) + "px";
     boxWrap.append(pop); openPop = pop;
     const f = pop.querySelector("input"); if (f) f.focus();
   };
-  const outside = (e) => { if (openPop && !openPop.contains(e.target) && !e.target.closest(".fmt-bar")) closePop(); };
+  const outside = (e) => {
+    if (openPop && !openPop.contains(e.target) && !e.target.closest(".fmt-bar") && !(e.target.tagName === "IMG" && editor.contains(e.target))) closePop();
+    if (!(e.target.tagName === "IMG" && editor.contains(e.target)) && !(openPop && openPop.contains(e.target))) editor.querySelectorAll("img.img-selected").forEach(x => x.classList.remove("img-selected"));
+  };
+  /* 本文の画像をタップ → 大きさを変える */
+  editor.addEventListener("click", (e) => {
+    const img = e.target.tagName === "IMG" ? e.target : null;
+    if (!img) return;
+    editor.querySelectorAll("img.img-selected").forEach(x => x.classList.remove("img-selected"));
+    img.classList.add("img-selected");
+    const cur = () => Math.round(parseFloat(img.style.width) || 100);
+    const val = h("span", {}, cur() + "%");
+    const range = h("input", { type: "range", min: "10", max: "100", step: "5", value: String(cur()), "aria-label": "画像の大きさ" });
+    const presets = [["小", 25], ["中", 50], ["大", 75], ["全幅", 100]];
+    const presetBtns = presets.map(([n, v]) => h("button", { type: "button", class: "btn", "aria-pressed": String(cur() === v), onclick: () => apply(v) }, n));
+    const apply = (v) => {
+      img.style.width = v + "%"; range.value = String(v); val.textContent = v + "%";
+      presetBtns.forEach((b, i) => b.setAttribute("aria-pressed", String(presets[i][1] === v)));
+      markDirty();
+    };
+    range.addEventListener("input", () => apply(parseInt(range.value, 10)));
+    showPop(img, h("div", { class: "img-size" },
+      h("div", { class: "cap" }, h("b", {}, "画像の大きさ"), val),
+      h("div", { class: "row" }, presetBtns),
+      range,
+      h("div", { class: "row" }, h("span", { class: "spacer" }),
+        h("button", { type: "button", class: "btn ghost danger", onclick: () => { img.remove(); closePop(); markDirty(); } }, "本文から外す"),
+        h("button", { type: "button", class: "btn primary", onclick: () => { img.classList.remove("img-selected"); closePop(); } }, "完了"))), true);
+  });
   document.addEventListener("mousedown", outside); cleanupFns.push(() => document.removeEventListener("mousedown", outside));
 
   const COLORS = [["既定", ""], ["ローズ", "#d0637a"], ["オレンジ", "#d98a3d"], ["グリーン", "#4e9e78"], ["ブルー", "#4f86c6"], ["パープル", "#8e6cc4"], ["グレー", "#8a8fa3"], ["ブラウン", "#a0705a"]];
@@ -1331,7 +1231,7 @@ function renderEdit(s) {
       if (!d.attachments.length) { toast("先に下の「添付ファイル」から追加してください", true); return; }
       showPop(e.currentTarget, h("div", { class: "attach-pick" }, d.attachments.map(a => h("button", { type: "button", onmousedown: (ev) => ev.preventDefault(), onclick: () => {
         const url = attUrl(a);
-        if ((a.type || "").startsWith("image/")) exec("insertHTML", `<img data-att="${a.id}" src="${url}" alt="">`);
+        if ((a.type || "").startsWith("image/")) exec("insertHTML", `<img data-att="${a.id}" src="${url}" alt="" style="width:50%">`);
         else exec("insertHTML", `<a data-att="${a.id}" href="${url}">📄 ${a.name.replace(/[<>&"]/g, "")}</a>&nbsp;`);
         closePop();
       } }, ((a.type || "").startsWith("image/") ? "🖼 " : "📄 ") + a.name))));
@@ -1414,7 +1314,7 @@ function renderEdit(s) {
   // save / delete
   const collect = () => {
     const clone = editor.cloneNode(true);
-    clone.querySelectorAll("img[data-att]").forEach(img => img.removeAttribute("src"));
+    clone.querySelectorAll("img[data-att]").forEach(img => { img.removeAttribute("src"); img.classList.remove("img-selected"); });
     clone.querySelectorAll("a[data-att]").forEach(a => a.removeAttribute("href"));
     d.bodyHtml = sanitize(clone.innerHTML);
     const used = new Set(d.attachments.map(a => a.id));
@@ -1455,9 +1355,12 @@ function renderEdit(s) {
       const v = await modal({ title: "変更が保存されていません", message: "このまま戻ると、今回の変更は失われます。", buttons: [{ label: "キャンセル", value: null }, { label: "破棄して戻る", value: "discard", cls: "danger" }, { label: "保存して戻る", value: "save", cls: "primary" }] });
       if (!v) return;
       if (v === "save") { const wasNew = d.isNew; const ok = await save(); if (!ok) return; if (wasNew) return; }
+      d.dirty = false;
     }
     activeEditor = null; back();
   }
+  UI.leaveGuard = () => { if (d.dirty) { goBack(); return true; } return false; };
+  cleanupFns.push(() => { UI.leaveGuard = null; });
 
   const saveBtn = h("button", { class: "btn primary", onclick: () => save() }, "保存");
   const dirtyEl = h("span", { class: "dirty-dot" }, d.dirty ? "未保存の変更があります" : "");
@@ -1468,7 +1371,7 @@ function renderEdit(s) {
     h("header", { class: "topbar" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: goBack }, "←"),
       h("h1", {}, isNew ? "新しいメモ" : "メモを編集"),
-      h("button", { class: "btn danger ghost", onclick: del }, "削除"))),
+      h("button", { class: "btn danger ghost", onclick: del }, "削除")), crumbBar()),
     h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, bodyField, attField, linkField, listField),
     h("div", { class: "edit-actions" }, h("div", { class: "edit-actions-in" }, dirtyEl, h("span", { class: "spacer" }), saveBtn)));
 }
@@ -1499,57 +1402,13 @@ async function storeFile(file) {
 }
 
 /* =========================================================
-   AI検索 (Claude / Gemini API — キーはこの端末にだけ保存)
-   ========================================================= */
-const AI_DEFAULTS = { claude: "claude-haiku-4-5-20251001", gemini: "gemini-3.8-flash" };
-const getAiConf = () => ({ provider: "claude", key: "", model: "", ...lsGet("sm.ai", {}) });
-async function aiAsk(prompt, signal) {
-  const c = getAiConf();
-  if (!navigator.onLine) throw { code: "offline" };
-  if (!c.key) throw { code: "no_key" };
-  const model = c.model || AI_DEFAULTS[c.provider];
-  let res, data;
-  if (c.provider === "gemini") {
-    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(c.key)}`, {
-      method: "POST", signal, headers: { "content-type": "application/json" },
-      body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] }),
-    });
-    data = await res.json().catch(() => ({}));
-    if (!res.ok) throw { code: res.status === 429 ? "rate_limited" : "api_error", message: (data.error && data.error.message) || res.status };
-    return ((data.candidates || [])[0]?.content?.parts || []).map(p => p.text || "").join("");
-  }
-  res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST", signal,
-    headers: { "content-type": "application/json", "x-api-key": c.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model, max_tokens: 1000, messages: [{ role: "user", content: prompt }] }),
-  });
-  data = await res.json().catch(() => ({}));
-  if (!res.ok) throw { code: res.status === 429 ? "rate_limited" : "api_error", message: (data.error && data.error.message) || res.status };
-  return (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
-}
-
-/* =========================================================
-   設定 (AI検索 / バックアップ)
+   設定 (バックアップ)
    ========================================================= */
 function openSettings() {
   modal({ wide: true, title: "設定", body: (close) => {
-    const c = getAiConf();
-    const prov = h("select", { id: "aiprov" }, h("option", { value: "claude" }, "Claude (Anthropic)"), h("option", { value: "gemini" }, "Gemini (Google)"));
-    prov.value = c.provider;
-    const key = h("input", { id: "aikey", class: "text-input", type: "password", placeholder: "APIキー", value: c.key, autocomplete: "off" });
-    const model = h("input", { id: "aimodel", class: "text-input", placeholder: "モデル名（空欄なら標準）", value: c.model });
-    const syncPh = () => { model.placeholder = "モデル名（空欄なら " + AI_DEFAULTS[prov.value] + "）"; };
-    prov.addEventListener("change", syncPh); syncPh();
     const impIn = h("input", { id: "importfile", type: "file", accept: "application/json,.json", hidden: true, onchange: async (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) { close(true); await importBackup(f); } } });
     return h("div", { style: "overflow:auto;min-height:0" },
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
-        h("h4", {}, "AIに聞く（任意）"),
-        h("p", { class: "ai-hint", style: "margin:0" }, "登録すると、調べものウィンドウに「AIに聞く」ボタンが表示されます。登録しなくても、Wikipediaと外部検索は使えます。キーはこの端末の中にだけ保存され、AIサービス以外には送られません。"),
-        h("div", { class: "row" }, prov), key, model,
-        h("div", { class: "row" }, h("button", { class: "btn primary", type: "button", onclick: () => {
-          lsSet("sm.ai", { provider: prov.value, key: key.value.trim(), model: model.value.trim() }); toast("AI検索の設定を保存しました");
-        } }, "AI設定を保存"), h("button", { class: "btn ghost", type: "button", onclick: () => { key.value = ""; lsSet("sm.ai", { provider: prov.value, key: "", model: "" }); toast("APIキーを削除しました"); } }, "キーを削除"))),
-      h("div", { class: "settings-sec" },
         h("h4", {}, "バックアップ"),
         h("p", { class: "ai-hint", style: "margin:0" }, "メモはこの端末の中だけに保存されています。機種変更や別の端末への移行に備えて、ときどき書き出しておいてください。"),
         h("div", { class: "row" },
@@ -1607,6 +1466,7 @@ function scheduleMidnight() {
 
 async function boot() {
   applyTheme();
+  if (historyOk) try { history.replaceState({ depth: 1 }, ""); } catch {}
   $("#app").append(h("div", { class: "wrap" }, h("p", { class: "ai-hint" }, "メモを読み込んでいます…")));
   await Storage.init();
   try { await Manager.load(); }
