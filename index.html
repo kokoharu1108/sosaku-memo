@@ -37,6 +37,8 @@
   --scrim: rgba(40, 42, 58, .38);
   --shadow: 0 1px 2px rgba(44,47,61,.06), 0 6px 20px rgba(44,47,61,.07);
   --bar-view: #e3eef2; --bar-list: #e9e4f6; --bar-edit: #f5ece1;
+  --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
+  --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #c9566a;
   --font-body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
   --font-title: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
@@ -54,6 +56,8 @@
     --scrim: rgba(0,0,0,.55);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
     --bar-view: #22343a; --bar-list: #2f2a45; --bar-edit: #3a3127; --danger: #e48a9a;
+    --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
+    --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
   }
 }
@@ -68,6 +72,8 @@
   --scrim: rgba(0,0,0,.55);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
   --bar-view: #22343a; --bar-list: #2f2a45; --bar-edit: #3a3127; --danger: #e48a9a;
+  --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
+  --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
 }
 
@@ -249,6 +255,40 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .sel-count { font-size: 14px; }
 .btn.danger-solid { background: var(--danger); border-color: var(--danger); color: var(--surface); }
 .btn.sel-start { padding: 2px 10px; font-size: 13px; color: var(--accent-ink); }
+/* search panel */
+.search-toggle { position: relative; }
+.search-toggle svg { width: 21px; height: 21px; }
+.search-toggle[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+.search-toggle .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
+.search-toggle.active .dot { display: block; }
+.search-panel { padding-top: 6px; }
+.filter-row { margin-top: 8px !important; margin-bottom: 0 !important; }
+.fr-label { font-size: 12px; color: var(--ink-3); }
+.search-tools .tab-row { margin: 6px 0 8px; }
+/* tree */
+.tree { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 1px dashed var(--line); margin-left: 13px; }
+.tree.tree-top { padding-left: 0; border-left: 0; margin-left: 0; }
+.tree li { margin: 0; }
+.tree-row { display: flex; align-items: center; gap: 2px; min-height: 38px; border-radius: 8px; }
+.tree-row.current { background: var(--accent-soft); }
+.tree-tog { border: 0; background: none; width: 28px; height: 28px; border-radius: 6px; color: var(--ink-2); font-size: 13px; flex: 0 0 auto; }
+.tree-tog:hover { background: var(--surface-2); }
+.tree-leaf { width: 28px; text-align: center; color: var(--ink-3); flex: 0 0 auto; }
+.tree-title { border: 0; background: none; text-align: left; padding: 6px 6px; border-radius: 6px; color: var(--ink); font-size: 15px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-title:hover { background: var(--surface-2); color: var(--accent-ink); }
+.tree-count { font-size: 11.5px; color: var(--ink-3); background: var(--surface-2); border-radius: 999px; padding: 0 7px; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.tree-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 6px 8px; }
+.tree-path { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; font-size: 13px; color: var(--ink-3); margin-top: 6px; }
+.tp-root { font-size: 13px; }
+.tp-item { border: 0; background: none; padding: 1px 4px; border-radius: 6px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; font-size: 13px; }
+.tp-item.static { text-decoration: none; color: var(--ink-2); }
+.tp-sep { color: var(--ink-3); }
+.tp-self { color: var(--ink-2); font-weight: 700; padding: 1px 4px; }
+.tree-path.edit { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; margin: 0; }
+.child-sec { margin-top: 28px; }
+.child-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.child-sec .tree.tree-top { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 6px 8px; }
+.ref-item.on { border-color: var(--accent); background: var(--accent-soft); }
 /* attachments (view) */
 .att-details { margin-top: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .att-details summary { list-style: none; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; font-size: 14px; font-weight: 700; color: var(--ink-2); }
@@ -354,15 +394,42 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 
 .editor-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .editor-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.fmt-bar { display: flex; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 53px); background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; z-index: 5; }
-.fmt-bar button { border: 0; background: transparent; min-width: 36px; height: 34px; border-radius: 8px; color: var(--ink-2); font-size: 15px; padding: 0 8px; }
+.fmt-bar { display: flex; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--hdr-h, 90px)); background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; z-index: 5; }
+.fmt-bar button { border: 0; background: transparent; min-width: 36px; height: 34px; border-radius: 8px; color: var(--ink-2); font-size: 15px; padding: 0 8px; flex: 0 0 auto; }
 .fmt-bar button:hover { background: var(--surface-2); color: var(--ink); }
+.fmt-bar button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.fmt-bar .b-bold { font-weight: 700; } .fmt-bar .b-italic { font-style: italic; font-family: serif; }
+.fmt-bar .b-strike { text-decoration: line-through; } .fmt-bar .b-under { text-decoration: underline; }
+.fmt-bar .head-btn { font-size: 13px; font-weight: 700; min-width: 64px; }
+.fmt-bar .color-btn { font-weight: 700; text-decoration: underline 3px; }
+.fmt-bar.floating { position: fixed; left: 0; right: 0; top: auto; z-index: 60; border-radius: 0; border-top: 1px solid var(--line); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; box-shadow: 0 -4px 14px rgba(0,0,0,.08); padding: 6px 10px; }
+.fmt-bar.floating::-webkit-scrollbar { display: none; }
+body.editing-body .edit-actions { display: none; }
+.pop { position: fixed; z-index: 70; }
+.pop-cap { font-size: 12px; font-weight: 700; color: var(--ink-3); margin-bottom: 6px; }
+.head-pick { display: grid; gap: 2px; min-width: 160px; }
+.head-pick button { text-align: left; border: 0; background: none; padding: 6px 10px; border-radius: 8px; color: var(--ink); }
+.head-pick button:hover { background: var(--surface-2); }
+.head-pick .hp-h2 { font-size: 20px; font-weight: 700; } .head-pick .hp-h3 { font-size: 17px; font-weight: 700; } .head-pick .hp-h4 { font-size: 15px; font-weight: 700; color: var(--ink-2); }
+/* text colors & markers (theme aware) */
+.tc-default { color: var(--ink); } .tc-rose { color: var(--tc-rose); } .tc-orange { color: var(--tc-orange); } .tc-green { color: var(--tc-green); }
+.tc-blue { color: var(--tc-blue); } .tc-purple { color: var(--tc-purple); } .tc-gray { color: var(--tc-gray); } .tc-brown { color: var(--tc-brown); }
+.hl-none { background: transparent; } .hl-yellow, .hl-pink, .hl-green, .hl-blue, .hl-purple { border-radius: 3px; padding: 0 1px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.hl-yellow { background: var(--hl-yellow); } .hl-pink { background: var(--hl-pink); } .hl-green { background: var(--hl-green); } .hl-blue { background: var(--hl-blue); } .hl-purple { background: var(--hl-purple); }
+/* headings in body */
+.view-body h2, .editor h2 { font-size: 1.35em; line-height: 1.45; margin: 1.1em 0 .4em; padding-bottom: .2em; border-bottom: 1px solid var(--line); }
+.view-body h3, .editor h3 { font-size: 1.17em; line-height: 1.5; margin: 1em 0 .35em; }
+.view-body h4, .editor h4 { font-size: 1em; line-height: 1.6; margin: .9em 0 .3em; color: var(--ink-2); }
+.view-body > :first-child, .editor > :first-child { margin-top: 0; }
 .fmt-bar .sep { width: 1px; background: var(--line); margin: 6px 4px; }
 .editor { min-height: 240px; padding: 14px 16px; font-size: 16px; line-height: 1.85; outline: none; overflow-wrap: anywhere; }
 .editor:empty::before { content: attr(data-placeholder); color: var(--ink-3); }
 .pop { position: absolute; z-index: 30; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; }
-.swatches { display: grid; grid-template-columns: repeat(4, 30px); gap: 6px; }
-.swatches button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--surface); box-shadow: 0 0 0 1px var(--line); }
+.swatches { display: grid; grid-template-columns: repeat(4, 58px); gap: 6px; }
+.swatches .sw { display: grid; justify-items: center; gap: 2px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 6px 2px 4px; }
+.swatches .sw:hover { border-color: var(--accent); }
+.sw-a { font-weight: 700; font-size: 18px; line-height: 1.2; min-width: 26px; text-align: center; }
+.sw-n { font-size: 10.5px; color: var(--ink-3); }
 .link-pop { width: min(320px, calc(100vw - 48px)); display: grid; gap: 8px; }
 .attach-pick { display: grid; gap: 4px; max-height: 240px; overflow: auto; width: min(280px, calc(100vw - 48px)); }
 .attach-pick button { text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -462,7 +529,11 @@ const svgIcon = (d) => { const s = document.createElementNS("http://www.w3.org/2
 /* =========================================================
    HTML sanitizer for rich-text body
    ========================================================= */
-const OK_TAGS = new Set(["B","STRONG","I","EM","S","STRIKE","DEL","U","SPAN","FONT","A","BR","DIV","P","IMG","UL","OL","LI","BLOCKQUOTE","H3","H4"]);
+const OK_TAGS = new Set(["B","STRONG","I","EM","S","STRIKE","DEL","U","SPAN","FONT","A","BR","DIV","P","IMG","UL","OL","LI","BLOCKQUOTE","H2","H3","H4"]);
+const COLOR_CLASS = /^(tc-(default|rose|orange|green|blue|purple|gray|brown)|hl-(none|yellow|pink|green|blue|purple))$/;
+/* 以前の版で保存した文字色（色コード）を、テーマ対応の色の種類に置き換える */
+const LEGACY_TC = { "#d0637a": "rose", "#d98a3d": "orange", "#4e9e78": "green", "#4f86c6": "blue", "#8e6cc4": "purple", "#8a8fa3": "gray", "#a0705a": "brown" };
+const toHex = (c) => { c = (c || "").trim().toLowerCase(); if (c.startsWith("#")) return c; const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/); return m ? "#" + [m[1], m[2], m[3]].map(x => (+x).toString(16).padStart(2, "0")).join("") : c; };
 const okColor = (c) => /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\))$/i.test((c || "").trim());
 function sanitize(html) {
   const tpl = document.createElement("template");
@@ -488,19 +559,34 @@ function sanitize(html) {
         const w = (child.style && child.style.width) || "";
         if (/^\d{1,3}(\.\d+)?%$/.test(w) && parseFloat(w) > 0 && parseFloat(w) <= 100) keep.style = "width:" + w;
       }
-      if (child.tagName !== "IMG" && child.tagName === "FONT" && okColor(child.getAttribute("color"))) keep.style = "color:" + child.getAttribute("color");
-      const col = child.style && child.style.color;
-      if (child.tagName !== "IMG" && col && okColor(col)) keep.style = "color:" + col;
+      if (child.tagName === "SPAN" && child.style) {
+        // スタイルで付いた太字・斜体・取り消し線・下線をタグに置き換える
+        const st = child.style, wraps = [];
+        if (st.fontWeight === "bold" || parseInt(st.fontWeight, 10) >= 600) wraps.push("B");
+        if (st.fontStyle === "italic") wraps.push("I");
+        const deco = (st.textDecorationLine || st.textDecoration || "");
+        if (deco.includes("line-through")) wraps.push("S");
+        if (deco.includes("underline")) wraps.push("U");
+        for (const t of wraps) { const w = document.createElement(t); while (child.firstChild) w.append(child.firstChild); child.append(w); }
+      }
+      if (child.tagName === "SPAN" || child.tagName === "FONT") {
+        const cls = [...(child.classList || [])].filter(c => COLOR_CLASS.test(c));
+        const legacy = LEGACY_TC[toHex(child.getAttribute("color") || (child.style && child.style.color) || "")];
+        if (legacy && !cls.some(c => c.startsWith("tc-"))) cls.push("tc-" + legacy);
+        if (cls.length) keep.class = cls.join(" ");
+      }
       for (const a of [...child.attributes]) child.removeAttribute(a.name);
       for (const [k, v] of Object.entries(keep)) child.setAttribute(k, v);
       if (child.tagName === "IMG" && !keep.src && !keep["data-att"]) { child.remove(); continue; }
+      if (child.tagName === "FONT") { const sp = document.createElement("span"); if (keep.class) sp.className = keep.class; while (child.firstChild) sp.append(child.firstChild); child.replaceWith(sp); walk(sp); if (!sp.className) sp.replaceWith(...sp.childNodes); continue; }
+      if (child.tagName === "SPAN" && !keep.class) { walk(child); child.replaceWith(...child.childNodes); continue; }
       walk(child);
     }
   };
   walk(tpl.content);
   return tpl.innerHTML;
 }
-const htmlToText = (html) => { const t = document.createElement("template"); t.innerHTML = (html || "").replace(/<(br|\/p|\/div|\/li)>/gi, "\n$&"); return (t.content.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); };
+const htmlToText = (html) => { const t = document.createElement("template"); t.innerHTML = (html || "").replace(/<(br|\/p|\/div|\/li|\/h[2-4])>/gi, "\n$&"); return (t.content.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); };
 
 /* =========================================================
    Storage: IndexedDB on this device (works offline)
@@ -581,6 +667,46 @@ const Manager = {
   reindex() {
     this.sorted = [...this.memos.values()].sort((a, b) => b.updatedAt - a.updatedAt);
     for (const m of this.sorted) m._search = [m.title, m.bodyText, (m.genres || []).join(" "), listNames(m).join(" "), (m.tags || []).map(t => "#" + t).join(" ")].join("\n").toLowerCase();
+    // 階層（親子）の索引
+    this.kids = new Map(); this.roots = [];
+    for (const m of this.sorted) {
+      const p = this.effParent(m);
+      if (p) { if (!this.kids.has(p)) this.kids.set(p, []); this.kids.get(p).push(m); } else this.roots.push(m);
+    }
+  },
+  /* 親が存在しない・循環している場合は最上位として扱う */
+  effParent(m) {
+    if (!m.parentId || !this.memos.has(m.parentId) || m.parentId === m.id) return null;
+    const seen = new Set([m.id]); let cur = this.memos.get(m.parentId);
+    while (cur) { if (seen.has(cur.id)) return null; seen.add(cur.id); if (!cur.parentId) break; cur = this.memos.get(cur.parentId); }
+    return m.parentId;
+  },
+  ancestors(id) {
+    const out = []; let m = this.memos.get(id); const seen = new Set();
+    while (m && this.effParent(m) && !seen.has(m.id)) { seen.add(m.id); m = this.memos.get(m.parentId); out.unshift(m); }
+    return out;
+  },
+  childrenOf(id, sort) { return sortMemos(this.kids.get(id) || [], sort || "upd-desc"); },
+  descendantIds(id) {
+    const out = new Set(); const stack = [id];
+    while (stack.length) { const x = stack.pop(); for (const c of this.kids.get(x) || []) if (!out.has(c.id)) { out.add(c.id); stack.push(c.id); } }
+    return out;
+  },
+  /* 以前の「参照メモ」を親子関係に移す（一度だけ）: メモAがBを参照していたら、BをAの子にする */
+  async migrateTree() {
+    if (this.meta.treeMigrated) return;
+    const byCreated = [...this.memos.values()].sort((a, b) => a.createdAt - b.createdAt);
+    const changed = new Set();
+    for (const a of byCreated) for (const bid of a.links || []) {
+      const b = this.memos.get(bid);
+      if (!b || b.id === a.id || b.parentId) continue;
+      this.reindex();
+      if (this.ancestors(a.id).some(x => x.id === b.id)) continue;
+      b.parentId = a.id; changed.add(b);
+    }
+    for (const m of changed) await Storage.putMemo(stripRuntime(m)).catch(() => {});
+    this.meta.treeMigrated = true; await Storage.putMeta(this.meta).catch(() => {});
+    this.reindex();
   },
   get(id) { return this.memos.get(id) || null; },
   /* 保存依頼 */
@@ -612,9 +738,12 @@ const Manager = {
       await Storage.delMemo(id);
       for (const lid of prev.listIds || []) { const l = this.lists.get(lid); if (l) { l.updatedAt = now; await Storage.putList(l); } }
     } catch (e) { this.memos.set(id, prev); this.reindex(); throw e; }
-    // 参照されていたリンクを外す
+    // 参照されていたリンクを外し、子メモはひとつ上の階層へ移す
     for (const m of this.memos.values()) {
-      if ((m.links || []).includes(id)) { m.links = m.links.filter(x => x !== id); Storage.putMemo(stripRuntime(m)).catch(() => {}); }
+      let ch = false;
+      if ((m.links || []).includes(id)) { m.links = m.links.filter(x => x !== id); ch = true; }
+      if (m.parentId === id) { m.parentId = (prev.parentId && this.memos.has(prev.parentId)) ? prev.parentId : null; ch = true; }
+      if (ch) Storage.putMemo(stripRuntime(m)).catch(() => {});
     }
     this.reindex();
   },
@@ -691,7 +820,7 @@ function normalizeMemo(m) {
     id: m.id, title: m.title || "", genres: (m.genres || []).filter(g => GENRES.includes(g)),
     bodyHtml, bodyText: m.bodyText != null ? m.bodyText : htmlToText(bodyHtml),
     attachments: m.attachments || [], links: m.links || [], listIds: m.listIds || [],
-    tags: normTags(m.tags || []),
+    tags: normTags(m.tags || []), parentId: m.parentId || null,
     createdAt: m.createdAt || m.updatedAt || Date.now(), updatedAt: m.updatedAt || Date.now(),
   };
 }
@@ -723,7 +852,8 @@ function resolveBodyHtml(html, attachments) {
    ========================================================= */
 const UI = {
   stack: [{ name: "search" }],
-  search: { q: "", committed: "", tab: "memos", sort: "upd-desc", genre: "" },
+  search: { q: "", committed: "", tab: "memos", sort: "upd-desc", genre: "", open: false },
+  treeOpen: new Set(),
   listView: { sort: "upd-desc", genre: "" },
   select: { on: false, scope: "", ids: new Set() },
 };
@@ -806,7 +936,7 @@ function selectBar(visibleIds, actions, redraw) {
 async function bulkDelete() {
   const ids = [...UI.select.ids].filter(id => Manager.get(id));
   if (!ids.length) return;
-  const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のメモを削除します。元に戻すことはできません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
+  const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のメモを削除します。元に戻すことはできません。下の階層のメモは、ひとつ上の階層に移ります。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
   if (!ok) return;
   let done = 0;
   for (const id of ids) { try { await Manager.deleteMemo(id); done++; } catch {} }
@@ -919,24 +1049,31 @@ function renderSearch() {
     histBox.hidden = false;
   }
   input.addEventListener("blur", () => setTimeout(() => { histBox.hidden = true; }, 120));
-  function commit() { st.committed = st.q.trim(); st.tab = "memos"; if (st.committed) Manager.pushHistory(st.committed); histBox.hidden = true; drawResults(); }
+  function commit() { st.committed = st.q.trim(); if (st.tab !== "memos") st.tab = "memos"; if (st.committed) Manager.pushHistory(st.committed); histBox.hidden = true; drawResults(); }
 
   let fab, fabLabel;
   const results = h("div");
-  const toolbar = h("div", { class: "toolbar-row" });
+  const toolbar = h("div", { class: "toolbar-row tab-row" });
+  const filterRow = h("div", { class: "toolbar-row filter-row" });
+  const panel = h("div", { class: "search-panel", hidden: !st.open });
+  const searchBtn = h("button", { class: "icon-btn search-toggle", type: "button", "aria-label": "検索・絞り込み", "aria-expanded": String(!!st.open), title: "検索・絞り込み",
+    onclick: () => { st.open = !st.open; panel.hidden = !st.open; searchBtn.setAttribute("aria-expanded", String(st.open)); if (st.open) setTimeout(() => input.focus(), 50); } },
+    svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), h("span", { class: "dot", "aria-hidden": "true" }));
+  const switchTab = (t) => { if (UI.select.on) { UI.select.on = false; UI.select.ids.clear(); if (historyOk && history.state && history.state.select) history.back(); } st.tab = t; drawResults(); };
   function drawResults() {
-    toolbar.replaceChildren(); results.replaceChildren();
-    const tabs = h("div", { class: "tabs", role: "tablist" },
-      h("button", { role: "tab", "aria-selected": String(st.tab === "memos"), onclick: () => { if (UI.select.on) { UI.select.on = false; UI.select.ids.clear(); } st.tab = "memos"; drawResults(); } }, "メモ"),
-      h("button", { role: "tab", "aria-selected": String(st.tab === "lists"), onclick: () => { if (UI.select.on) exitSelect(); st.tab = "lists"; drawResults(); } }, "リスト"));
-    toolbar.append(...[tabs, h("span", { class: "spacer" }), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
+    toolbar.replaceChildren(); results.replaceChildren(); filterRow.replaceChildren();
+    toolbar.append(h("div", { class: "tabs", role: "tablist" },
+      [["memos", "メモ"], ["tree", "ツリー"], ["lists", "リスト"]].map(([k, l]) => h("button", { role: "tab", "aria-selected": String(st.tab === k), onclick: () => switchTab(k) }, l))));
+    filterRow.append(...[h("span", { class: "fr-label" }, "絞り込み"), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
       sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
+    searchBtn.classList.toggle("active", !!(st.committed || st.genre));
     const selecting = UI.select.on && UI.select.scope === "search";
     fab.hidden = selecting;
 
     fabLabel.textContent = st.tab === "lists" ? "新規リスト" : "新規メモ";
     fab.setAttribute("aria-label", fabLabel.textContent);
     if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
+    if (st.tab === "tree") { results.append(renderTreeTab(drawResults)); return; }
 
     let items = filterByGenre(Manager.sorted, st.genre);
     const terms = st.committed.toLowerCase().split(/\s+/).filter(Boolean);
@@ -946,6 +1083,7 @@ function renderSearch() {
     if (!terms.length && !st.genre && !selecting) { const rc = recallCard(drawResults); if (rc) results.append(rc); }
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
+    if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
     metaRow.append(h("span", { class: "result-meta" }, (terms.length || st.genre) ? `${items.length}件見つかりました` : `全${items.length}件`));
     if (items.length && !selecting) metaRow.append(h("span", { class: "spacer" }), h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect("search") }, "選択"));
     results.append(metaRow);
@@ -976,21 +1114,40 @@ function renderSearch() {
     h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
       h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "創作メモ帳"), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
-      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定（バックアップ）", onclick: openSettings }, "⚙")),
+      searchBtn,
+      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定", onclick: openSettings }, "⚙")),
       h("div", { class: "search-tools" },
-        h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
-          h("div", { class: "search-row" },
-            h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), input),
-            h("button", { class: "btn primary search-go", type: "submit" }, "検索")),
-          histBox),
+        panel,
         toolbar)),
     h("main", { class: "wrap", style: "padding-top:12px" },
       storeNote,
       results),
     fab);
-  const ico = scr.querySelector(".search-row svg"); ico.classList.add("search-ico");
+  panel.append(
+    h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
+      h("div", { class: "search-row" },
+        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), input),
+        h("button", { class: "btn primary search-go", type: "submit" }, "検索")),
+      histBox),
+    filterRow);
+  const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
   return scr;
+}
+function renderTreeTab(redraw) {
+  const st = UI.search;
+  const wrap = h("div");
+  const roots = sortMemos(Manager.roots, st.sort);
+  if (!roots.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「新規メモ」から書き始めましょう。")); return wrap; }
+  const withKids = Manager.sorted.filter(m => (Manager.kids.get(m.id) || []).length);
+  const allOpen = withKids.length > 0 && withKids.every(m => UI.treeOpen.has(m.id));
+  wrap.append(
+    h("div", { class: "toolbar-row", style: "margin-top:0" },
+      h("span", { class: "result-meta" }, `全${Manager.memos.size}件 ・ 最上位 ${roots.length}件`),
+      h("span", { class: "spacer" }),
+      withKids.length ? h("button", { class: "btn ghost sel-start", type: "button", onclick: () => { if (allOpen) UI.treeOpen.clear(); else withKids.forEach(m => UI.treeOpen.add(m.id)); redraw(); } }, allOpen ? "すべて閉じる" : "すべて開く") : null),
+    h("div", { class: "tree-card" }, treeList(roots, { open: UI.treeOpen, sort: st.sort, redraw })));
+  return wrap;
 }
 /* ふりかえり: 「n年前の今日」か、しばらく見ていない過去のメモを1件出す */
 let recallOffset = 0;
@@ -1201,18 +1358,28 @@ function renderView(s) {
   document.addEventListener("click", closeMenu); cleanupFns.push(() => document.removeEventListener("click", closeMenu));
 
   const body = h("div", { class: "view-body", html: resolveBodyHtml(m.bodyHtml, m.attachments) });
+  const childSection = h("section", { class: "child-sec" });
+  const drawChildren = () => {
+    const kids = Manager.childrenOf(m.id, "cre-asc");
+    const total = Manager.descendantIds(m.id).size;
+    childSection.replaceChildren(
+      h("div", { class: "child-head" }, h("span", { class: "section-h", style: "margin:0" }, kids.length ? `下の階層のメモ（${total}件）` : "下の階層のメモ"),
+        h("span", { class: "spacer" }), h("button", { class: "btn", type: "button", onclick: () => go({ name: "edit", id: null, presetParent: m.id }) }, "＋ 子メモを作成")),
+      kids.length ? treeList(kids, { open: UI.treeOpen, sort: "cre-asc", redraw: drawChildren }) : h("p", { class: "ai-hint", style: "margin:4px 0 0" }, "このメモの下に、関連するメモを階層でぶら下げられます。"));
+  };
+  drawChildren();
   body.addEventListener("click", (e) => { if (e.target.tagName === "IMG") lightbox(e.target.src); });
 
   const doc = h("article", { class: "view-doc" },
     h("div", { class: "view-meta" }, h("span", {}, "作成 " + fmtDate(m.createdAt)), h("span", {}, "更新 " + fmtDate(m.updatedAt))),
+    Manager.ancestors(m.id).length ? treePath(m) : null,
     h("h2", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
     h("div", { class: "view-meta" }, genreChips(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
       h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name))),
     (m.tags || []).length ? h("div", { class: "view-meta tag-row" }, m.tags.map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))) : null,
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
     m.attachments.length ? attList(m.attachments) : null,
-    m.links.length ? [h("div", { class: "section-h" }, "参照メモ"), h("div", { class: "ref-list" }, m.links.map(id => Manager.get(id)).filter(Boolean).map(r =>
-      h("button", { class: "ref-item", onclick: () => go({ name: "view", id: r.id }) }, h("span", { class: "t" }, r.title || "無題のメモ"), h("span", { class: "d" }, fmtDate(r.updatedAt)), "›")))] : null);
+    childSection);
 
   const main = h("div", { class: "view-main" }, doc);
   return h("div", { class: "screen view-screen" },
@@ -1261,6 +1428,30 @@ function attList(atts) {
       h("span", { class: "att-size" }, fmtSize(a.size)),
       h("span", { class: "att-go", "aria-hidden": "true" }, "›")))));
 }
+/* 階層（ツリー）表示 */
+function treeList(nodes, ctx, depth = 0) {
+  const ul = h("ul", { class: "tree" + (depth ? "" : " tree-top") });
+  for (const m of nodes) {
+    const kids = Manager.childrenOf(m.id, ctx.sort);
+    const open = ctx.open.has(m.id);
+    const li = h("li", {},
+      h("div", { class: "tree-row" + (ctx.current === m.id ? " current" : "") },
+        kids.length ? h("button", { class: "tree-tog", type: "button", "aria-expanded": String(open), "aria-label": (open ? "閉じる：" : "開く：") + (m.title || "無題のメモ"),
+          onclick: () => { open ? ctx.open.delete(m.id) : ctx.open.add(m.id); ctx.redraw(); } }, open ? "▾" : "▸") : h("span", { class: "tree-leaf", "aria-hidden": "true" }, "・"),
+        h("button", { class: "tree-title", type: "button", onclick: () => go({ name: "view", id: m.id }) }, m.title || "無題のメモ"),
+        kids.length ? h("span", { class: "tree-count" }, String(kids.length)) : null));
+    if (open && kids.length) li.append(treeList(kids, ctx, depth + 1));
+    ul.append(li);
+  }
+  return ul;
+}
+function treePath(m, opts = {}) {
+  const anc = Manager.ancestors(m.id);
+  return h("nav", { class: "tree-path", "aria-label": "階層" },
+    h("span", { class: "tp-root" }, "🗂"),
+    anc.flatMap(a => [h("button", { class: "tp-item", type: "button", onclick: () => go({ name: "view", id: a.id }) }, clip(a.title || "無題のメモ", 16)), h("span", { class: "tp-sep" }, "/")]),
+    h("span", { class: "tp-self" }, clip(opts.selfLabel || m.title || "無題のメモ", 18)));
+}
 function tagSearch(tag) {
   Object.assign(UI.search, { q: "#" + tag, committed: "#" + tag, tab: "memos", genre: "" });
   Manager.pushHistory("#" + tag);
@@ -1289,6 +1480,7 @@ function renderEdit(s) {
     title: base ? base.title : "", genres: base ? [...base.genres] : [],
     bodyHtml: base ? base.bodyHtml : "", attachments: base ? base.attachments.map(a => ({ ...a })) : [],
     tags: base ? [...(base.tags || [])] : [],
+    parentId: base ? (base.parentId || null) : (s.presetParent && Manager.get(s.presetParent) ? s.presetParent : null),
     links: base ? [...base.links] : [], listIds: base ? [...base.listIds] : (s.presetList && Manager.lists.has(s.presetList) ? [s.presetList] : []),
     savedOnce: !isNew, dirty: false,
   });
@@ -1369,20 +1561,50 @@ function renderEdit(s) {
   editor.addEventListener("keydown", (e) => {
     if (e.key === "Backspace" && !e.isComposing) { if (!handledByBefore) onBackspace(e); handledByBefore = false; }
   });
-  const exec = (cmd, val) => { restoreRange(); try { document.execCommand("styleWithCSS", false, true); } catch {} document.execCommand(cmd, false, val); keepRange(); markDirty(); };
+  // 太字などは <b> 等のタグで、色だけはスタイルで適用（色はあとでクラスに置き換える）
+  const exec = (cmd, val) => { restoreRange(); try { document.execCommand("styleWithCSS", false, cmd === "foreColor" || cmd === "hiliteColor"); } catch {} document.execCommand(cmd, false, val); keepRange(); markDirty(); updateStates(); };
 
-  const boxWrap = h("div", { style: "position:relative" });
-  let openPop = null;
-  const closePop = () => { if (openPop) { openPop.remove(); openPop = null; } };
-  const showPop = (anchor, content, onTop) => {
-    closePop();
-    const pop = h("div", { class: "pop" }, content);
-    const r = anchor.getBoundingClientRect(), br = boxWrap.getBoundingClientRect();
-    pop.style.top = (onTop ? Math.max(0, r.top - br.top + 8) : (r.bottom - br.top + 6)) + "px";
-    pop.style.left = Math.max(0, Math.min(r.left - br.left, br.width - 290)) + "px";
-    boxWrap.append(pop); openPop = pop;
-    const f = pop.querySelector("input"); if (f) f.focus();
+  /* 文字色・マーカー: ダークモードでも読めるよう、色そのものではなく「色の種類」で保存する */
+  const applyClass = (kind, name) => {
+    const sentinel = kind === "tc" ? "#010203" : "#030201";
+    const sentRgb = kind === "tc" ? "rgb(1, 2, 3)" : "rgb(3, 2, 1)";
+    const prop = kind === "tc" ? "color" : "backgroundColor";
+    exec(kind === "tc" ? "foreColor" : "hiliteColor", sentinel);
+    editor.querySelectorAll("span, font").forEach(el => {
+      const hit = (el.style && el.style[prop] === sentRgb) || (kind === "tc" && (el.getAttribute("color") || "").toLowerCase() === sentinel);
+      if (!hit) return;
+      el.style[prop] = ""; el.removeAttribute("color");
+      let target = el;
+      if (el.tagName === "FONT") { const sp = document.createElement("span"); while (el.firstChild) sp.append(el.firstChild); el.replaceWith(sp); target = sp; }
+      target.querySelectorAll("span").forEach(x => [...x.classList].forEach(c => { if (c.startsWith(kind + "-")) x.classList.remove(c); }));
+      [...target.classList].forEach(c => { if (c.startsWith(kind + "-")) target.classList.remove(c); });
+      target.classList.add(kind + "-" + name);
+      if (!target.getAttribute("style")) target.removeAttribute("style");
+    });
+    markDirty(); updateStates();
   };
+  const setBlock = (tag) => { exec("formatBlock", "<" + tag + ">"); };
+
+  /* ポップアップ（色・リンクなど）は画面に固定して表示 */
+  let openPop = null;
+  const closePop = () => { if (openPop) { openPop.remove(); openPop = null; } setTimeout(checkDock, 0); };
+  const showPop = (anchor, content, onTop) => {
+    if (openPop) { openPop.remove(); openPop = null; }
+    const pop = h("div", { class: "pop" }, content);
+    document.body.append(pop); openPop = pop;
+    const r = anchor.getBoundingClientRect();
+    const vv = window.visualViewport;
+    const vTop = vv ? vv.offsetTop : 0, vH = vv ? vv.height : window.innerHeight;
+    const pw = pop.offsetWidth, ph = pop.offsetHeight;
+    let top;
+    if (onTop) top = Math.max(vTop + 8, r.top + 8);
+    else if (r.top - vTop > vH / 2) top = Math.max(vTop + 8, r.top - ph - 6);
+    else top = Math.min(r.bottom + 6, vTop + vH - ph - 8);
+    pop.style.top = top + "px";
+    pop.style.left = Math.max(8, Math.min(r.left, window.innerWidth - pw - 8)) + "px";
+    const f = pop.querySelector("input:not([type=range])"); if (f) f.focus();
+  };
+  cleanupFns.push(() => { if (openPop) { openPop.remove(); openPop = null; } });
   const outside = (e) => {
     if (openPop && !openPop.contains(e.target) && !e.target.closest(".fmt-bar") && !(e.target.tagName === "IMG" && editor.contains(e.target))) closePop();
     if (!(e.target.tagName === "IMG" && editor.contains(e.target)) && !(openPop && openPop.contains(e.target))) editor.querySelectorAll("img.img-selected").forEach(x => x.classList.remove("img-selected"));
@@ -1414,28 +1636,36 @@ function renderEdit(s) {
   });
   document.addEventListener("mousedown", outside); cleanupFns.push(() => document.removeEventListener("mousedown", outside));
 
-  const COLORS = [["既定", ""], ["ローズ", "#d0637a"], ["オレンジ", "#d98a3d"], ["グリーン", "#4e9e78"], ["ブルー", "#4f86c6"], ["パープル", "#8e6cc4"], ["グレー", "#8a8fa3"], ["ブラウン", "#a0705a"]];
-  const tb = (label, title, fn, style) => h("button", { type: "button", title, "aria-label": title, style, onmousedown: (e) => e.preventDefault(), onclick: fn }, label);
+  /* 書式ツールバー */
+  const TEXT_COLORS = [["default", "標準"], ["rose", "ローズ"], ["orange", "オレンジ"], ["green", "グリーン"], ["blue", "ブルー"], ["purple", "パープル"], ["gray", "グレー"], ["brown", "ブラウン"]];
+  const MARKERS = [["none", "なし"], ["yellow", "黄"], ["pink", "ピンク"], ["green", "緑"], ["blue", "青"], ["purple", "紫"]];
+  const noSteal = (e) => e.preventDefault();
+  const tb = (label, title, fn, cls) => h("button", { type: "button", class: cls || "", title, "aria-label": title, onmousedown: noSteal, onclick: fn }, label);
+  const stateBtns = {};
+  const stateBtn = (cmd, label, title, cls) => (stateBtns[cmd] = tb(label, title, () => exec(cmd), cls));
+  const headBtn = tb("本文", "見出し", (e) => showPop(e.currentTarget, h("div", { class: "head-pick" },
+    [["div", "本文", "hp-p"], ["h2", "見出し1", "hp-h2"], ["h3", "見出し2", "hp-h3"], ["h4", "見出し3", "hp-h4"]].map(([tag, label, cls]) =>
+      h("button", { type: "button", class: cls, onmousedown: noSteal, onclick: () => { setBlock(tag); closePop(); } }, label)))), "head-btn");
+  const colorBtn = tb("A", "文字色", (e) => showPop(e.currentTarget, h("div", {},
+    h("div", { class: "pop-cap" }, "文字色"),
+    h("div", { class: "swatches" }, TEXT_COLORS.map(([k, n]) => h("button", { type: "button", class: "sw tc-" + k, title: n, "aria-label": n, onmousedown: noSteal, onclick: () => { applyClass("tc", k); closePop(); } },
+      h("span", { class: "sw-a" }, "A"), h("span", { class: "sw-n" }, n)))))), "color-btn");
+  const markBtn = tb("🖍", "マーカー", (e) => showPop(e.currentTarget, h("div", {},
+    h("div", { class: "pop-cap" }, "マーカー"),
+    h("div", { class: "swatches" }, MARKERS.map(([k, n]) => h("button", { type: "button", class: "sw", title: n, "aria-label": "マーカー " + n, onmousedown: noSteal, onclick: () => { applyClass("hl", k); closePop(); } },
+      h("span", { class: "sw-a hl-" + k }, k === "none" ? "✕" : "あ"), h("span", { class: "sw-n" }, n)))))));
+  const bulletBtn = tb("•", "箇条書き（もう一度押すと解除）", () => { toggleBullet(); updateStates(); });
   const fmtBar = h("div", { class: "fmt-bar", role: "toolbar", "aria-label": "書式" },
-    tb("B", "太字", () => exec("bold"), "font-weight:700"),
-    tb("I", "斜体", () => exec("italic"), "font-style:italic;font-family:serif"),
-    tb("S", "取り消し線", () => exec("strikeThrough"), "text-decoration:line-through"),
-    tb("U", "下線", () => exec("underline"), "text-decoration:underline"),
+    headBtn,
     h("span", { class: "sep" }),
-    tb("A", "文字色", (e) => showPop(e.currentTarget, h("div", { class: "swatches" }, COLORS.map(([n, c]) =>
-      h("button", { type: "button", title: n, "aria-label": n, style: c ? `background:${c}` : "background:var(--ink)", onmousedown: (ev) => ev.preventDefault(), onclick: () => {
-        if (c) exec("foreColor", c);
-        else {
-          exec("foreColor", "#010203");
-          editor.querySelectorAll("span, font").forEach(el => {
-            if ((el.style && el.style.color === "rgb(1, 2, 3)") || (el.getAttribute("color") || "").toLowerCase() === "#010203") {
-              el.style.removeProperty("color"); el.removeAttribute("color");
-              if (el.tagName === "FONT" || !el.getAttribute("style")) el.replaceWith(...el.childNodes);
-            }
-          });
-        }
-        closePop();
-      } })))), "color:#d0637a;font-weight:700;text-decoration:underline 3px #d0637a"),
+    stateBtn("bold", "B", "太字", "b-bold"),
+    stateBtn("italic", "I", "斜体", "b-italic"),
+    stateBtn("strikeThrough", "S", "取り消し線", "b-strike"),
+    stateBtn("underline", "U", "下線", "b-under"),
+    h("span", { class: "sep" }),
+    colorBtn, markBtn,
+    h("span", { class: "sep" }),
+    bulletBtn,
     tb("🔗", "リンク", (e) => {
       const sel = savedRange ? savedRange.toString() : "";
       const url = h("input", { id: "linkurl", class: "text-input", placeholder: "https://", type: "url" });
@@ -1448,17 +1678,71 @@ function renderEdit(s) {
         closePop();
       } }, url, sel ? null : txt, h("div", { class: "modal-actions" }, h("button", { class: "btn primary", type: "submit" }, "リンクを挿入"))));
     }),
-    tb("•", "箇条書き（もう一度押すと解除）", () => toggleBullet()),
     tb("📎", "添付ファイルを本文に挿入", (e) => {
       if (!d.attachments.length) { toast("先に下の「添付ファイル」から追加してください", true); return; }
-      showPop(e.currentTarget, h("div", { class: "attach-pick" }, d.attachments.map(a => h("button", { type: "button", onmousedown: (ev) => ev.preventDefault(), onclick: () => {
+      showPop(e.currentTarget, h("div", { class: "attach-pick" }, d.attachments.map(a => h("button", { type: "button", onmousedown: noSteal, onclick: () => {
         const url = attUrl(a);
         if ((a.type || "").startsWith("image/")) exec("insertHTML", `<img data-att="${a.id}" src="${url}" alt="" style="width:50%">`);
         else exec("insertHTML", `<a data-att="${a.id}" href="${url}">📄 ${a.name.replace(/[<>&"]/g, "")}</a>&nbsp;`);
         closePop();
       } }, ((a.type || "").startsWith("image/") ? "🖼 " : "📄 ") + a.name))));
     }));
-  boxWrap.append(h("div", { class: "editor-box" }, fmtBar, editor));
+
+  /* 選択中の書式をボタンに反映 */
+  const updateStates = () => {
+    const sel = window.getSelection();
+    const n = sel && sel.anchorNode; const el = n && (n.nodeType === 1 ? n : n.parentElement);
+    const inside = el && editor.contains(el);
+    for (const [cmd, b] of Object.entries(stateBtns)) { let on = false; if (inside) try { on = document.queryCommandState(cmd); } catch {} b.setAttribute("aria-pressed", String(!!on)); }
+    const hd = inside ? el.closest("h2,h3,h4") : null;
+    headBtn.textContent = hd ? ({ H2: "見出し1", H3: "見出し2", H4: "見出し3" })[hd.tagName] : "本文";
+    headBtn.setAttribute("aria-pressed", String(!!hd));
+    bulletBtn.setAttribute("aria-pressed", String(!!(inside && caretLi())));
+    const tcEl = inside ? el.closest("[class*='tc-']") : null;
+    const tcName = tcEl && editor.contains(tcEl) ? ([...tcEl.classList].find(c => c.startsWith("tc-")) || "tc-default") : "tc-default";
+    colorBtn.className = "color-btn " + tcName; colorBtn.setAttribute("aria-pressed", String(tcName !== "tc-default"));
+    const hlEl = inside ? el.closest("[class*='hl-']") : null;
+    const hlName = hlEl && editor.contains(hlEl) ? [...hlEl.classList].find(c => c.startsWith("hl-")) : null;
+    markBtn.setAttribute("aria-pressed", String(!!hlName && hlName !== "hl-none"));
+  };
+  // スマホの日本語入力ではキー操作のイベントが来ないことがあるため、カーソル位置は入力・選択の変化のたびに記録する
+  const onSelChange = () => { const s2 = window.getSelection(); if (s2 && s2.anchorNode && editor.contains(s2.anchorNode)) { keepRange(); updateStates(); } };
+  editor.addEventListener("input", keepRange);
+  document.addEventListener("selectionchange", onSelChange); cleanupFns.push(() => document.removeEventListener("selectionchange", onSelChange));
+  editor.addEventListener("keyup", updateStates);
+
+  /* スマホでは本文の入力中、ツールバーをキーボードのすぐ上に固定して長文でも押しやすくする */
+  const coarse = window.matchMedia && matchMedia("(pointer: coarse)").matches;
+  const barSlot = h("div", { class: "fmt-slot" });
+  let docked = false;
+  const placeBar = () => {
+    if (!docked) return;
+    const vv = window.visualViewport;
+    const bottom = vv ? vv.offsetTop + vv.height : window.innerHeight;
+    fmtBar.style.top = Math.round(bottom - fmtBar.offsetHeight) + "px";
+  };
+  const setDocked = (on) => {
+    if (!coarse || on === docked) return;
+    docked = on;
+    barSlot.style.height = on ? fmtBar.offsetHeight + "px" : "0px";
+    fmtBar.classList.toggle("floating", on);
+    document.body.classList.toggle("editing-body", on);
+    if (on) placeBar(); else fmtBar.style.top = "";
+  };
+  function checkDock() {
+    const ae = document.activeElement;
+    setDocked(!!(editor.contains(ae) || (openPop && openPop.contains(ae)) || fmtBar.contains(ae) || openPop));
+  }
+  editor.addEventListener("focus", () => setDocked(true));
+  editor.addEventListener("blur", () => setTimeout(checkDock, 120));
+  if (window.visualViewport) {
+    visualViewport.addEventListener("resize", placeBar); visualViewport.addEventListener("scroll", placeBar);
+    cleanupFns.push(() => { visualViewport.removeEventListener("resize", placeBar); visualViewport.removeEventListener("scroll", placeBar); });
+  }
+  cleanupFns.push(() => document.body.classList.remove("editing-body"));
+
+  const boxWrap = h("div", { style: "position:relative" });
+  boxWrap.append(h("div", { class: "editor-box" }, barSlot, fmtBar, editor));
   const bodyField = h("div", { class: "field" }, h("div", { class: "label" }, "本文"), boxWrap);
 
   // attachments
@@ -1487,34 +1771,39 @@ function renderEdit(s) {
   drawAtts();
   const attField = h("div", { class: "field" }, h("div", { class: "label" }, "添付ファイル"), attHolder, h("div", { style: "height:8px" }), drop, uploading);
 
-  // reference links
-  const linkChips = h("div", { class: "chips" });
-  const drawLinks = () => {
-    linkChips.replaceChildren(...d.links.map(id => Manager.get(id)).filter(Boolean).map(r => h("span", { class: "chip" }, h("span", { class: "tx" }, r.title || "無題のメモ"), h("button", { type: "button", "aria-label": "紐づけを外す", onclick: () => { d.links = d.links.filter(x => x !== r.id); markDirty(); drawLinks(); } }, "✕"))),
-      h("button", { class: "chip-btn", type: "button", onclick: pickLinks }, "＋ 参照メモを紐づける"));
+  // 階層（親メモ）
+  const parentBox = h("div", { class: "parent-box" });
+  const drawParent = () => {
+    const p = d.parentId && Manager.get(d.parentId);
+    const chain = p ? [...Manager.ancestors(p.id), p] : [];
+    parentBox.replaceChildren(
+      h("div", { class: "tree-path edit" }, h("span", { class: "tp-root" }, "🗂"), chain.flatMap(x => [h("span", { class: "tp-item static" }, clip(x.title || "無題のメモ", 14)), h("span", { class: "tp-sep" }, "/")]),
+        h("span", { class: "tp-self" }, clip(d.title || "このメモ", 16))),
+      h("div", { class: "chips", style: "margin-top:8px" },
+        h("button", { class: "chip-btn", type: "button", onclick: pickParent }, p ? "親メモを変更" : "＋ 親メモを選ぶ"),
+        p ? h("button", { class: "chip-btn", type: "button", onclick: () => { d.parentId = null; markDirty(); drawParent(); } }, "最上位にする") : null));
   };
-  async function pickLinks() {
-    const picked = new Set(d.links);
-    await modal({ wide: true, title: "参照メモを紐づける", body: (close) => {
-      const q = h("input", { id: "pickq", class: "text-input", placeholder: "題名や本文で絞り込み" });
+  async function pickParent() {
+    const exclude = Manager.descendantIds(d.id); exclude.add(d.id);
+    await modal({ wide: true, title: "親メモを選ぶ", body: (close) => {
+      const q = h("input", { id: "parentq", class: "text-input", placeholder: "題名や本文で絞り込み" });
       const listEl = h("div", { class: "picker-list" });
+      const pathOf = (m) => [...Manager.ancestors(m.id), m].map(x => clip(x.title || "無題のメモ", 12)).join(" / ");
       const draw = () => {
         const t = q.value.trim().toLowerCase();
-        const items = Manager.sorted.filter(m => m.id !== d.id && (!t || m._search.includes(t)));
-        listEl.replaceChildren(...(items.length ? items.map(m => {
-          const b = h("button", { class: "ref-item", type: "button", "aria-pressed": String(picked.has(m.id)), onclick: () => { picked.has(m.id) ? picked.delete(m.id) : picked.add(m.id); draw(); } },
-            h("span", {}, picked.has(m.id) ? "☑" : "☐"), h("span", { class: "t" }, m.title || "無題のメモ"), h("span", { class: "d" }, fmtDate(m.updatedAt)));
-          return b;
-        }) : [h("p", { class: "ai-hint" }, "紐づけられる保存済みメモがありません。")]));
+        const items = Manager.sorted.filter(m => !exclude.has(m.id) && (!t || m._search.includes(t)));
+        listEl.replaceChildren(...(items.length ? items.map(m => h("button", { class: "ref-item" + (d.parentId === m.id ? " on" : ""), type: "button", onclick: () => { d.parentId = m.id; markDirty(); drawParent(); close(true); } },
+          h("span", { class: "t" }, pathOf(m)), h("span", { class: "d" }, fmtDate(m.updatedAt))))
+          : [h("p", { class: "ai-hint" }, "親にできる保存済みのメモがありません。")]));
       };
       q.addEventListener("input", draw); draw();
       return h("div", { style: "display:flex;flex-direction:column;min-height:0;flex:1" }, q, listEl,
-        h("div", { class: "modal-actions" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"),
-          h("button", { class: "btn primary", type: "button", onclick: () => { d.links = [...picked]; markDirty(); drawLinks(); close(true); } }, "決定")));
+        h("div", { class: "modal-actions" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル")));
     } });
   }
-  drawLinks();
-  const linkField = h("div", { class: "field" }, h("div", { class: "label" }, "参照メモ"), linkChips);
+  drawParent();
+  titleIn.addEventListener("input", drawParent);
+  const linkField = h("div", { class: "field" }, h("div", { class: "label" }, "階層（このメモの親）"), parentBox);
 
   // lists
   const listBox = h("div", { class: "chips" });
@@ -1568,7 +1857,7 @@ function renderEdit(s) {
     const tpl = document.createElement("template"); tpl.innerHTML = d.bodyHtml;
     tpl.content.querySelectorAll("[data-att]").forEach(el => { if (!used.has(el.dataset.att)) el.remove(); });
     d.bodyHtml = tpl.innerHTML;
-    return { id: d.id, title: d.title.trim(), genres: d.genres, bodyHtml: d.bodyHtml, bodyText: htmlToText(d.bodyHtml), attachments: d.attachments, links: d.links, listIds: d.listIds, tags: (tagIn.value.trim() ? (addTag(tagIn.value), tagIn.value = "", d.tags) : d.tags) };
+    return { id: d.id, title: d.title.trim(), genres: d.genres, bodyHtml: d.bodyHtml, bodyText: htmlToText(d.bodyHtml), attachments: d.attachments, links: d.links, listIds: d.listIds, parentId: d.parentId || null, tags: (tagIn.value.trim() ? (addTag(tagIn.value), tagIn.value = "", d.tags) : d.tags) };
   };
   let saving = false;
   async function save({ auto } = {}) {
@@ -1615,12 +1904,18 @@ function renderEdit(s) {
   activeEditor = { save, isDirty: () => d.dirty };
   cleanupFns.push(() => { if (activeEditor && activeEditor.save === save) activeEditor = null; });
 
-  return h("div", { class: "screen" },
-    h("header", { class: "topbar bar-edit" }, h("div", { class: "topbar-in" },
+  const editHeader = h("header", { class: "topbar bar-edit" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: goBack }, "←"),
       h("h1", {}, isNew ? "新しいメモ" : "メモを編集"),
-      h("button", { class: "btn danger ghost", onclick: del }, "削除")), crumbBar()),
-    h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, tagField, bodyField, attField, linkField, listField),
+      h("button", { class: "btn danger ghost", onclick: del }, "削除")), crumbBar());
+  // ツールバーがヘッダーの真下に貼り付くよう、ヘッダーの高さを渡す
+  if (window.ResizeObserver) {
+    const ro = new ResizeObserver(() => document.documentElement.style.setProperty("--hdr-h", editHeader.offsetHeight + "px"));
+    ro.observe(editHeader); cleanupFns.push(() => ro.disconnect());
+  }
+  return h("div", { class: "screen" },
+    editHeader,
+    h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, linkField, tagField, bodyField, attField, listField),
     h("div", { class: "edit-actions" }, h("div", { class: "edit-actions-in" }, dirtyEl, h("span", { class: "spacer" }), saveBtn)));
 }
 
@@ -1728,6 +2023,7 @@ async function boot() {
   try { await Manager.load(); }
   catch (e) { toast("メモを読み込めませんでした。アプリを開き直してください。", true); }
   render();
+  Manager.migrateTree().then(() => { if (current().name === "search") render(); }).catch(() => {});
   Manager.maintain(false).catch(() => {});
   scheduleMidnight();
   // ブラウザが容量不足時にデータを消さないよう依頼
