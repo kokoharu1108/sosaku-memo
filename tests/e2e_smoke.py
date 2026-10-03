@@ -96,6 +96,8 @@ with sync_playwright() as p:
 
     # 本文エディタ（本文より上は題名とジャンルだけ・書式ボタンは1行）
     pg.click(".tabs >> text=メモ"); pg.click(".fab")
+    check("題名の欄は「題名」だけ", pg.get_attribute("#title", "placeholder") == "題名")
+    check("リストはプルダウンで選ぶ", pg.locator("select#elist").count() == 1)
     check("メモ画面の下部の見出しは「タグ」「リスト」だけ", "そのほかの設定" not in pg.inner_text("main") and "自由に付けられます" not in pg.inner_text("main") and "リストに入れる" not in pg.inner_text("main"))
     check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
     check("タグ・リストは本文より下・階層の欄はない", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&!document.querySelector('.parent-box')})()"))
@@ -196,6 +198,23 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("ダークモードのバーが背景と見分けられる", pg.evaluate("""(()=>{const L=c=>{const m=c.match(/\\d+/g).slice(0,3).map(x=>{x/=255;return x<=.03928?x/12.92:((x+.055)/1.055)**2.4});return .2126*m[0]+.7152*m[1]+.0722*m[2]};
       const a=L(getComputedStyle(document.querySelector('.topbar')).backgroundColor),b=L(getComputedStyle(document.body).backgroundColor);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)>1.8})()"""))
     pg.evaluate("document.documentElement.dataset.theme='light'")
+
+    # 検索画面: 横スライドでタブ切り替え（画面の端からの操作は「戻る」なので反応しない）
+    SWIPE = """([x0,x1])=>{const el=document.querySelector('.swipe-area');const mk=(x)=>new Touch({identifier:1,target:el,clientX:x,clientY:400});
+el.dispatchEvent(new TouchEvent('touchstart',{touches:[mk(x0)],changedTouches:[mk(x0)],bubbles:true}));
+el.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[mk(x1)],bubbles:true}));}"""
+    pg.evaluate(SWIPE, [300, 120]); time.sleep(0.2)
+    check("左へスライドでリストタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "リスト")
+    pg.evaluate(SWIPE, [8, 250]); time.sleep(0.2)
+    check("画面の端からの操作ではタブが変わらない", pg.locator(".tabs [aria-selected=true]").inner_text() == "リスト")
+    pg.evaluate(SWIPE, [120, 300]); time.sleep(0.2)
+    check("右へスライドでメモタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "メモ")
+
+    # まとめ: リストを選べる
+    pg.click(".report-btn"); pg.wait_for_selector("#rp-list")
+    pg.select_option("#rp-list", label="京都"); time.sleep(0.3)
+    check("まとめでリストを選べる", pg.inner_text(".rp-title").startswith("京都のまとめ"))
+    pg.go_back(); pg.wait_for_selector(".search-toggle")
 
     # 検索画面: 「null」が出ない・「選択」は上部の固定バー
     check("検索画面に「null」が出ない", "null" not in pg.inner_text("body"))

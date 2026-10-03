@@ -254,7 +254,12 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .tag-chip:hover { border-color: var(--accent); }
 .tag-add { display: flex; gap: 6px; margin-top: 8px; }
 .tag-input { height: 38px; font-size: 15px; }
-.tag-sugg { margin-top: 8px; }
+.tag-sugg { margin-top: 8px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+.tag-sugg::-webkit-scrollbar { display: none; }
+.sugg-ico { color: var(--ink-3); display: inline-grid; place-items: center; flex: 0 0 auto; }
+.sugg-ico svg { width: 18px; height: 18px; }
+.chip-btn.mini { flex: 0 0 auto; padding: 2px 10px; font-size: 13.5px; }
+.list-pick { height: 36px; font-size: 14.5px; }
 .sugg-label { font-size: 12px; color: var(--ink-3); }
 /* recall */
 .recall { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 8px 10px 10px 14px; margin-bottom: 12px; }
@@ -505,7 +510,9 @@ body.editing-body .edit-actions { display: none; }
 .rp-tools { display: grid; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .rp-tool-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .rp-tool-row.rp-actions { flex-wrap: nowrap; gap: 2px; }
-.rp-tools .genre-select { height: 38px; font-size: 14.5px; }
+.rp-tools .genre-select { height: 38px; font-size: 14.5px; max-width: 100%; }
+.rp-tool-row > .fr-label { min-width: 3em; }
+.swipe-area { min-height: calc(100vh - 170px); }
 .rp-range { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .rp-date { padding: 0 6px; min-width: 0; }
 .rp-actions .btn.primary { margin-right: 6px; }
@@ -522,6 +529,7 @@ body.editing-body .edit-actions { display: none; }
 .rp-list > li::marker { color: var(--ink-3); }
 .rp-list > li > * { margin: 0; }
 .rp-list ul, .rp-list ol { padding-left: 1.3em; }
+.rp-list img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 6px 0 8px; }
 .rp-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
 .rp-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; display: block; background: var(--surface-2); }
 .rp-files { list-style: none; padding: 0; margin: 0; font-size: 14px; }
@@ -582,6 +590,7 @@ const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); retu
 /* 小さなアイコン（文字の代わりに使い、画面の情報量を減らす） */
 const ICONS = {
   note: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
   report: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
   select: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
@@ -1222,7 +1231,7 @@ function renderSearch() {
       h("div", { class: "search-tools" },
         panel,
         toolbar)),
-    h("main", { class: "wrap", style: "padding-top:12px" },
+    h("main", { class: "wrap swipe-area", style: "padding-top:12px" },
       storeNote,
       results),
     fab);
@@ -1235,6 +1244,23 @@ function renderSearch() {
     filterRow);
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
+  /* 画面を横にスライドして「メモ」「リスト」タブを切り替える。
+     画面の端から始まる操作はスマホの「戻る」なので無視し、横スクロールする部分の上でも反応しない */
+  const area = scr.querySelector(".swipe-area");
+  let t0 = null;
+  area.addEventListener("touchstart", (e) => {
+    const t = e.touches[0];
+    t0 = (e.touches.length === 1 && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".hist-chips, .tag-sugg, input, select, textarea")) ? { x: t.clientX, y: t.clientY, at: Date.now() } : null;
+  }, { passive: true });
+  area.addEventListener("touchend", (e) => {
+    if (!t0 || UI.select.on) { t0 = null; return; }
+    const t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t.clientY - t0.y;
+    const fast = Date.now() - t0.at < 700; t0 = null;
+    if (!fast || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+    const order = ["memos", "lists"], i = order.indexOf(st.tab);
+    const next = order[i + (dx < 0 ? 1 : -1)];
+    if (next) switchTab(next);
+  }, { passive: true });
   return scr;
 }
 /* ふりかえり: 「n年前の今日」か、しばらく見ていない過去のメモを1件出す */
@@ -1387,12 +1413,13 @@ function renderListScreen(s) {
     h("main", { class: "wrap" }, body),
     fabEl);
 }
+const askListName = () => modal({ title: "新しいリスト", body: (close) => {
+  const inp = h("input", { id: "newlist", class: "text-input", placeholder: "リスト名（例：京都旅行2026）", maxlength: "60" });
+  return h("form", { onsubmit: (e) => { e.preventDefault(); const v = inp.value.trim(); if (v) close(v); else inp.focus(); } }, inp,
+    h("div", { class: "modal-actions", style: "margin-top:14px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"), h("button", { class: "btn primary", type: "submit" }, "作成")));
+} });
 async function createList() {
-  const name = await modal({ title: "新しいリスト", body: (close) => {
-    const inp = h("input", { id: "newlist", class: "text-input", placeholder: "リスト名（例：京都旅行2026）", maxlength: "60" });
-    return h("form", { onsubmit: (e) => { e.preventDefault(); const v = inp.value.trim(); if (v) close(v); else inp.focus(); } }, inp,
-      h("div", { class: "modal-actions", style: "margin-top:14px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"), h("button", { class: "btn primary", type: "submit" }, "作成")));
-  } });
+  const name = await askListName();
   if (!name) return;
   let l;
   try { l = await Manager.saveList({ id: uid("l"), name }); }
@@ -1463,18 +1490,14 @@ function periodRange(o) {
 }
 function reportSource(s) {
   const o = s.opts || {};
-  let items, terms = [], base = [], listId = null;
-  if (s.listId) {
-    const l = Manager.lists.get(s.listId);
-    items = l ? Manager.sorted.filter(m => (m.listIds || []).includes(l.id)) : [];
-    if (l) { base.push(l.name); listId = l.id; }
-    items = filterByGenre(items, s.genre);
-  } else {
-    terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
-    items = filterByGenre(Manager.sorted, s.genre);
-    if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
-    if (s.q) base.push(s.q);
-  }
+  // リストはまとめ画面で選び直せる（リスト画面から開いたときは、そのリストが選ばれた状態）
+  const l = o.listId ? Manager.lists.get(o.listId) : null;
+  const terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
+  const base = [], listId = l ? l.id : null;
+  let items = filterByGenre(Manager.sorted, s.genre);
+  if (l) { items = items.filter(m => (m.listIds || []).includes(l.id)); base.push(l.name); }
+  if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
+  if (s.q) base.push(s.q);
   if (s.genre) base.push(s.genre);
   const pr = periodRange(o);
   if (pr) items = items.filter(m => (!pr.from || m.createdAt >= pr.from.getTime()) && (!pr.to || m.createdAt < pr.to.getTime()));
@@ -1483,51 +1506,64 @@ function reportSource(s) {
   return { title, items, terms, listId };
 }
 const BLOCK_TAGS = new Set(["DIV", "P", "UL", "OL", "BLOCKQUOTE", "H2", "H3", "H4"]);
-/* 本文を段落ごとに分ける（入力欄の HTML は「1行目の文字 + <div>2行目</div>…」の形が多い） */
-function bodyBlocks(html) {
-  const tpl = document.createElement("template"); tpl.innerHTML = html || "";
+const hasText = (b) => !!b.textContent.replace(/​/g, "").trim();
+/* 本文を段落ごとに分ける（入力欄の HTML は「1行目の文字 + <div>2行目</div>…」の形が多い）。
+   画像だけの段落も残し、直前の文章（例：「▼タイの写真」）と一緒に載せられるようにする */
+function bodyBlocks(m) {
+  const tpl = document.createElement("template"); tpl.innerHTML = resolveBodyHtml(m.bodyHtml, m.attachments);
   const blocks = []; let cur = null;
-  const flush = () => { if (cur && cur.textContent.trim()) blocks.push(cur); cur = null; };
+  const keep = (b) => hasText(b) || b.querySelector("img");
+  const flush = () => { if (cur && keep(cur)) blocks.push(cur); cur = null; };
   for (const n of [...tpl.content.childNodes]) {
-    if (n.nodeType === 1 && BLOCK_TAGS.has(n.tagName)) { flush(); if (n.textContent.trim()) blocks.push(n); }
+    if (n.nodeType === 1 && BLOCK_TAGS.has(n.tagName)) { flush(); if (keep(n)) blocks.push(n); }
     else if (n.nodeType === 1 && n.tagName === "BR") flush();
     else { if (!cur) cur = document.createElement("div"); cur.append(n); }
   }
   flush();
-  // 画像は最後の「画像」欄にまとめるので本文からは外す。元の見出しは太字の1行にして、まとめの見出しと混ざらないようにする
+  // 元の見出しは太字の1行にして、まとめの見出しと混ざらないようにする
   return blocks.map(b => {
-    b.querySelectorAll("img").forEach(i => i.remove());
     if (/^H[2-4]$/.test(b.tagName)) { const d = document.createElement("div"); const bb = document.createElement("b"); bb.append(...b.childNodes); d.append(bb); return d; }
     return b;
-  }).filter(b => b.textContent.trim());
+  });
 }
-/* 1件のメモから載せる段落を選ぶ。excerpt=true ならキーワードを含む段落（と直前の見出し行）だけ */
+/* 1件のメモから載せる段落を選ぶ。excerpt=true ならキーワードを含む段落（と直前の見出し行・直後の画像）だけ */
 function pickBlocks(m, terms, excerpt) {
-  const raw = bodyBlocks(m.bodyHtml);
-  if (!excerpt || !terms.length) return raw;
-  const hit = (b) => terms.some(t => b.textContent.toLowerCase().includes(t));
-  const keep = raw.map(() => false);
-  raw.forEach((b, i) => { if (hit(b)) { keep[i] = true; if (i && raw[i - 1].children.length === 1 && raw[i - 1].firstElementChild.tagName === "B" && raw[i - 1].textContent === raw[i - 1].firstElementChild.textContent) keep[i - 1] = true; } });
-  // 題名やタグだけが一致したメモは、冒頭の数段落を載せる
-  if (!keep.some(Boolean)) return raw.slice(0, 3);
+  const raw = bodyBlocks(m);
+  const isHead = (b) => b.children.length === 1 && b.firstElementChild.tagName === "B" && b.textContent === b.firstElementChild.textContent;
+  const keep = raw.map(() => !excerpt || !terms.length);
+  if (excerpt && terms.length) {
+    const hit = (b) => terms.some(t => b.textContent.toLowerCase().includes(t));
+    raw.forEach((b, i) => { if (hasText(b) && hit(b)) { keep[i] = true; if (i && isHead(raw[i - 1])) keep[i - 1] = true; } });
+    // 題名やタグだけが一致したメモは、冒頭の数段落を載せる
+    if (!keep.some(Boolean)) { let n = 0; raw.forEach((b, i) => { if (n < 3) { keep[i] = true; if (hasText(b)) n++; } }); }
+    // 載せる文章のすぐ後ろにある画像だけの段落は、その文章と一緒に載せる
+    raw.forEach((b, i) => { if (keep[i] && hasText(b)) for (let j = i + 1; j < raw.length && !hasText(raw[j]); j++) keep[j] = true; });
+  }
   return raw.filter((b, i) => keep[i]);
 }
-/* まとめの中身: ジャンルごとの文章、画像、ファイル */
+/* まとめの中身: ジャンルごとの文章（本文中の画像はその文章と一緒）、本文に入っていない画像、ファイル */
 function digest(s, src) {
   const o = s.opts;
   const items = [...src.items].sort((a, b) => a.createdAt - b.createdAt);
   const groups = new Map();
-  const images = [], files = [], seen = new Set();
+  const images = [], files = [], seen = new Set(), inlineAtts = [];
   for (const m of items) {
     const key = GENRES.find(g => (m.genres || []).includes(g)) || "その他";
     const blocks = pickBlocks(m, src.terms, o.body === "excerpt");
-    if (blocks.length) { if (!groups.has(key)) groups.set(key, []); groups.get(key).push(blocks); }
+    const inlineIds = new Set();
+    for (const b of blocks) b.querySelectorAll("img").forEach(img => { if (!o.images) img.remove(); else if (img.dataset.att) inlineIds.add(img.dataset.att); });
+    const kept = blocks.filter(b => hasText(b) || b.querySelector("img"));
+    if (kept.length) { if (!groups.has(key)) groups.set(key, []); groups.get(key).push(kept); }
     for (const a of m.attachments || []) {
-      const k = a.fileId || a.id; if (seen.has(k)) continue; seen.add(k);
+      const k = a.fileId || a.id;
+      if (inlineIds.has(a.id)) { inlineAtts.push(a); seen.add(k); continue; }
+      // 本文の中で使っている画像は、本文から外した段落でもここには出さない（関係の薄い画像が末尾に並ばないように）
+      if (fileKind(a) === "image" && (m.bodyHtml || "").includes(`data-att="${a.id}"`)) continue;
+      if (seen.has(k)) continue; seen.add(k);
       (fileKind(a) === "image" ? images : files).push(a);
     }
   }
-  return { title: src.title, count: items.length, groups: [...GENRES, "その他"].filter(g => groups.has(g)).map(g => [g, groups.get(g)]), images: o.images ? images : [], files };
+  return { title: src.title, count: items.length, groups: [...GENRES, "その他"].filter(g => groups.has(g)).map(g => [g, groups.get(g)]), images: o.images ? images : [], files, inlineAtts };
 }
 /* 画面・ファイル用の見た目 */
 function digestDoc(dg) {
@@ -1541,16 +1577,18 @@ function digestDoc(dg) {
     dg.files.length ? h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, "添付ファイル"),
       h("ul", { class: "rp-files" }, dg.files.map(a => h("li", {}, h("a", { class: "rp-file", href: attUrl(a), download: a.name, "data-size": String(a.size || 0) }, KIND_ICON[fileKind(a)] + " " + a.name))))) : null);
 }
-/* 新しいメモの下書きにする（画像・ファイルは元のメモと同じものを共有して添付） */
+/* 新しいメモの下書きにする（画像・ファイルは元のメモと同じものを共有して添付。本文中の画像は文章と同じ位置に入れる） */
 function digestDraft(dg, src) {
-  const atts = [...dg.images, ...dg.files].map(a => ({ id: uid("a"), name: a.name, type: a.type, size: a.size, fileId: a.fileId }));
+  const idMap = new Map();
+  const copy = (a) => { const n = { id: uid("a"), name: a.name, type: a.type, size: a.size, fileId: a.fileId }; idMap.set(a.id, n.id); return n; };
+  const atts = [...dg.inlineAtts.map(copy), ...dg.images.map(copy), ...dg.files.map(copy)];
   const box = document.createElement("div");
   for (const [g, list] of dg.groups) {
     box.append(h("h2", {}, g));
     box.append(h("ul", {}, list.map(blocks => h("li", {}, blocks.map(b => b.cloneNode(true))))));
   }
-  const imgAtts = atts.slice(0, dg.images.length);
-  if (imgAtts.length) { box.append(h("h2", {}, "画像")); imgAtts.forEach(a => box.append(h("img", { "data-att": a.id, alt: "", style: "width:50%" }))); }
+  box.querySelectorAll("img[data-att]").forEach(img => { const id = idMap.get(img.dataset.att); if (id) { img.dataset.att = id; img.removeAttribute("src"); } else img.remove(); });
+  if (dg.images.length) { box.append(h("h2", {}, "画像")); dg.images.forEach(a => box.append(h("img", { "data-att": idMap.get(a.id), alt: "", style: "width:50%" }))); }
   const genres = GENRES.filter(g => src.items.some(m => (m.genres || []).includes(g)));
   return { id: uid("m"), isNew: true, title: dg.title, genres, bodyHtml: sanitize(box.innerHTML), attachments: atts, tags: [], parentId: null, links: [],
     listIds: src.listId ? [src.listId] : [], savedOnce: false, dirty: true };
@@ -1583,7 +1621,7 @@ async function reportFileHtml(doc, title) {
 </style></head><body>${clone.outerHTML}</body></html>`;
 }
 function renderReport(s) {
-  s.opts = s.opts || { body: s.listId ? "full" : "excerpt", images: true, period: "all", from: "", to: "" };
+  s.opts = s.opts || { body: s.listId ? "full" : "excerpt", images: true, period: "all", from: "", to: "", listId: s.listId || "" };
   const o = s.opts;
   const src = reportSource(s);
   const holder = h("div", { class: "rp-holder" }, h("p", { class: "ai-hint" }, "まとめを作っています…"));
@@ -1617,7 +1655,11 @@ function renderReport(s) {
     PERIODS.map(([v, l]) => h("option", { value: v }, l)));
   periodSel.value = o.period;
   const dateIn = (key, label) => h("input", { type: "date", class: "genre-select rp-date", "aria-label": label, value: o[key] || "", max: ymd(new Date()), onchange: (e) => { o[key] = e.target.value; render(); } });
+  const listSel = h("select", { id: "rp-list", class: "genre-select" + (o.listId ? " on" : ""), "aria-label": "リスト", onchange: () => { o.listId = listSel.value; render(); } },
+    h("option", { value: "" }, "すべて"), [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt).map(x => h("option", { value: x.id }, x.name)));
+  listSel.value = Manager.lists.has(o.listId) ? o.listId : "";
   const tools = h("div", { class: "rp-tools" },
+    Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "リスト"), listSel) : null,
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg,
@@ -1749,7 +1791,7 @@ function renderEdit(s) {
   const markDirty = () => { d.dirty = true; dirtyEl.textContent = "未保存の変更があります"; };
 
   // title
-  const titleIn = h("input", { id: "title", class: "title-input", placeholder: "題名（空欄でもOK）", "aria-label": "題名", value: d.title, oninput: (e) => { d.title = e.target.value; markDirty(); } });
+  const titleIn = h("input", { id: "title", class: "title-input", placeholder: "題名", "aria-label": "題名", value: d.title, oninput: (e) => { d.title = e.target.value; markDirty(); } });
   // 直近の題名は、題名の欄を触っている間だけ1行で出す（常に出すと本文が下に押し出されるため）
   const recents = Manager.recentTitles();
   const recentRow = recents.length ? h("div", { class: "recent-titles", hidden: true }, h("span", {}, "直近の題名："),
@@ -2172,17 +2214,22 @@ function renderEdit(s) {
 
   // lists
   const listBox = h("div", { class: "chips" });
+  // 作成済みのリストはプルダウンから選ぶ。選んだリストは「✕」付きで並べ、最後の項目から新しいリストも作れる
   const drawListsPick = () => {
     const lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
-    const newIn = h("input", { id: "elist", class: "text-input", placeholder: "新しいリスト", style: "width:160px;height:32px;font-size:14px" });
-    listBox.replaceChildren(...lists.map(l => h("button", { type: "button", class: "list-toggle", "aria-pressed": String(d.listIds.includes(l.id)), onclick: () => {
-      d.listIds = d.listIds.includes(l.id) ? d.listIds.filter(x => x !== l.id) : [...d.listIds, l.id]; markDirty(); drawListsPick();
-    } }, (d.listIds.includes(l.id) ? "✓ " : "") + l.name)),
-      h("form", { style: "display:flex;gap:6px;align-items:center", onsubmit: async (e) => {
-        e.preventDefault(); const name = newIn.value.trim(); if (!name) return;
-        try { const l = await Manager.saveList({ id: uid("l"), name }); d.listIds.push(l.id); markDirty(); drawListsPick(); }
-        catch { toast("リストを作成できませんでした", true); }
-      } }, newIn, h("button", { class: "btn", type: "submit", style: "padding:4px 10px" }, "追加")));
+    const chosen = d.listIds.map(id => Manager.lists.get(id)).filter(Boolean);
+    const sel = h("select", { id: "elist", class: "genre-select list-pick", "aria-label": "リストを選ぶ", onchange: async () => {
+      const v = sel.value; sel.value = "";
+      if (v === "__new") {
+        const name = await askListName(); if (!name) return;
+        try { const l = await Manager.saveList({ id: uid("l"), name }); d.listIds.push(l.id); }
+        catch { toast("リストを作成できませんでした", true); return; }
+      } else if (v && !d.listIds.includes(v)) d.listIds.push(v);
+      else return;
+      markDirty(); drawListsPick();
+    } }, h("option", { value: "" }, "＋ リストを選ぶ"), lists.filter(l => !d.listIds.includes(l.id)).map(l => h("option", { value: l.id }, l.name)), h("option", { value: "__new" }, "＋ 新しいリストを作る"));
+    listBox.replaceChildren(...chosen.map(l => h("span", { class: "chip on" }, h("span", { class: "tx" }, l.name),
+      h("button", { type: "button", "aria-label": l.name + " から外す", onclick: () => { d.listIds = d.listIds.filter(x => x !== l.id); markDirty(); drawListsPick(); } }, "✕"))), sel);
   };
   drawListsPick();
   const listField = h("div", { class: "field" }, h("div", { class: "label" }, "リスト"), listBox);
@@ -2203,7 +2250,8 @@ function renderEdit(s) {
       h("button", { type: "button", "aria-label": t + " を外す", onclick: () => { d.tags = d.tags.filter(x => x !== t); markDirty(); drawTags(); } }, "✕"))));
     const known = allTags().filter(t => !d.tags.includes(t));
     tagList.replaceChildren(...known.map(t => h("option", { value: t })));
-    sugg.replaceChildren(...(known.length ? [h("span", { class: "sugg-label" }, "よく使うタグ："), ...known.slice(0, 8).map(t => h("button", { type: "button", class: "chip-btn", onclick: () => addTag(t) }, "#" + t))] : []));
+    // よく使うタグは、見出しの文字の代わりに小さなタグのアイコン＋1行（横にスクロール）で出す
+    sugg.replaceChildren(...(known.length ? [h("span", { class: "sugg-ico", title: "よく使うタグ", "aria-label": "よく使うタグ" }, svgIcon(ICONS.tag)), ...known.slice(0, 8).map(t => h("button", { type: "button", class: "chip-btn mini", onclick: () => addTag(t) }, "#" + t))] : []));
   };
   tagIn.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); addTag(tagIn.value); tagIn.value = ""; } });
   tagIn.addEventListener("change", () => { if (tagIn.value.trim()) { addTag(tagIn.value); tagIn.value = ""; } });
