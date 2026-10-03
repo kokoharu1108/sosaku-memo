@@ -12,10 +12,20 @@ const KEY = "ここに合言葉";
 const FOLDER_NAME = "ヒフミヨ_同期";   // ドライブに作るフォルダの名前
 const KEEP_DAYS = 30;                  // 毎日の控え（data-日付.json）を残す日数
 
+/* ブラウザでURLを開いたときの表示（接続の確認用）。アプリとのやり取りは下の doPost で行う */
+function doGet() {
+  const ok = KEY && KEY !== "ここに合言葉";
+  const msg = ok
+    ? "ヒフミヨ同期：準備できています。このページは閉じて、このURLをアプリの設定「接続先のURL」に貼り付けてください。"
+    : "ヒフミヨ同期：まだ合言葉が設定されていません。プログラムの KEY を書き換えて保存し、新しいバージョンで公開し直してください。";
+  return HtmlService.createHtmlOutput('<meta name="viewport" content="width=device-width,initial-scale=1"><p style="font:16px/1.7 sans-serif;padding:16px">' + msg + "</p>");
+}
+
 function doPost(e) {
   try {
     const req = JSON.parse(e.postData.contents);
-    if (!KEY || KEY === "ここに合言葉" || req.key !== KEY) return out_({ ok: false, error: "auth" });
+    if (!KEY || KEY === "ここに合言葉") return out_({ ok: false, error: "nokey" });
+    if (req.key !== KEY) return out_({ ok: false, error: "auth" });
     const root = folder_(DriveApp.getRootFolder(), FOLDER_NAME);
     const files = folder_(root, "files");
     switch (req.action) {

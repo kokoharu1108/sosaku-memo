@@ -270,6 +270,12 @@ fire('touchend',x1,false);}"""
     sync_on(pb); pb.wait_for_timeout(500)
     check("別の端末で同期するとメモと添付が戻る", pb.locator(".memo-card", has_text="同期のメモ").count() == 1 and "📎 1" in pb.inner_text(".memo-card"))
     pb.locator(".memo-card").first.click(); pb.click(".menu-btn"); pb.click(".menu >> text=削除"); pb.click(".modal >> text=Yes"); pb.wait_for_timeout(5500)
+    # 接続先のプログラムが古い（保存前に公開した）ときは、Google のエラー画面を見分けて直し方を示す
+    pc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    pc.route(FakeGas.URL, lambda r: r.fulfill(status=200, content_type="text/html", body="<html><body>スクリプト関数が見つかりません: doPost</body></html>"))
+    qc = pc.new_page(); qc.goto(URL); qc.wait_for_selector(".fab")
+    check("古い接続先のときは直し方を表示", "プログラムが古いまま" in sync_on(qc))
+    pc.close()
     pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(2500)
     check("削除も他の端末に反映・同期のオンは開き直しても続く", pa.locator(".memo-card").count() == 0 and pa.evaluate("localStorage.getItem('sm.syncOn')") == "true")
     b.close()

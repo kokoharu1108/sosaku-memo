@@ -2428,9 +2428,17 @@ const Sync = {
   notify() { this.listeners.forEach(f => { try { f(); } catch {} }); },
   async call(action, extra) {
     const res = await fetch(this.url(), { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ key: this.key(), action, ...extra }) });
-    if (!res.ok) throw new Error("http " + res.status);
-    let j; try { j = await res.json(); } catch { throw new Error("接続先の応答を読めませんでした（URLを確かめてください）"); }
-    if (!j.ok) throw new Error(j.error === "auth" ? "合言葉が違います" : (j.error || "エラー"));
+    if (!res.ok) throw new Error(res.status === 404 ? "接続先が見つかりません（URLが /exec で終わっているか確かめてください）" : "接続先でエラーが起きました（" + res.status + "）");
+    const text = await res.text();
+    let j; try { j = JSON.parse(text); } catch {
+      // Google 側のエラー画面が返ってきたときは、原因ごとに直し方を示す
+      if (/doPost/.test(text)) throw new Error("接続先のプログラムが古いままです。Apps Script でコードを貼り付けて保存したあと、「デプロイ」→「デプロイを管理」→ 鉛筆 →「新しいバージョン」で公開し直してください");
+      if (/accounts\.google\.com|ログイン|Sign in/i.test(text)) throw new Error("公開の設定で「アクセスできるユーザー」が「全員」になっていません");
+      throw new Error("接続先の応答を読めませんでした（URLを確かめてください）");
+    }
+    if (!j.ok) throw new Error(j.error === "auth" ? "合言葉が違います"
+      : j.error === "nokey" ? "接続先のプログラムで合言葉（KEY）がまだ設定されていません。書き換えて保存し、新しいバージョンで公開し直してください"
+      : (j.error || "エラー"));
     return j;
   },
   schedule(delay = 4000) { if (!this.ready()) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.run(), delay); },
