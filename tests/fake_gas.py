@@ -7,6 +7,10 @@ class FakeGas:
     def __init__(self, key="aikotoba-123", version=2):
         self.key, self.data, self.files, self.calls, self.version = key, None, {}, [], version
         self.parts, self.fail_next = {}, 0   # fail_next: 次の putChunk を何回「通信切れ」にするか
+        self.echo404 = {}   # {操作名: 回数}: 処理はしたが、返事が 404 になる回数（本物では googleusercontent.com で起きる）
+
+    def echo(self, route):
+        route.fulfill(status=404, content_type="text/html", headers={"Access-Control-Allow-Origin": "*"}, body="<html><head><title>ページが見つかりません</title></head></html>")
 
     def handle(self, route):
         req = json.loads(route.request.post_data or "{}")
@@ -48,4 +52,7 @@ class FakeGas:
                 out = {"ok": True, "type": t, "data": d} if d is not None else {"ok": False, "error": "nofile"}
             else:
                 out = {"ok": True}
+        if self.echo404.get(req.get("action"), 0) > 0:
+            self.echo404[req["action"]] -= 1
+            self.echo(route); return   # 本物は googleusercontent.com へ回されてから 404（Playwright では回し先を横取りできないため、その場で 404 を返す）
         route.fulfill(status=200, content_type="application/json", headers={"Access-Control-Allow-Origin": "*"}, body=json.dumps(out))

@@ -2436,12 +2436,12 @@ const Sync = {
   ready() { return this.on() && /^https:\/\/script\.google(usercontent)?\.com\//.test(this.url()) && !!this.key(); },
   listeners: new Set(),
   notify() { this.listeners.forEach(f => { try { f(); } catch {} }); },
-  async call(action, extra, tries = 2) {
+  async call(action, extra, tries = 3) {
     let res;
     try {
       res = await fetch(this.url(), { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ key: this.key(), action, ...extra }) });
     } catch {
-      // 「Failed to fetch」「Load failed」= 通信が途中で切れた。少し待って1回だけやり直す
+      // 「Failed to fetch」「Load failed」= 通信が途中で切れた。少し待ってやり直す（2回まで）
       if (tries > 1) { await new Promise(r => setTimeout(r, 1500)); return this.call(action, extra, tries - 1); }
       throw new Error("通信が途中で切れました。電波の良い場所で、もう一度「同期」を押してください");
     }
@@ -2451,6 +2451,14 @@ const Sync = {
       const title = ((/<title>([^<]*)<\/title>/i.exec(body) || [])[1] || "").trim().slice(0, 60);
       let where = ""; try { where = new URL(res.url).hostname.replace(/^script\./, ""); } catch {}
       const info = `（${res.status}・${SYNC_STEP[action] || action}${where ? "・" + where : ""}${title ? "・" + title : ""}）`;
+      // 接続先のプログラムは動いたが、Google の「返事の受け取り口」（googleusercontent.com）で失敗した、
+      // または同じ同期の中で、ついさっきまで同じURLとつながっていた（＝URLは正しい）。
+      // Google 側の一時的な不調なので、少し待ってやり直す（どの操作も、やり直しても二重にならない作り）
+      if (/googleusercontent/.test(where) || this.reached) {
+        if (tries > 1) { await new Promise(r => setTimeout(r, 2000)); return this.call(action, extra, tries - 1); }
+        const err = new Error("Googleからの返事を受け取れませんでした" + info + "。Google側の一時的な不調です。少したってから自動でやり直します");
+        err.transient = true; throw err;
+      }
       throw new Error(res.status === 404
         ? "接続先が見つかりません" + info + "。Apps Script の「デプロイを管理」で、このURLの公開が残っているか（アーカイブしていないか）確かめてください"
         : "接続先でエラーが起きました" + info);
@@ -2465,14 +2473,19 @@ const Sync = {
     if (!j.ok) throw new Error(j.error === "auth" ? "合言葉が違います"
       : j.error === "nokey" ? "接続先のプログラムで合言葉（KEY）がまだ設定されていません。書き換えて保存し、新しいバージョンで公開し直してください"
       : (j.error || "エラー"));
+    this.reached = true;
     return j;
   },
+  /* 一時的な失敗のあとは、1分後に自動でやり直す（続けて3回まで。成功したら数え直す） */
+  retries: 0, RETRY_DELAY: 60000,
+  retryLater() { if (this.retries >= 3) return; this.retries++; this.schedule(this.RETRY_DELAY); },
   schedule(delay = 4000) { if (!this.ready()) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.run(), delay); },
-  async run() {
+  async run(force) {
     if (!this.ready()) return false;
     if (this.busy) { this.again = true; return false; }
     if (!navigator.onLine) { this.status = "電波がないため、つながったら同期します"; this.notify(); return false; }
     this.busy = true; this.error = ""; this.status = "同期しています…"; this.notify();
+    this.reached = false;
     try {
       const ver = (await this.call("ping")).version || 1;
       if (ver < 2) throw new Error("接続先のプログラムが古いままです。最新の gas/Code.gs を貼り付けて保存し、「デプロイを管理」→ 鉛筆 →「新しいバージョン」で公開し直してください");
@@ -2481,14 +2494,16 @@ const Sync = {
       // メモ・リストのデータを先に保存する（添付ファイルの途中で失敗しても、メモ本体はドライブに残るように）
       await this.call("push", { data: this.snapshot() });
       Manager.meta.lastSync = Date.now(); await Storage.putMeta(Manager.meta).catch(() => {});
-      const failed = await this.syncFiles();
+      const failed = await this.syncFiles(force);
       this.status = "";
-      if (failed) this.error = `メモは同期しましたが、添付ファイル${failed}件を送受信できませんでした（${this.fileError || "通信が途中で切れました"}）。もう一度「同期」を押すと続きから送ります`;
+      if (failed) { this.error = `メモは同期しましたが、添付ファイル${failed}件を送受信できませんでした（${this.fileError || "通信が途中で切れました"}）。少したってから自動で続きを送ります`; this.retryLater(); }
+      else this.retries = 0;
       // ドライブ側から増えた・変わったメモを画面に反映（メモを書いている途中の画面は作り直さない）
       if (changed) { const n = current().name; if (n === "search" || n === "list" || n === "view") render(); }
       return !failed;
     } catch (e) {
       this.error = (e && e.message) || "同期できませんでした";
+      if (e && e.transient) this.retryLater();
       return false;
     } finally {
       this.busy = false; this.notify();
@@ -2526,12 +2541,20 @@ const Sync = {
   /* 添付ファイルを足りない側へ送る。大きなファイルも送れるよう小分け（約0.5MBずつ）にする。
      1つ失敗しても残りは続け、失敗した件数を返す（次の同期で続きから） */
   CHUNK: 700000,
-  async syncFiles() {
+  async syncFiles(force) {
     const need = new Map();
     for (const m of Manager.memos.values()) for (const a of m.attachments || []) if (a.fileId) need.set(a.fileId, a);
     if (!need.size) return 0;
-    const remoteIds = new Set((await this.call("listFiles")).ids || []);
+    const meta = Manager.meta;
     const localIds = new Set(await Storage.allFileIds());
+    // ドライブにあると確かめ済みの添付だけなら、問い合わせを省く（通信の回数を減らす）。
+    // ただし「同期」を押したときと、前回の確かめから1日たったときは、ドライブ側を確かめ直す
+    const known = new Set(meta.driveFiles || []);
+    const fresh = Date.now() - (meta.driveFilesAt || 0) < 864e5;
+    if (!force && fresh && [...need.keys()].every(id => localIds.has(id) && known.has(id))) return 0;
+    const remoteIds = new Set((await this.call("listFiles")).ids || []);
+    const saveKnown = () => { meta.driveFiles = [...need.keys()].filter(id => remoteIds.has(id)); return Storage.putMeta(meta).catch(() => {}); };
+    meta.driveFilesAt = Date.now(); await saveKnown();
     const todo = [...need].filter(([id]) => localIds.has(id) !== remoteIds.has(id));
     let n = 0, failed = 0; this.fileError = "";
     for (const [id, a] of todo) {
@@ -2545,6 +2568,7 @@ const Sync = {
             this.status = `添付ファイルを送っています（${n}/${todo.length}${total > 1 ? `・${Math.round((i + 1) / total * 100)}%` : ""}）…`; this.notify();
             await this.call("putChunk", { id, type: rec.type || a.type, index: i, total, data: data.slice(i * this.CHUNK, (i + 1) * this.CHUNK) });
           }
+          remoteIds.add(id); await saveKnown();
         } else {
           let b64 = "", type = a.type, total = Infinity;
           while (b64.length < total) {
@@ -2622,7 +2646,8 @@ function syncSection() {
     if (!key) { toast("合言葉を入れてください", true); keyIn.focus(); return; }
     lsSet("sm.syncUrl", url); lsSet("sm.syncKey", key); lsSet("sm.syncOn", true);
     draw();
-    const ok = await Sync.run();
+    Sync.retries = 0;
+    const ok = await Sync.run(true);
     toast(ok ? "同期しました" : syncErrText(Sync.error || Sync.status), !ok);
   } }, svgIcon(ICONS.sync), h("span", {}, "同期"));
   const setup = h("details", { class: "sync-setup" }, h("summary", {}, "接続の設定"),

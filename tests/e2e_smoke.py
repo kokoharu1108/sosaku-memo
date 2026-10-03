@@ -288,7 +288,7 @@ fire('touchend',x1,false);}"""
     big = bytes((i * 37) % 256 for i in range(1_200_000))
     pb.click(".fab"); pb.fill("#title", "大きな添付"); pb.click(".genre-pick >> text=学び")
     pb.set_input_files("#file", files=[{"name": "big.bin", "mimeType": "application/octet-stream", "buffer": big}]); pb.wait_for_selector(".att-tile")
-    gas.fail_next = 2   # 最初の送信は2回とも通信切れ（自動のやり直しも失敗）
+    gas.fail_next = 3   # 最初の送信は3回とも通信切れ（自動のやり直しも失敗）
     pb.click(".edit-actions .btn.primary"); pb.wait_for_timeout(9000)
     pb.click("[aria-label=設定]"); st = pb.inner_text(".sync-status")
     check("通信が切れてもメモは先にドライブへ・失敗した添付は件数で知らせる", any(m["title"] == "大きな添付" for m in gas.data["memos"]) and "添付ファイル1件" in st, st)
@@ -311,6 +311,22 @@ fire('touchend',x1,false);}"""
     pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")   # pb はオフに
     n = len(gas.calls); pb.wait_for_timeout(21000); pb.evaluate(RESUME); pb.wait_for_timeout(2000)
     check("同期オフなら画面に戻しても通信しない", len(gas.calls) == n)
+
+    # Google の返事の受け取り口（googleusercontent.com）の一時的な 404 は、自動でやり直して同期を続ける
+    def sync_now(q):
+        q.click("[aria-label=設定]"); q.click(".sync-btn"); q.wait_for_timeout(300); q.click(".sync-btn"); q.wait_for_timeout(6000)
+        st = q.inner_text(".sync-status"); q.click(".modal >> text=閉じる"); return st
+    gas.echo404 = {"listFiles": 2}
+    st = sync_now(pa)
+    check("返事の受け取り口の一時的な404は、その場でやり直して成功", st.startswith("オン") and gas.echo404["listFiles"] == 0, st)
+    # 1分待ちを8秒に縮めて確かめる
+    pa.add_init_script("(() => { const st = window.setTimeout; window.setTimeout = (f, d, ...a) => st(f, d === 60000 ? 8000 : d, ...a); })()")
+    pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(3000)
+    gas.echo404 = {"listFiles": 3}
+    st = sync_now(pa)
+    check("やり直しても404なら一時的な不調と知らせる", "一時的な不調" in st and "添付の確認" in st, st)
+    pa.wait_for_timeout(9000); pa.click("[aria-label=設定]"); st = pa.inner_text(".sync-status"); pa.click(".modal >> text=閉じる")
+    check("少したつと自動でやり直して同期できる", st.startswith("オン"), st)
 
     # 古い接続先プログラム（版1）のときは更新を案内
     old = FakeGas(version=1); pd = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True); pd.route(FakeGas.URL, old.handle)
