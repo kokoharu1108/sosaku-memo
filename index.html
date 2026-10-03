@@ -262,6 +262,11 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .search-toggle .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
 .search-toggle.active .dot { display: block; }
 .search-panel { padding-top: 6px; }
+.hist-row { display: flex; align-items: center; gap: 6px; margin-top: 8px; min-width: 0; }
+.hist-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
+.hist-chips::-webkit-scrollbar { display: none; }
+.hist-chips .chip-btn { flex: 0 0 auto; max-width: 12em; }
+.hist-clear { border: 0; background: none; color: var(--ink-3); font-size: 12px; padding: 4px 2px; flex: 0 0 auto; }
 .filter-row { margin-top: 8px !important; margin-bottom: 0 !important; }
 .fr-label { font-size: 12px; color: var(--ink-3); }
 .search-tools .tab-row { margin: 6px 0 8px; }
@@ -271,10 +276,13 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .tree li { margin: 0; }
 .tree-row { display: flex; align-items: center; gap: 2px; min-height: 38px; border-radius: 8px; }
 .tree-row.current { background: var(--accent-soft); }
-.tree-tog { border: 0; background: none; width: 28px; height: 28px; border-radius: 6px; color: var(--ink-2); font-size: 13px; flex: 0 0 auto; }
-.tree-tog:hover { background: var(--surface-2); }
-.tree-leaf { width: 28px; text-align: center; color: var(--ink-3); flex: 0 0 auto; }
-.tree-title { border: 0; background: none; text-align: left; padding: 6px 6px; border-radius: 6px; color: var(--ink); font-size: 15px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tree-leaf { width: 22px; text-align: center; color: var(--ink-3); flex: 0 0 auto; }
+.tree-title { border: 0; background: none; text-align: left; padding: 6px 6px; border-radius: 6px; color: var(--ink); font-size: 15px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+.tree-row.has-kids .tree-title { font-weight: 700; }
+.tree-title .tree-count { margin-right: 0; font-weight: 400; }
+.tree-tog { width: 22px; text-align: center; color: var(--ink-3); font-size: 12px; flex: 0 0 auto; }
+.tree-open { border: 1px solid var(--line); background: var(--surface); color: var(--accent-ink); width: 34px; height: 30px; border-radius: 8px; font-size: 18px; line-height: 1; flex: 0 0 auto; }
+.tree-open:hover { border-color: var(--accent); }
 .tree-title:hover { background: var(--surface-2); color: var(--accent-ink); }
 .tree-count { font-size: 11.5px; color: var(--ink-3); background: var(--surface-2); border-radius: 999px; padding: 0 7px; margin-right: 6px; font-variant-numeric: tabular-nums; }
 .tree-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 6px 8px; }
@@ -405,7 +413,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .fmt-bar.floating { position: fixed; left: 0; right: 0; top: auto; z-index: 60; border-radius: 0; border-top: 1px solid var(--line); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; box-shadow: 0 -4px 14px rgba(0,0,0,.08); padding: 6px 10px; }
 .fmt-bar.floating::-webkit-scrollbar { display: none; }
 body.editing-body .edit-actions { display: none; }
-.pop { position: fixed; z-index: 70; }
+.pop { position: fixed; z-index: 70; overflow: auto; max-width: calc(100vw - 16px); }
 .pop-cap { font-size: 12px; font-weight: 700; color: var(--ink-3); margin-bottom: 6px; }
 .head-pick { display: grid; gap: 2px; min-width: 160px; }
 .head-pick button { text-align: left; border: 0; background: none; padding: 6px 10px; border-radius: 8px; color: var(--ink); }
@@ -424,7 +432,7 @@ body.editing-body .edit-actions { display: none; }
 .fmt-bar .sep { width: 1px; background: var(--line); margin: 6px 4px; }
 .editor { min-height: 240px; padding: 14px 16px; font-size: 16px; line-height: 1.85; outline: none; overflow-wrap: anywhere; }
 .editor:empty::before { content: attr(data-placeholder); color: var(--ink-3); }
-.pop { position: absolute; z-index: 30; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; }
+.pop { position: fixed; z-index: 70; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; }
 .swatches { display: grid; grid-template-columns: repeat(4, 58px); gap: 6px; }
 .swatches .sw { display: grid; justify-items: center; gap: 2px; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 6px 2px 4px; }
 .swatches .sw:hover { border-color: var(--accent); }
@@ -559,7 +567,7 @@ function sanitize(html) {
         const w = (child.style && child.style.width) || "";
         if (/^\d{1,3}(\.\d+)?%$/.test(w) && parseFloat(w) > 0 && parseFloat(w) <= 100) keep.style = "width:" + w;
       }
-      if (child.tagName === "SPAN" && child.style) {
+      if (["SPAN", "B", "STRONG", "I", "EM", "S", "STRIKE", "DEL", "U"].includes(child.tagName) && child.style && child.getAttribute("style")) {
         // スタイルで付いた太字・斜体・取り消し線・下線をタグに置き換える
         const st = child.style, wraps = [];
         if (st.fontWeight === "bold" || parseInt(st.fontWeight, 10) >= 600) wraps.push("B");
@@ -581,12 +589,14 @@ function sanitize(html) {
       if (child.tagName === "FONT") { const sp = document.createElement("span"); if (keep.class) sp.className = keep.class; while (child.firstChild) sp.append(child.firstChild); child.replaceWith(sp); walk(sp); if (!sp.className) sp.replaceWith(...sp.childNodes); continue; }
       if (child.tagName === "SPAN" && !keep.class) { walk(child); child.replaceWith(...child.childNodes); continue; }
       walk(child);
+      // 中身のない書式（太字だけ残った空要素など）は取り除く
+      if (["B", "STRONG", "I", "EM", "S", "STRIKE", "DEL", "U", "SPAN", "A"].includes(child.tagName) && !child.textContent.replace(/\u200B/g, "") && !child.querySelector("img, br")) child.remove();
     }
   };
   walk(tpl.content);
   return tpl.innerHTML;
 }
-const htmlToText = (html) => { const t = document.createElement("template"); t.innerHTML = (html || "").replace(/<(br|\/p|\/div|\/li|\/h[2-4])>/gi, "\n$&"); return (t.content.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); };
+const htmlToText = (html) => { html = (html || "").replace(/\u200B/g, ""); const t = document.createElement("template"); t.innerHTML = (html || "").replace(/<(br|\/p|\/div|\/li|\/h[2-4])>/gi, "\n$&"); return (t.content.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); };
 
 /* =========================================================
    Storage: IndexedDB on this device (works offline)
@@ -1037,19 +1047,18 @@ function renderSearch() {
   const st = UI.search;
   const input = h("input", { id: "q", class: "search-input", type: "search", enterkeyhint: "search", placeholder: "キーワードでメモを探す", value: st.q, autocomplete: "off",
     oninput: (e) => { st.q = e.target.value; },
-    onfocus: () => showHistory(),
     onkeydown: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); input.blur(); } } });
-  const histBox = h("div", { class: "history", hidden: true });
+  // 最近の検索: 絞り込みを隠さないよう、検索窓の下に横並びで表示する
+  const histBox = h("div", { class: "hist-row" });
   function showHistory() {
     const hist = Manager.meta.history || [];
-    histBox.replaceChildren();
-    if (!hist.length) { histBox.hidden = true; return; }
-    histBox.append(h("div", { class: "history-head" }, "最近の検索", h("button", { onmousedown: (e) => e.preventDefault(), onclick: () => { Manager.clearHistory(); histBox.hidden = true; } }, "履歴を消去")));
-    hist.forEach(q => histBox.append(h("button", { class: "history-item", onmousedown: (e) => e.preventDefault(), onclick: () => { st.q = q; input.value = q; commit(); input.blur(); } }, h("span", {}, "↺"), q)));
-    histBox.hidden = false;
+    histBox.hidden = !hist.length;
+    histBox.replaceChildren(...(hist.length ? [h("span", { class: "fr-label" }, "最近"),
+      h("div", { class: "hist-chips" }, hist.map(q => h("button", { class: "chip-btn", type: "button", onclick: () => { st.q = q; input.value = q; commit(); } }, q))),
+      h("button", { class: "hist-clear", type: "button", "aria-label": "検索履歴を消去", title: "検索履歴を消去", onclick: () => { Manager.clearHistory(); showHistory(); } }, "消去")] : []));
   }
-  input.addEventListener("blur", () => setTimeout(() => { histBox.hidden = true; }, 120));
-  function commit() { st.committed = st.q.trim(); if (st.tab !== "memos") st.tab = "memos"; if (st.committed) Manager.pushHistory(st.committed); histBox.hidden = true; drawResults(); }
+  showHistory();
+  function commit() { st.committed = st.q.trim(); if (st.tab !== "memos") st.tab = "memos"; if (st.committed) Manager.pushHistory(st.committed); showHistory(); input.blur(); drawResults(); }
 
   let fab, fabLabel;
   const results = h("div");
@@ -1127,8 +1136,8 @@ function renderSearch() {
     h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
       h("div", { class: "search-row" },
         h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), input),
-        h("button", { class: "btn primary search-go", type: "submit" }, "検索")),
-      histBox),
+        h("button", { class: "btn primary search-go", type: "submit" }, "検索"))),
+    histBox,
     filterRow);
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
@@ -1137,13 +1146,14 @@ function renderSearch() {
 function renderTreeTab(redraw) {
   const st = UI.search;
   const wrap = h("div");
-  const roots = sortMemos(Manager.roots, st.sort);
-  if (!roots.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「新規メモ」から書き始めましょう。")); return wrap; }
+  // 下の階層を持つ最上位のメモだけを表示（階層のないメモは出さない）
+  const roots = sortMemos(Manager.roots.filter(m => (Manager.kids.get(m.id) || []).length), st.sort);
+  if (!roots.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "階層のあるメモはまだありません"), "メモを開いて「＋ 子メモを作成」を押すか、メモ画面の「階層（このメモの親）」で親メモを選ぶと、ここにツリーで表示されます。")); return wrap; }
   const withKids = Manager.sorted.filter(m => (Manager.kids.get(m.id) || []).length);
   const allOpen = withKids.length > 0 && withKids.every(m => UI.treeOpen.has(m.id));
   wrap.append(
     h("div", { class: "toolbar-row", style: "margin-top:0" },
-      h("span", { class: "result-meta" }, `全${Manager.memos.size}件 ・ 最上位 ${roots.length}件`),
+      h("span", { class: "result-meta" }, `階層のあるメモ ${roots.length}件`),
       h("span", { class: "spacer" }),
       withKids.length ? h("button", { class: "btn ghost sel-start", type: "button", onclick: () => { if (allOpen) UI.treeOpen.clear(); else withKids.forEach(m => UI.treeOpen.add(m.id)); redraw(); } }, allOpen ? "すべて閉じる" : "すべて開く") : null),
     h("div", { class: "tree-card" }, treeList(roots, { open: UI.treeOpen, sort: st.sort, redraw })));
@@ -1434,12 +1444,15 @@ function treeList(nodes, ctx, depth = 0) {
   for (const m of nodes) {
     const kids = Manager.childrenOf(m.id, ctx.sort);
     const open = ctx.open.has(m.id);
+    const toggle = () => { open ? ctx.open.delete(m.id) : ctx.open.add(m.id); ctx.redraw(); };
+    // 下の階層があるメモ: 行をタップで開閉、右端の「›」でメモを開く。下の階層がないメモ: タップでメモを開く
     const li = h("li", {},
-      h("div", { class: "tree-row" + (ctx.current === m.id ? " current" : "") },
-        kids.length ? h("button", { class: "tree-tog", type: "button", "aria-expanded": String(open), "aria-label": (open ? "閉じる：" : "開く：") + (m.title || "無題のメモ"),
-          onclick: () => { open ? ctx.open.delete(m.id) : ctx.open.add(m.id); ctx.redraw(); } }, open ? "▾" : "▸") : h("span", { class: "tree-leaf", "aria-hidden": "true" }, "・"),
-        h("button", { class: "tree-title", type: "button", onclick: () => go({ name: "view", id: m.id }) }, m.title || "無題のメモ"),
-        kids.length ? h("span", { class: "tree-count" }, String(kids.length)) : null));
+      h("div", { class: "tree-row" + (ctx.current === m.id ? " current" : "") + (kids.length ? " has-kids" : "") },
+        kids.length ? h("span", { class: "tree-tog", "aria-hidden": "true" }, open ? "▾" : "▸") : h("span", { class: "tree-leaf", "aria-hidden": "true" }, "・"),
+        kids.length
+          ? h("button", { class: "tree-title", type: "button", "aria-expanded": String(open), onclick: toggle }, m.title || "無題のメモ", h("span", { class: "tree-count" }, String(kids.length)))
+          : h("button", { class: "tree-title", type: "button", onclick: () => go({ name: "view", id: m.id }) }, m.title || "無題のメモ"),
+        kids.length ? h("button", { class: "tree-open", type: "button", "aria-label": (m.title || "無題のメモ") + " を開く", title: "このメモを開く", onclick: () => go({ name: "view", id: m.id }) }, "›") : null));
     if (open && kids.length) li.append(treeList(kids, ctx, depth + 1));
     ul.append(li);
   }
@@ -1515,7 +1528,13 @@ function renderEdit(s) {
   let savedRange = null;
   const keepRange = () => { const sel = window.getSelection(); if (sel.rangeCount && editor.contains(sel.anchorNode)) savedRange = sel.getRangeAt(0).cloneRange(); };
   editor.addEventListener("keyup", keepRange); editor.addEventListener("mouseup", keepRange); editor.addEventListener("blur", keepRange);
-  const restoreRange = () => { editor.focus(); if (savedRange) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); } };
+  // 本文にカーソルが残っているときは選択を触らない（触ると「次に打つ文字を太字に」等の状態が消える）
+  const restoreRange = () => {
+    const sel = window.getSelection();
+    if (document.activeElement === editor && sel.rangeCount && editor.contains(sel.anchorNode)) return;
+    editor.focus();
+    if (savedRange) { sel.removeAllRanges(); sel.addRange(savedRange); }
+  };
   /* 箇条書き: カーソルが点の行にあれば解除、なければ追加 */
   const caretLi = () => {
     const sel = window.getSelection();
@@ -1564,23 +1583,94 @@ function renderEdit(s) {
   // 太字などは <b> 等のタグで、色だけはスタイルで適用（色はあとでクラスに置き換える）
   const exec = (cmd, val) => { restoreRange(); try { document.execCommand("styleWithCSS", false, cmd === "foreColor" || cmd === "hiliteColor"); } catch {} document.execCommand(cmd, false, val); keepRange(); markDirty(); updateStates(); };
 
-  /* 文字色・マーカー: ダークモードでも読めるよう、色そのものではなく「色の種類」で保存する */
-  const applyClass = (kind, name) => {
-    const sentinel = kind === "tc" ? "#010203" : "#030201";
-    const sentRgb = kind === "tc" ? "rgb(1, 2, 3)" : "rgb(3, 2, 1)";
-    const prop = kind === "tc" ? "color" : "backgroundColor";
-    exec(kind === "tc" ? "foreColor" : "hiliteColor", sentinel);
+  /* 文字色・マーカー: ダークモードでも読めるよう、色そのものではなく「色の種類」で保存する。
+     色ごとに目印の色コードで一旦付け、すぐ（またはその後に入力された文字も）色の種類に置き換える */
+  const TC_NAMES = ["default", "rose", "orange", "green", "blue", "purple", "gray", "brown"];
+  const HL_NAMES = ["none", "yellow", "pink", "green", "blue", "purple"];
+  const markHex = (kind, i) => kind === "tc" ? "#0102" + (10 + i).toString(16).padStart(2, "0") : "#0302" + (10 + i).toString(16).padStart(2, "0");
+  const markOf = (str) => { const m = /^rgb\((1|3), 2, (\d+)\)$/.exec((str || "").trim()); return m ? { kind: m[1] === "1" ? "tc" : "hl", i: +m[2] - 10 } : null; };
+  const convertMarks = (stripInner) => {
     editor.querySelectorAll("span, font").forEach(el => {
-      const hit = (el.style && el.style[prop] === sentRgb) || (kind === "tc" && (el.getAttribute("color") || "").toLowerCase() === sentinel);
-      if (!hit) return;
-      el.style[prop] = ""; el.removeAttribute("color");
+      const fc = el.tagName === "FONT" ? toHexRgb(el.getAttribute("color")) : "";
+      const hits = [];
+      const c1 = markOf(el.style && el.style.color) || markOf(fc); if (c1 && c1.kind === "tc") hits.push(c1);
+      const c2 = markOf(el.style && el.style.backgroundColor); if (c2 && c2.kind === "hl") hits.push(c2);
+      if (!hits.length) return;
       let target = el;
-      if (el.tagName === "FONT") { const sp = document.createElement("span"); while (el.firstChild) sp.append(el.firstChild); el.replaceWith(sp); target = sp; }
-      target.querySelectorAll("span").forEach(x => [...x.classList].forEach(c => { if (c.startsWith(kind + "-")) x.classList.remove(c); }));
-      [...target.classList].forEach(c => { if (c.startsWith(kind + "-")) target.classList.remove(c); });
-      target.classList.add(kind + "-" + name);
+      if (el.tagName === "FONT") { const sp = document.createElement("span"); sp.className = el.className; while (el.firstChild) sp.append(el.firstChild); el.replaceWith(sp); target = sp; }
+      for (const hit of hits) {
+        const name = (hit.kind === "tc" ? TC_NAMES : HL_NAMES)[hit.i]; if (!name) continue;
+        if (hit.kind === "tc") target.style.color = ""; else target.style.backgroundColor = "";
+        if (stripInner) target.querySelectorAll("span").forEach(x => [...x.classList].forEach(c => { if (c.startsWith(hit.kind + "-")) x.classList.remove(c); }));
+        [...target.classList].forEach(c => { if (c.startsWith(hit.kind + "-")) target.classList.remove(c); });
+        target.classList.add(hit.kind + "-" + name);
+      }
       if (!target.getAttribute("style")) target.removeAttribute("style");
     });
+  };
+  const toHexRgb = (c) => { c = (c || "").trim().toLowerCase(); const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(c); return m ? `rgb(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)})` : ""; };
+  const applyClass = (kind, name) => {
+    const i = (kind === "tc" ? TC_NAMES : HL_NAMES).indexOf(name);
+    exec(kind === "tc" ? "foreColor" : "hiliteColor", markHex(kind, i));
+    convertMarks(true);
+    markDirty(); updateStates();
+  };
+  // 日本語入力の変換中に本文をいじると入力が壊れるため、変換が確定してから整える
+  const tidyAfterInput = () => {
+    convertMarks(false);
+    // 文字を打ったら、書式の切り替え用に入れた見えない文字を取り除く（カーソル位置は保つ）
+    const sel = window.getSelection();
+    if (!sel.rangeCount || !sel.isCollapsed) return;
+    const node = sel.anchorNode;
+    if (!node || node.nodeType !== 3 || !editor.contains(node) || !node.data.includes(ZW) || node.data === ZW) return;
+    if (sel.anchorNode && window.getSelection().rangeCount && (document.activeElement === editor)) {
+      const off = sel.anchorOffset;
+      const before = node.data.slice(0, off).split(ZW).length - 1;
+      node.data = node.data.replace(/\u200B/g, "");
+      putCaret(node, Math.max(0, off - before));
+    }
+  };
+  editor.addEventListener("input", (e) => { if (!e.isComposing) tidyAfterInput(); });
+  editor.addEventListener("compositionend", () => setTimeout(tidyAfterInput, 0));
+  /* 太字・斜体・取り消し線・下線: カーソルだけのとき（文字を選んでいないとき）は自前で切り替える */
+  const FMT = { bold: ["B", "STRONG"], italic: ["I", "EM"], strikeThrough: ["S", "STRIKE", "DEL"], underline: ["U"] };
+  const INLINE = new Set(["B", "STRONG", "I", "EM", "S", "STRIKE", "DEL", "U", "SPAN", "FONT", "A"]);
+  const ZW = "\u200B";
+  const caretInfo = () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount || !editor.contains(sel.anchorNode)) return null;
+    return { sel, range: sel.getRangeAt(0) };
+  };
+  const fmtAncestor = (node, cmd) => {
+    let el = node && (node.nodeType === 1 ? node : node.parentElement);
+    while (el && el !== editor) { if (FMT[cmd].includes(el.tagName)) return el; el = el.parentElement; }
+    return null;
+  };
+  const putCaret = (node, off) => { const r = document.createRange(); r.setStart(node, off); r.collapse(true); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); keepRange(); };
+  const toggleInline = (cmd) => {
+    restoreRange();
+    const ci = caretInfo();
+    if (!ci || !ci.range.collapsed) { exec(cmd); return; }
+    const { range } = ci;
+    const owner = fmtAncestor(range.startContainer, cmd);
+    if (!owner) {
+      // 書式を付ける: 目に見えない文字を入れた要素を置き、その中にカーソルを移す
+      const el = document.createElement(FMT[cmd][0]); const t = document.createTextNode(ZW); el.append(t);
+      range.insertNode(el); putCaret(t, 1);
+    } else {
+      // 書式を外す: カーソル位置で書式の要素を分け、外側（他の書式は保ったまま）にカーソルを出す
+      const chain = [];
+      let el = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+      while (el && el !== owner) { if (INLINE.has(el.tagName)) chain.push(el); el = el.parentElement; }
+      const r2 = document.createRange(); r2.setStart(range.startContainer, range.startOffset); r2.setEnd(owner, owner.childNodes.length);
+      const tail = r2.extractContents();
+      const t = document.createTextNode(ZW); let wrap = t;
+      for (const anc of chain) { const c = anc.cloneNode(false); c.append(wrap); wrap = c; }
+      owner.after(wrap);
+      if (tail.textContent.replace(/\u200B/g, "")) { const owner2 = owner.cloneNode(false); owner2.append(tail); wrap.after(owner2); }
+      if (!owner.textContent.replace(/\u200B/g, "") && !owner.querySelector("img")) owner.remove();
+      putCaret(t, 1);
+    }
     markDirty(); updateStates();
   };
   const setBlock = (tag) => { exec("formatBlock", "<" + tag + ">"); };
@@ -1597,7 +1687,14 @@ function renderEdit(s) {
     const vTop = vv ? vv.offsetTop : 0, vH = vv ? vv.height : window.innerHeight;
     const pw = pop.offsetWidth, ph = pop.offsetHeight;
     let top;
-    if (onTop) top = Math.max(vTop + 8, r.top + 8);
+    if (docked && fmtBar.contains(anchor)) {
+      // ツールバーが画面下に固定されているときは、そのすぐ上に出す
+      const barTop = parseFloat(fmtBar.style.top) || (vTop + vH - fmtBar.offsetHeight);
+      const maxH = Math.max(120, barTop - vTop - 12);
+      pop.style.maxHeight = maxH + "px";
+      top = barTop - Math.min(pop.offsetHeight, maxH) - 6;
+    }
+    else if (onTop) top = Math.max(vTop + 8, r.top + 8);
     else if (r.top - vTop > vH / 2) top = Math.max(vTop + 8, r.top - ph - 6);
     else top = Math.min(r.bottom + 6, vTop + vH - ph - 8);
     pop.style.top = top + "px";
@@ -1642,7 +1739,7 @@ function renderEdit(s) {
   const noSteal = (e) => e.preventDefault();
   const tb = (label, title, fn, cls) => h("button", { type: "button", class: cls || "", title, "aria-label": title, onmousedown: noSteal, onclick: fn }, label);
   const stateBtns = {};
-  const stateBtn = (cmd, label, title, cls) => (stateBtns[cmd] = tb(label, title, () => exec(cmd), cls));
+  const stateBtn = (cmd, label, title, cls) => (stateBtns[cmd] = tb(label, title, () => toggleInline(cmd), cls));
   const headBtn = tb("本文", "見出し", (e) => showPop(e.currentTarget, h("div", { class: "head-pick" },
     [["div", "本文", "hp-p"], ["h2", "見出し1", "hp-h2"], ["h3", "見出し2", "hp-h3"], ["h4", "見出し3", "hp-h4"]].map(([tag, label, cls]) =>
       h("button", { type: "button", class: cls, onmousedown: noSteal, onclick: () => { setBlock(tag); closePop(); } }, label)))), "head-btn");
@@ -1668,7 +1765,7 @@ function renderEdit(s) {
     bulletBtn,
     tb("🔗", "リンク", (e) => {
       const sel = savedRange ? savedRange.toString() : "";
-      const url = h("input", { id: "linkurl", class: "text-input", placeholder: "https://", type: "url" });
+      const url = h("input", { id: "linkurl", class: "text-input", placeholder: "https://（example.com のように省略可）", type: "text", inputmode: "url", autocapitalize: "off", autocomplete: "off", spellcheck: "false" });
       const txt = h("input", { id: "linktext", class: "text-input", placeholder: "表示する文字（省略可）", value: sel });
       showPop(e.currentTarget, h("form", { class: "link-pop", onsubmit: (ev) => {
         ev.preventDefault(); let u = url.value.trim(); if (!u) return;
@@ -1693,7 +1790,12 @@ function renderEdit(s) {
     const sel = window.getSelection();
     const n = sel && sel.anchorNode; const el = n && (n.nodeType === 1 ? n : n.parentElement);
     const inside = el && editor.contains(el);
-    for (const [cmd, b] of Object.entries(stateBtns)) { let on = false; if (inside) try { on = document.queryCommandState(cmd); } catch {} b.setAttribute("aria-pressed", String(!!on)); }
+    const collapsed = !sel || sel.isCollapsed;
+    for (const [cmd, b] of Object.entries(stateBtns)) {
+      let on = false;
+      if (inside) { if (collapsed) on = !!fmtAncestor(n, cmd); else try { on = document.queryCommandState(cmd); } catch {} }
+      b.setAttribute("aria-pressed", String(!!on));
+    }
     const hd = inside ? el.closest("h2,h3,h4") : null;
     headBtn.textContent = hd ? ({ H2: "見出し1", H3: "見出し2", H4: "見出し3" })[hd.tagName] : "本文";
     headBtn.setAttribute("aria-pressed", String(!!hd));
@@ -1849,7 +1951,9 @@ function renderEdit(s) {
 
   // save / delete
   const collect = () => {
+    convertMarks(false);
     const clone = editor.cloneNode(true);
+    { const w = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT); const ts = []; let t; while ((t = w.nextNode())) if (t.data.includes("\u200B")) ts.push(t); ts.forEach(x => { x.data = x.data.replace(/\u200B/g, ""); }); }
     clone.querySelectorAll("img[data-att]").forEach(img => { img.removeAttribute("src"); img.classList.remove("img-selected"); });
     clone.querySelectorAll("a[data-att]").forEach(a => a.removeAttribute("href"));
     d.bodyHtml = sanitize(clone.innerHTML);
