@@ -1,4 +1,4 @@
-"""創作メモ帳: 主要操作の自動確認（スマホ幅）
+"""ヒフミヨ（創作メモアプリ）: 主要操作の自動確認（スマホ幅）
 
 使い方:
   1. このリポジトリのルートで  python3 -m http.server 8765
@@ -48,6 +48,8 @@ with sync_playwright() as p:
     check("ツリーのタブがない", pg.locator(".tabs >> text=ツリー").count() == 0)
     check("カードは題名・日付・冒頭・ジャンルだけ（リスト名・時刻なし）", pg.locator(".memo-card .list-tag").count() == 0 and ":" not in pg.locator(".memo-card .card-date").first.inner_text())
     pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
+    check("閲覧画面の上部バーに題名とジャンル（「メモを読む」はない）", pg.inner_text("header .view-title") == "京都取材" and pg.locator("header .genre").count() >= 1 and "メモを読む" not in pg.inner_text("header"))
+    check("アプリ名はヒフミヨ", pg.title() == "ヒフミヨ")
     check("閲覧画面に階層の欄がない", pg.locator(".child-sec, .tree-path").count() == 0 and "階層" not in pg.inner_text(".view-doc"))
 
     # 戻る操作（Android のスワイプと同じ）
@@ -186,6 +188,8 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     # まとめ: キーワードなしでも作れて、作成日時の期間（今日など）で絞れる
     pg.click(".report-btn"); pg.wait_for_selector(".rp-tools")
     check("キーワードなしで全メモのまとめ", pg.inner_text(".rp-title") == "すべてのメモのまとめ")
+    check("リスト・期間は「未選択」から選ぶ", pg.locator("#rp-period option").first.inner_text() == "未選択")
+    check("キーワードなしでは「関連部分だけ／全文」を出さない", pg.locator(".rp-seg").count() == 0)
     pg.select_option("#rp-period", "today"); time.sleep(0.3)
     import datetime as _dt
     check("期間「今日」でまとめられる", pg.inner_text(".rp-title") == _dt.date.today().strftime("%Y/%m/%d") + "のまとめ")
@@ -200,14 +204,18 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.evaluate("document.documentElement.dataset.theme='light'")
 
     # 検索画面: 横スライドでタブ切り替え（画面の端からの操作は「戻る」なので反応しない）
-    SWIPE = """([x0,x1])=>{const el=document.querySelector('.swipe-area');const mk=(x)=>new Touch({identifier:1,target:el,clientX:x,clientY:400});
-el.dispatchEvent(new TouchEvent('touchstart',{touches:[mk(x0)],changedTouches:[mk(x0)],bubbles:true}));
-el.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[mk(x1)],bubbles:true}));}"""
-    pg.evaluate(SWIPE, [300, 120]); time.sleep(0.2)
+    SWIPE = """async ([x0,x1])=>{const el=document.querySelector('.swipe-area');const mk=(x)=>new Touch({identifier:1,target:el,clientX:x,clientY:400});
+const fire=(type,x,on)=>el.dispatchEvent(new TouchEvent(type,{touches:on?[mk(x)]:[],changedTouches:[mk(x)],bubbles:true}));
+fire('touchstart',x0,true);
+for(let k=1;k<=8;k++){fire('touchmove',x0+(x1-x0)*k/8,true);await new Promise(r=>setTimeout(r,16));}
+window.__midX=getComputedStyle(document.querySelector('.swipe-area > div:last-child')).transform;
+fire('touchend',x1,false);}"""
+    pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
+    check("スライド中は指に合わせて一覧が動く", pg.evaluate("window.__midX") not in ("none", ""))
     check("左へスライドでリストタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "リスト")
-    pg.evaluate(SWIPE, [8, 250]); time.sleep(0.2)
+    pg.evaluate(SWIPE, [8, 250]); time.sleep(0.6)
     check("画面の端からの操作ではタブが変わらない", pg.locator(".tabs [aria-selected=true]").inner_text() == "リスト")
-    pg.evaluate(SWIPE, [120, 300]); time.sleep(0.2)
+    pg.evaluate(SWIPE, [120, 300]); time.sleep(0.6)
     check("右へスライドでメモタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "メモ")
 
     # まとめ: リストを選べる
@@ -223,7 +231,7 @@ el.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[mk(x1)],b
     # バックアップの書き出し → 「前回の書き出し」がその場で更新される
     pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
     with pg.expect_download() as dl: pg.click(".modal >> text=バックアップを書き出す")
-    check("バックアップを書き出せる", dl.value.suggested_filename.startswith("sosaku-memo-backup-"))
+    check("バックアップを書き出せる", dl.value.suggested_filename.startswith("hifumiyo-backup-"))
     time.sleep(0.3)
     check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
     pg.click(".modal >> text=閉じる")
