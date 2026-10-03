@@ -90,7 +90,23 @@ with sync_playwright() as p:
     pg.go_back(); time.sleep(0.3)
     check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
 
-    # 本文エディタ
+    pg.click(".tabs >> text=リスト"); pg.click(".list-row .open"); time.sleep(0.3)
+    # リスト → 閲覧 → 編集で削除すると、リスト画面に戻り「戻る」もずれない
+    pg.locator(".memo-card", has_text="リスト内メモ").click(); pg.wait_for_selector(".view-title")
+    pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.click(".topbar .btn.danger"); time.sleep(0.2)
+    if pg.locator(".modal").count(): pg.click(".modal >> text=Yes")
+    time.sleep(0.6)
+    check("編集画面で削除するとリスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 0)
+    pg.go_back(); time.sleep(0.4)
+    check("削除後の戻る操作で最初の画面へ", pg.locator(".search-toggle").count() == 1)
+
+    # 本文エディタ（本文より上は題名とジャンルだけ・書式ボタンは1行）
+    pg.click(".tabs >> text=メモ"); pg.click(".fab")
+    check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
+    check("タグ・階層は本文より下", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&document.querySelector('.parent-box').getBoundingClientRect().top>e})()"))
+    check("書式ボタンが1行に収まる", pg.evaluate("(()=>{const f=document.querySelector('.fmt-bar');return f.scrollWidth<=f.clientWidth+1})()"))
+    pg.click("#title"); check("題名を触ると直近の題名が出る", pg.locator(".recent-titles").is_visible())
+    pg.click(".topbar .back"); pg.wait_for_selector(".search-toggle")
     pg.click(".tabs >> text=メモ"); pg.click(".fab"); pg.fill("#title", "書式"); pg.click(".genre-pick >> text=アイデア"); pg.click(".editor")
     pg.click(".b-bold"); pg.click(".b-italic"); pg.keyboard.insert_text("太斜")
     pg.click(".b-bold"); pg.keyboard.insert_text("斜"); pg.click(".b-italic"); pg.keyboard.insert_text("標準")
@@ -119,6 +135,14 @@ with sync_playwright() as p:
     pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.fill("#title", "書式（改）")
     pg.click(".edit-actions .btn.primary"); time.sleep(0.5)
     check("編集保存後は閲覧画面に戻る", pg.locator(".view-title").count() == 1 and pg.inner_text(".view-title") == "書式（改）")
+
+    # バックアップの書き出し → 「前回の書き出し」がその場で更新される
+    pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
+    with pg.expect_download() as dl: pg.click(".modal >> text=バックアップを書き出す")
+    check("バックアップを書き出せる", dl.value.suggested_filename.startswith("sosaku-memo-backup-"))
+    time.sleep(0.3)
+    check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
+    pg.click(".modal >> text=閉じる")
 
     # オフライン起動
     pg.goto(URL); pg.wait_for_selector(".fab"); time.sleep(1)

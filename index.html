@@ -388,8 +388,16 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .field > label, .field > .label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-2); letter-spacing: .06em; margin-bottom: 6px; }
 .title-input { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; font-family: var(--font-title); font-size: 22px; padding: 6px 2px; }
 .title-input:focus { outline: none; border-bottom-color: var(--accent); }
-.recent-titles { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
-.recent-titles span { font-size: 12px; color: var(--ink-3); }
+.recent-titles { display: flex; gap: 6px; margin-top: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; }
+.recent-titles::-webkit-scrollbar { display: none; }
+.recent-titles span { font-size: 12px; color: var(--ink-3); flex: 0 0 auto; }
+.recent-titles .chip-btn { flex: 0 0 auto; max-width: 12em; }
+/* 新規・編集画面: 本文より上は題名とジャンルだけにし、細かい設定は本文の下にまとめる */
+.field.genre-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.field.genre-row > .label { margin: 0; }
+.field.genre-row > .field-err { flex-basis: 100%; margin-top: 0; }
+.more-sec { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 14px; }
+.more-head { font-size: 13px; font-weight: 700; color: var(--ink-2); margin-bottom: 12px; }
 .chip-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 11px; font-size: 13px; color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip-btn:hover { border-color: var(--accent); color: var(--accent-ink); }
 .genre-pick { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -403,7 +411,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 
 .editor-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .editor-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.fmt-bar { display: flex; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--hdr-h, 90px)); background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; z-index: 5; }
+.fmt-bar { display: flex; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--hdr-h, 90px)); background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; z-index: 5; }
 .fmt-bar button { border: 0; background: transparent; min-width: 36px; height: 34px; border-radius: 8px; color: var(--ink-2); font-size: 15px; padding: 0 8px; flex: 0 0 auto; }
 .fmt-bar button:hover { background: var(--surface-2); color: var(--ink); }
 .fmt-bar button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -412,7 +420,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .fmt-bar .head-btn { font-size: 13px; font-weight: 700; min-width: 64px; }
 .fmt-bar .color-btn { font-weight: 700; text-decoration: underline 3px; }
 .fmt-bar.floating { position: fixed; left: 0; right: 0; top: auto; z-index: 60; border-radius: 0; border-top: 1px solid var(--line); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; box-shadow: 0 -4px 14px rgba(0,0,0,.08); padding: 6px 10px; }
-.fmt-bar.floating::-webkit-scrollbar { display: none; }
+.fmt-bar::-webkit-scrollbar, .fmt-bar.floating::-webkit-scrollbar { display: none; }
 body.editing-body .edit-actions { display: none; }
 .pop { position: fixed; z-index: 70; overflow: auto; max-width: calc(100vw - 16px); }
 .pop-cap { font-size: 12px; font-weight: 700; color: var(--ink-3); margin-bottom: 6px; }
@@ -484,6 +492,13 @@ body.editing-body .edit-actions { display: none; }
   .toast { animation: toastFade 3s steps(1) forwards; }
   @keyframes toastFade { 0% { opacity: 1; } 100% { opacity: 0; } }
   * { transition: none !important; }
+}
+@media (max-width: 420px) {
+  /* スマホ幅でも書式ボタンが1行に収まるよう詰める */
+  .fmt-bar { gap: 1px; padding: 5px 4px; }
+  .fmt-bar .sep { display: none; }
+  .fmt-bar button { flex: 1 1 auto; min-width: 27px; padding: 0 3px; }
+  .fmt-bar .head-btn { min-width: 46px; }
 }
 @media (max-width: 520px) {
   .brand small { display: none; }
@@ -1041,6 +1056,11 @@ try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", sync
    Render
    ========================================================= */
 let cleanupFns = [];
+/* 削除済みのメモ・リストの画面は飛ばして1つ前へ（ブラウザの履歴も一緒に戻し、「戻る」操作がずれないようにする） */
+function dropMissing() {
+  if (atDepth() && !history.state.select) { history.back(); return; }
+  UI.stack.pop(); render();
+}
 function render() {
   const cs = current();
   const needAtts = cs.name === "view" ? (Manager.get(cs.id) || {}).attachments
@@ -1050,9 +1070,9 @@ function render() {
   const app = $("#app"); app.replaceChildren();
   const s = current();
   if (s.name === "search") app.append(renderSearch());
-  else if (s.name === "view") { if (!Manager.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderView(s)); }
-  else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderEdit(s)); }
-  else if (s.name === "list") { if (!Manager.lists.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderListScreen(s)); }
+  else if (s.name === "view") { if (!Manager.get(s.id)) return dropMissing(); app.append(renderView(s)); }
+  else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
+  else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
   syncThemeColor();
 }
 
@@ -1374,7 +1394,7 @@ function renderView(s) {
     h("button", { class: "danger", onclick: async () => {
       menu.hidden = true;
       if (!(await confirmDelete())) return;
-      try { await Manager.deleteMemo(m.id); toast("メモを削除しました"); resetTo(); }
+      try { await Manager.deleteMemo(m.id); toast("メモを削除しました"); back(); }
       catch { toast("削除できませんでした。通信状態を確認してもう一度お試しください。", true); }
     } }, "🗑 削除"));
   const menuBtn = h("button", { class: "icon-btn menu-btn", "aria-label": "編集・削除のメニュー", onclick: (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; } }, "⋯");
@@ -1513,14 +1533,20 @@ function renderEdit(s) {
   const markDirty = () => { d.dirty = true; dirtyEl.textContent = "未保存の変更があります"; };
 
   // title
-  const titleIn = h("input", { id: "title", class: "title-input", placeholder: "題名（空欄でもOK）", value: d.title, oninput: (e) => { d.title = e.target.value; markDirty(); } });
+  const titleIn = h("input", { id: "title", class: "title-input", placeholder: "題名（空欄でもOK）", "aria-label": "題名", value: d.title, oninput: (e) => { d.title = e.target.value; markDirty(); } });
+  // 直近の題名は、題名の欄を触っている間だけ1行で出す（常に出すと本文が下に押し出されるため）
   const recents = Manager.recentTitles();
-  const titleField = h("div", { class: "field" }, h("label", { for: "title" }, "題名"), titleIn,
-    recents.length ? h("div", { class: "recent-titles" }, h("span", {}, "直近の題名："), recents.map(t => h("button", { class: "chip-btn", type: "button", title: t, onclick: () => { titleIn.value = t; d.title = t; markDirty(); } }, t))) : null);
+  const recentRow = recents.length ? h("div", { class: "recent-titles", hidden: true }, h("span", {}, "直近の題名："),
+    recents.map(t => h("button", { class: "chip-btn", type: "button", title: t, onmousedown: (e) => e.preventDefault(), onclick: () => { titleIn.value = t; d.title = t; markDirty(); drawParent(); } }, t))) : null;
+  if (recentRow) {
+    titleIn.addEventListener("focus", () => { recentRow.hidden = false; });
+    titleIn.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== titleIn) recentRow.hidden = true; }, 200));
+  }
+  const titleField = h("div", { class: "field" }, titleIn, recentRow);
 
   // genre
   const genreErr = h("div", { class: "field-err", hidden: true }, "ジャンルを1つ以上選んでください。");
-  const genreField = h("div", { class: "field" }, h("div", { class: "label" }, "ジャンル（1つ以上）"),
+  const genreField = h("div", { class: "field genre-row" }, h("div", { class: "label" }, "ジャンル"),
     h("div", { class: "genre-pick", role: "group" }, GENRES.map(g => {
       const b = h("button", { type: "button", class: "g-" + g, "aria-pressed": String(d.genres.includes(g)), onclick: () => {
         d.genres = d.genres.includes(g) ? d.genres.filter(x => x !== g) : [...d.genres, g];
@@ -2001,8 +2027,10 @@ function renderEdit(s) {
   async function del() {
     const text = htmlToText(collect().bodyHtml);
     if (text.length > 10 && !(await confirmDelete())) return;
-    if (!d.savedOnce && !Manager.get(d.id)) { toast("メモを破棄しました"); resetTo(); return; }
-    try { await Manager.deleteMemo(d.id); toast("メモを削除しました"); resetTo(); }
+    // 削除・破棄したら1つ前の画面へ（削除したメモの閲覧画面は自動で飛ばす）
+    const leave = () => { d.dirty = false; activeEditor = null; back(); };
+    if (!d.savedOnce && !Manager.get(d.id)) { toast("メモを破棄しました"); leave(); return; }
+    try { await Manager.deleteMemo(d.id); toast("メモを削除しました"); leave(); }
     catch { toast("削除できませんでした。通信状態を確認してもう一度お試しください。", true); }
   }
   /* 未保存の変更があれば確認する。画面を離れてよければ true */
@@ -2039,7 +2067,8 @@ function renderEdit(s) {
   }
   return h("div", { class: "screen" },
     editHeader,
-    h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, linkField, tagField, bodyField, attField, listField),
+    h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, bodyField, attField,
+      h("section", { class: "more-sec" }, h("div", { class: "more-head" }, "そのほかの設定（あとからでもOK）"), tagField, linkField, listField)),
     h("div", { class: "edit-actions" }, h("div", { class: "edit-actions-in" }, dirtyEl, h("span", { class: "spacer" }), saveBtn)));
 }
 
@@ -2073,6 +2102,13 @@ async function storeFile(file) {
    ========================================================= */
 function openSettings() {
   modal({ wide: true, title: "設定", body: (close) => {
+    // 書き出したら、その場で「前回の書き出し」を更新する（連打で二重に書き出さないよう、終わるまでボタンを止める）
+    const lastText = () => "前回の書き出し：" + (Manager.meta.lastBackup ? fmtDate(Manager.meta.lastBackup) : "まだありません");
+    const lastEl = h("p", { class: "ai-hint", style: "margin:0" }, lastText());
+    const expBtn = h("button", { class: "btn", type: "button", onclick: async () => {
+      expBtn.disabled = true;
+      try { await exportBackup(); } finally { expBtn.disabled = false; lastEl.textContent = lastText(); }
+    } }, "バックアップを書き出す");
     const impIn = h("input", { id: "importfile", type: "file", accept: "application/json,.json", hidden: true, onchange: async (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) { close(true); await importBackup(f); } } });
     return h("div", { style: "overflow:auto;min-height:0" },
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
@@ -2081,13 +2117,13 @@ function openSettings() {
       h("div", { class: "settings-sec" },
         h("h4", {}, "バックアップ"),
         h("p", { class: "ai-hint", style: "margin:0" }, "メモはこの端末の中だけに保存されています。機種変更や別の端末への移行に備えて、ときどき書き出しておいてください。"),
-        h("p", { class: "ai-hint", style: "margin:0" }, "前回の書き出し：" + (Manager.meta.lastBackup ? fmtDate(Manager.meta.lastBackup) : "まだありません")),
+        lastEl,
         (() => { const el = h("p", { class: "ai-hint", style: "margin:0" }, "端末内の保存の保護：確認中…");
           (async () => { try { const ok = navigator.storage && navigator.storage.persisted ? await navigator.storage.persisted() : false;
             el.textContent = "端末内の保存の保護：" + (ok ? "有効（空き容量が少なくなっても自動で消されません）" : "未設定（ホーム画面に追加したアプリから開くと有効になりやすくなります）"); } catch { el.textContent = "端末内の保存の保護：確認できませんでした"; } })();
           return el; })(),
         h("div", { class: "row" },
-          h("button", { class: "btn", type: "button", onclick: () => exportBackup() }, "バックアップを書き出す"),
+          expBtn,
           h("button", { class: "btn", type: "button", onclick: () => impIn.click() }, "バックアップを読み込む"), impIn)),
       h("div", { class: "modal-actions", style: "margin-top:16px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "閉じる")));
   } });
@@ -2106,6 +2142,7 @@ async function exportBackup() {
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     Manager.meta.lastBackup = Date.now(); Storage.putMeta(Manager.meta).catch(() => {});
+    toast("バックアップを書き出しました（ダウンロードフォルダに保存されます）");
   } catch { toast("バックアップを作成できませんでした", true); }
 }
 async function importBackup(file) {
