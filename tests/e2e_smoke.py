@@ -296,6 +296,18 @@ fire('touchend',x1,false);}"""
     got = pa.evaluate("""() => new Promise(res => { const r = indexedDB.open('sosaku-memo'); r.onsuccess = () => { const q = r.result.transaction('files').objectStore('files').getAll(); q.onsuccess = () => res(q.result.map(f => f.blob.size)); }; })""")
     check("大きな添付を別の端末で小分けに受け取れる", len(big) in got, str(got))
 
+    # アプリを画面に戻したとき: 同期オンなら他の端末のメモを取り込む・オフなら何もしない
+    RESUME = "() => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); }"
+    pa.wait_for_timeout(21000)   # 起動時の同期から20秒あける
+    import copy as _cp
+    other = _cp.deepcopy(gas.data); other["memos"].append({**other["memos"][0], "id": "m-from-other", "title": "別の端末で書いたメモ", "updatedAt": int(time.time() * 1000) + 5000, "attachments": []})
+    gas.data = other
+    pa.evaluate(RESUME); pa.wait_for_timeout(2500)
+    check("画面に戻すと他の端末のメモを取り込む（同期オン）", pa.locator(".memo-card", has_text="別の端末で書いたメモ").count() == 1)
+    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")   # pb はオフに
+    n = len(gas.calls); pb.wait_for_timeout(21000); pb.evaluate(RESUME); pb.wait_for_timeout(2000)
+    check("同期オフなら画面に戻しても通信しない", len(gas.calls) == n)
+
     # 古い接続先プログラム（版1）のときは更新を案内
     old = FakeGas(version=1); pd = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True); pd.route(FakeGas.URL, old.handle)
     qd = pd.new_page(); qd.goto(URL); qd.wait_for_selector(".fab")

@@ -2554,6 +2554,16 @@ const Sync = {
   },
 };
 window.addEventListener("online", () => { if (Sync.ready()) Sync.schedule(500); });
+/* スマホでアプリを画面に戻したとき（裏で開いたままだった場合も）、同期がオンのときだけドライブから取り込む。
+   短い間に何度も切り替えたときは、前回の同期から20秒たつまで待つ */
+let lastResumeSync = 0;
+const resumeSync = () => {
+  if (document.visibilityState !== "visible" || !Sync.ready()) return;
+  if (Date.now() - lastResumeSync < 20000) return;
+  lastResumeSync = Date.now(); Sync.schedule(300);
+};
+document.addEventListener("visibilitychange", resumeSync);
+window.addEventListener("pageshow", (e) => { if (e.persisted) resumeSync(); });
 /* メモ・リストを変えたら（同期がオンのときだけ）少し待ってから送る */
 function afterChange() { Sync.schedule(); }
 
