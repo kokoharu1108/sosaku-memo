@@ -1,6 +1,6 @@
 // 創作メモ帳 — オフライン起動用 Service Worker
 // アプリを更新したら CACHE の番号を上げると、次回起動時に新しい版へ切り替わります。
-const CACHE = "sosaku-memo-v12";
+const CACHE = "sosaku-memo-v13";
 // フォントは版をまたいで使い回す（更新のたびに消すと、オフラインで文字の形が変わってしまうため）
 const FONTS = "sosaku-memo-fonts";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];

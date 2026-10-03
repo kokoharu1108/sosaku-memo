@@ -136,6 +136,43 @@ with sync_playwright() as p:
     pg.click(".edit-actions .btn.primary"); time.sleep(0.5)
     check("編集保存後は閲覧画面に戻る", pg.locator(".view-title").count() == 1 and pg.inner_text(".view-title") == "書式（改）")
 
+    # マーカー・文字色を付けて「なし」「標準」で外す（選んだ部分だけ外れる）
+    pg.goto(URL); pg.wait_for_selector(".fab")
+    pg.click(".fab"); pg.fill("#title", "マーカー"); pg.click(".genre-pick >> text=学び"); pg.click(".editor"); pg.keyboard.insert_text("あいうえおかきく")
+    SEL = """(([s,e])=>{const ed=document.querySelector('.editor');const w=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);let n,pos=0,r=document.createRange(),a=0,b=0;
+while((n=w.nextNode())){const L=n.data.length; if(!a&&s<=pos+L){r.setStart(n,s-pos);a=1} if(!b&&e<=pos+L){r.setEnd(n,e-pos);b=1} pos+=L}
+const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
+    VIS = """(t)=>{const ed=document.querySelector('.editor');const w=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);let n;while((n=w.nextNode())){if(n.data.includes(t)){let el=n.parentElement;while(el&&el!==ed){const c=getComputedStyle(el).backgroundColor;if(c!=='rgba(0, 0, 0, 0)')return c;el=el.parentElement}return 'none'}}return '?'}"""
+    def marker(k): pg.click("button[aria-label=マーカー]"); pg.click(f".pop .sw[aria-label='マーカー {k}']")
+    pg.evaluate(SEL, [0, 6]); marker("黄")
+    check("マーカーが付く", pg.evaluate(VIS, "あい") != "none")
+    pg.evaluate(SEL, [2, 4]); marker("なし")
+    check("マーカー「なし」で選んだ部分だけ外れる", pg.evaluate(VIS, "うえ") == "none" and pg.evaluate(VIS, "おか") != "none")
+    pg.evaluate(SEL, [0, 8]); marker("なし")
+    check("全体を選んで「なし」で全部外れる", "hl-" not in pg.inner_html(".editor"))
+    pg.evaluate(SEL, [8, 8]); marker("緑"); pg.keyboard.insert_text("けこ"); marker("なし"); pg.keyboard.insert_text("さし")
+    check("カーソルだけでもマーカーを付けて外せる", pg.evaluate(VIS, "けこ") != "none" and pg.evaluate(VIS, "さし") == "none")
+    check("添付はドロップ表記なしのボタン", "ドロップ" not in pg.inner_text(".edit-screen, main") and pg.locator("label.add-file").count() == 1)
+    check("下の保存バーも編集画面の色", pg.evaluate("getComputedStyle(document.querySelector('.edit-actions')).backgroundColor") == pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor"))
+    pg.click("#title"); pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
+
+    # 情報まとめ: 検索結果からまとめ → 画面表示・ファイル保存
+    pg.click(".search-toggle"); pg.fill("#q", "火祭"); pg.keyboard.press("Enter"); time.sleep(0.2)
+    pg.click(".report-btn"); pg.wait_for_selector(".rp-doc"); time.sleep(0.3)
+    check("まとめにメモと該当箇所の強調が出る", pg.locator(".rp-memo").count() >= 1 and pg.locator("mark.rp-hit").count() >= 1)
+    with pg.expect_download() as dl: pg.click(".rp-tools >> text=ファイルに保存")
+    import shutil; out = Path(__file__).resolve().parent / "_report_test.html"; shutil.copy(dl.value.path(), out)
+    html = out.read_text(encoding="utf-8"); out.unlink()
+    check("まとめを1つのファイルに保存できる", dl.value.suggested_filename.endswith(".html") and "rp-memo" in html and "blob:" not in html)
+    pg.click(".rp-seg >> text=日付順"); time.sleep(0.2)
+    check("まとめの並べ方を切り替えられる", "年" in pg.inner_text(".rp-sec-h"))
+    pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".filter-chip button"); pg.click(".search-toggle")
+    pg.click(".tabs >> text=リスト"); pg.click(".list-row .open"); time.sleep(0.2)
+    pg.click("text=保存済みのメモを入れる"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
+    pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
+    check("リストからもまとめを作れる", "リスト" in pg.inner_text(".rp-title"))
+    pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=メモ")
+
     # バックアップの書き出し → 「前回の書き出し」がその場で更新される
     pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
     with pg.expect_download() as dl: pg.click(".modal >> text=バックアップを書き出す")

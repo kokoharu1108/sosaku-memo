@@ -30,13 +30,14 @@
 
 ## index.html の中身（上から順）
 
-- `<style>` … 色はすべて `:root` のトークン（ライト）＋ダーク用の2ブロック（`prefers-color-scheme` と `[data-theme="dark"]`）。ペールトーン基調。画面ごとの上部バー色 `--bar-search/--bar-view/--bar-list/--bar-edit`（`syncThemeColor` でスマホ上端の帯 `theme-color` も同じ色に）、文字色 `--tc-*`、マーカー `--hl-*` もトークン。
+- `<style>` … 色はすべて `:root` のトークン（ライト）＋ダーク用の2ブロック（`prefers-color-scheme` と `[data-theme="dark"]`）。ペールトーン基調。画面ごとのバー色 `--bar-search/--bar-view/--bar-list/--bar-edit/--bar-report`（上部バー・編集の保存バー・選択モードの下部バーとも不透明でこの色）（`syncThemeColor` でスマホ上端の帯 `theme-color` も同じ色に）、文字色 `--tc-*`、マーカー `--hl-*` もトークン。
 - Utilities … `h()`（要素生成ヘルパー）、`fmtDate`、`lsGet/lsSet`（localStorage は try/catch 付き）
 - HTML sanitizer … 本文HTMLの許可タグ制限。色は **クラス**（`tc-rose` 等／`hl-yellow` 等）でのみ保存し、色コードは保存しない（ダークモード対応のため）。旧版の色コードは `LEGACY_TC` でクラスに変換。スタイルで付いた太字等は `<b>/<i>/<s>/<u>` に置き換え。空の書式要素は削除。
 - Storage … IndexedDB `sosaku-memo`（v1）。ストア: `memos` / `lists` / `meta`（key `app`） / `files`（添付ファイルの Blob）
 - Manager（メモ管理機能） … メモ・リストの保存/削除、検索用索引、階層（ツリー）索引、毎日0時の整理（`maintain`）、旧「参照メモ」→親子への一度きりの移行（`migrateTree`）
 - UI state & navigation … 画面スタック `UI.stack` とブラウザ履歴を連動（Android の戻る操作対応）。`go / back / backTo / resetTo / goHome`。選択モード（まとめて削除）、パンくず `crumbBar()`
-- Render … 画面: `renderSearch`（タブ: メモ／ツリー／リスト、🔍で開閉する検索パネル）、`renderListScreen`、`renderView`、`renderEdit`
+- Render … 画面: `renderSearch`（タブ: メモ／ツリー／リスト、🔍で開閉する検索パネル）、`renderListScreen`、`renderReport`（情報まとめ）、`renderView`、`renderEdit`
+- 情報まとめ … 検索結果・リスト画面の「まとめる」→ `{name:"report", q, genre}` / `{name:"report", listId}`。`reportSource`（検索と同じ条件）→ `buildReport`（段落分割 `bodyBlocks`・強調 `markTerms`）。保存は `reportFileHtml` で画像を data URL にした1つの HTML（CSS はアプリの `.rp-*` 等の規則を書き出す）
 - 設定 … ダークモード、バックアップ書き出し／読み込み（JSON に添付ファイルも data URL で含める）
 - Boot
 
@@ -53,7 +54,7 @@
 - `contenteditable` + `document.execCommand`。スマホの日本語入力を前提にする。
 - 文字を選んでいない状態の太字・斜体・取り消し線・下線は、`execCommand` ではなく自前の `toggleInline`（ゼロ幅スペース `​` を使う）で切り替える。保存時と `htmlToText` でゼロ幅スペースは除去。
 - `restoreRange` は、本文にフォーカスとカーソルがある間は選択範囲を触らない（触ると「次の文字を太字に」等の状態が消える）。
-- 文字色・マーカーは、色ごとの目印色で一旦付けて `convertMarks` でクラスに置き換える。日本語変換中（`isComposing`）は本文を書き換えない。
+- 文字色・マーカーは、色ごとの目印色で一旦付けて `convertMarks` でクラスに置き換える。範囲選択して付けるときは、先に既存の色クラスも目印色に戻し（`toMarks`）、ブラウザに色の要素を分割させる（そうしないと「なし」「標準」が内側に入るだけで外側の色が残る）。カーソルだけで「なし」「標準」は `exitInline` で色の要素の外へ出す。日本語変換中（`isComposing`）は本文を書き換えない。
 - メモ画面は、本文より上を「題名・ジャンル」だけにしている（タグ・階層・リストは本文と添付の下の「そのほかの設定」）。直近の題名は題名欄を触っている間だけ表示。書式ボタンはスマホ幅でも1行。
 - 書式ボタンの押下状態は `updateStates`（選択なしのときは DOM の祖先要素で判定）。
 - スマホで本文入力中はツールバーをキーボードの上に固定（`visualViewport` 使用）。小窓（`.pop`）は `position: fixed` で body 直下に出す。
