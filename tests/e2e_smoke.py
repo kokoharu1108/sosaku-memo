@@ -253,17 +253,18 @@ fire('touchend',x1,false);}"""
         c = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
         c.route(FakeGas.URL, gas.handle)
         q = c.new_page(); q.on("pageerror", lambda e: errors.append(str(e))); q.goto(URL); q.wait_for_selector(".fab"); return q
-    def sync_on(q, key="aikotoba-123"):
+    def sync_on(q, key="aikotoba-123", url=FakeGas.URL):
         q.click("[aria-label=設定]")
         if q.locator(".sync-setup").get_attribute("open") is None: q.click(".sync-setup summary")
-        q.fill("#sync-url", FakeGas.URL); q.fill("#sync-key", key); q.click(".sync-btn"); q.wait_for_timeout(1500)
+        q.fill("#sync-url", url); q.fill("#sync-key", key); q.click(".sync-btn"); q.wait_for_timeout(1500)
         st = q.inner_text(".sync-status"); q.click(".modal >> text=閉じる"); return st
     pa = device()
     pa.click(".fab"); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); pa.set_input_files("#file", ICON); pa.wait_for_selector(".att-tile")
     pa.click(".edit-actions .btn.primary"); pa.wait_for_timeout(5000)
     check("同期がオフの間はドライブへ送らない", gas.calls == [])
-    st = sync_on(pa)
-    check("「同期」を押すとドライブへ送る", st.startswith("オン") and gas.data and len(gas.data["memos"]) == 1 and len(gas.files) == 1, st)
+    # 複数アカウントでログイン中にコピーした「/macros/u/1/s/…」の形でも、自動で直してつながる
+    st = sync_on(pa, url=FakeGas.URL.replace("/macros/s/", "/macros/u/1/s/"))
+    check("「同期」を押すとドライブへ送る（URLの形も自動で直す）", st.startswith("オン") and gas.data and len(gas.data["memos"]) == 1 and len(gas.files) == 1, st)
     pb = device()
     check("合言葉が違うと分かる", "合言葉が違います" in sync_on(pb, "machigai"))
     pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")
