@@ -3,10 +3,15 @@ import json
 
 class FakeGas:
     URL = "https://script.google.com/macros/s/TEST/exec"
+    ECHO = "https://script.googleusercontent.com/macros/echo?user_content_key=TEST"   # 本物の Google が返事を置く場所
 
     def __init__(self, key="aikotoba-123", version=2):
         self.key, self.data, self.files, self.calls, self.version = key, None, {}, [], version
         self.parts, self.fail_next = {}, 0   # fail_next: 次の putChunk を何回「通信切れ」にするか
+        self.echo404 = {}   # {操作名: 回数}: 処理はしたが、返事の受け取り口（googleusercontent.com）が 404 になる回数
+
+    def echo(self, route):
+        route.fulfill(status=404, content_type="text/html", headers={"Access-Control-Allow-Origin": "*"}, body="<html><head><title>ページが見つかりません</title></head></html>")
 
     def handle(self, route):
         req = json.loads(route.request.post_data or "{}")
@@ -48,4 +53,7 @@ class FakeGas:
                 out = {"ok": True, "type": t, "data": d} if d is not None else {"ok": False, "error": "nofile"}
             else:
                 out = {"ok": True}
+        if self.echo404.get(req.get("action"), 0) > 0:
+            self.echo404[req["action"]] -= 1
+            route.fulfill(status=302, headers={"Location": self.ECHO, "Access-Control-Allow-Origin": "*"}, body=""); return
         route.fulfill(status=200, content_type="application/json", headers={"Access-Control-Allow-Origin": "*"}, body=json.dumps(out))
