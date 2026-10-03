@@ -4,17 +4,38 @@ import json
 class FakeGas:
     URL = "https://script.google.com/macros/s/TEST/exec"
 
-    def __init__(self, key="aikotoba-123"):
-        self.key, self.data, self.files, self.calls = key, None, {}, []
+    def __init__(self, key="aikotoba-123", version=2):
+        self.key, self.data, self.files, self.calls, self.version = key, None, {}, [], version
+        self.parts, self.fail_next = {}, 0   # fail_next: 次の putChunk を何回「通信切れ」にするか
 
     def handle(self, route):
         req = json.loads(route.request.post_data or "{}")
         self.calls.append(req.get("action"))
+        if req.get("action") == "putChunk" and self.fail_next > 0:
+            self.fail_next -= 1; route.abort("connectionreset"); return
         if req.get("key") != self.key:
             out = {"ok": False, "error": "auth"}
         else:
             a = req.get("action")
-            if a == "pull":
+            if a == "ping":
+                out = {"ok": True, "version": self.version}
+            elif a == "putChunk":
+                if req["id"] in self.files:
+                    out = {"ok": True, "done": True}
+                else:
+                    self.parts.setdefault(req["id"], {})[req["index"]] = req.get("data", "")
+                    if req["index"] == req["total"] - 1:
+                        ps = self.parts.pop(req["id"])
+                        self.files[req["id"]] = (req.get("type"), "".join(ps[i] for i in range(req["total"])))
+                    out = {"ok": True}
+            elif a == "getChunk":
+                t, d = self.files.get(req["id"], (None, None))
+                if d is None:
+                    out = {"ok": False, "error": "nofile"}
+                else:
+                    o, n = req.get("offset", 0), req.get("length", len(d))
+                    out = {"ok": True, "type": t, "total": len(d), "data": d[o:o + n]}
+            elif a == "pull":
                 out = {"ok": True, "data": self.data}
             elif a == "push":
                 self.data = req.get("data"); out = {"ok": True}

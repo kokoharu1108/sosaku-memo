@@ -11,6 +11,7 @@ const KEY = "ここに合言葉";
 
 const FOLDER_NAME = "ヒフミヨ_同期";   // ドライブに作るフォルダの名前
 const KEEP_DAYS = 30;                  // 毎日の控え（data-日付.json）を残す日数
+const VERSION = 2;                     // このプログラムの版（アプリが古さを見分けるため）
 
 /* ブラウザでURLを開いたときの表示（接続の確認用）。アプリとのやり取りは下の doPost で行う */
 function doGet() {
@@ -30,7 +31,7 @@ function doPost(e) {
     const files = folder_(root, "files");
     switch (req.action) {
       case "ping":
-        return out_({ ok: true });
+        return out_({ ok: true, version: VERSION });
       case "pull": {   // メモ・リストのデータを返す
         const f = first_(root.getFilesByName("data.json"));
         return out_({ ok: true, data: f ? JSON.parse(f.getBlob().getDataAsString("UTF-8")) : null });
@@ -56,6 +57,33 @@ function doPost(e) {
           files.createFile(Utilities.newBlob(Utilities.base64Decode(req.data), req.type || "application/octet-stream", req.id));
         }
         return out_({ ok: true });
+      }
+      case "putChunk": {   // 大きな添付ファイルを小分けにして受け取る（最後の1つが届いたらつなげて保存）
+        if (first_(files.getFilesByName(req.id))) return out_({ ok: true, done: true });
+        const tmp = folder_(root, "tmp");
+        const name = req.id + ".part" + req.index;
+        const old = first_(tmp.getFilesByName(name));
+        if (old) old.setTrashed(true);
+        tmp.createFile(name, req.data || "", "text/plain");
+        if (req.index < req.total - 1) return out_({ ok: true });
+        let all = "";
+        const parts = [];
+        for (let i = 0; i < req.total; i++) {
+          const p = first_(tmp.getFilesByName(req.id + ".part" + i));
+          if (!p) return out_({ ok: false, error: "part" });
+          all += p.getBlob().getDataAsString();
+          parts.push(p);
+        }
+        files.createFile(Utilities.newBlob(Utilities.base64Decode(all), req.type || "application/octet-stream", req.id));
+        parts.forEach(function (p) { p.setTrashed(true); });
+        return out_({ ok: true, done: true });
+      }
+      case "getChunk": {   // 添付ファイルを小分けにして返す（offset 文字目から length 文字）
+        const f = first_(files.getFilesByName(req.id));
+        if (!f) return out_({ ok: false, error: "nofile" });
+        const blob = f.getBlob();
+        const b64 = Utilities.base64Encode(blob.getBytes());
+        return out_({ ok: true, type: blob.getContentType(), total: b64.length, data: b64.substr(req.offset || 0, req.length || b64.length) });
       }
       case "getFile": {   // 添付ファイルを1つ返す
         const f = first_(files.getFilesByName(req.id));
