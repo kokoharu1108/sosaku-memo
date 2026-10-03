@@ -28,7 +28,7 @@
 
 ## index.html の中身（上から順）
 
-- `<style>` … 色はすべて `:root` のトークン（ライト）＋ダーク用の2ブロック（`prefers-color-scheme` と `[data-theme="dark"]`）。ペールトーン基調。画面ごとの上部バー色 `--bar-view/--bar-list/--bar-edit`、文字色 `--tc-*`、マーカー `--hl-*` もトークン。
+- `<style>` … 色はすべて `:root` のトークン（ライト）＋ダーク用の2ブロック（`prefers-color-scheme` と `[data-theme="dark"]`）。ペールトーン基調。画面ごとの上部バー色 `--bar-search/--bar-view/--bar-list/--bar-edit`（`syncThemeColor` でスマホ上端の帯 `theme-color` も同じ色に）、文字色 `--tc-*`、マーカー `--hl-*` もトークン。
 - Utilities … `h()`（要素生成ヘルパー）、`fmtDate`、`lsGet/lsSet`（localStorage は try/catch 付き）
 - HTML sanitizer … 本文HTMLの許可タグ制限。色は **クラス**（`tc-rose` 等／`hl-yellow` 等）でのみ保存し、色コードは保存しない（ダークモード対応のため）。旧版の色コードは `LEGACY_TC` でクラスに変換。スタイルで付いた太字等は `<b>/<i>/<s>/<u>` に置き換え。空の書式要素は削除。
 - Storage … IndexedDB `sosaku-memo`（v1）。ストア: `memos` / `lists` / `meta`（key `app`） / `files`（添付ファイルの Blob）

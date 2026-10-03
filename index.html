@@ -36,7 +36,7 @@
   --ng: #f8dde0; --ng-ink: #a23b4b;
   --scrim: rgba(40, 42, 58, .38);
   --shadow: 0 1px 2px rgba(44,47,61,.06), 0 6px 20px rgba(44,47,61,.07);
-  --bar-view: #e3eef2; --bar-list: #e9e4f6; --bar-edit: #f5ece1;
+  --bar-search: #d5e2fb; --bar-view: #c9ece3; --bar-list: #ead6f7; --bar-edit: #fadfc0;
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #c9566a;
@@ -55,7 +55,7 @@
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
     --scrim: rgba(0,0,0,.55);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-view: #22343a; --bar-list: #2f2a45; --bar-edit: #3a3127; --danger: #e48a9a;
+    --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --danger: #e48a9a;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
@@ -71,7 +71,7 @@
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
   --scrim: rgba(0,0,0,.55);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-view: #22343a; --bar-list: #2f2a45; --bar-edit: #3a3127; --danger: #e48a9a;
+  --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --danger: #e48a9a;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
@@ -213,7 +213,8 @@ a.btn { text-decoration: none; }
 .crumb.current { color: var(--ink-2); text-decoration: none; font-weight: 700; }
 .crumb-sep { color: var(--ink-3); flex: 0 0 auto; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
-/* bar colors per screen */
+/* bar colors per screen（屋外でも見分けやすいよう、画面ごとに色相を分ける） */
+.topbar.bar-search { background: color-mix(in srgb, var(--bar-search) 94%, transparent); }
 .topbar.bar-view { background: color-mix(in srgb, var(--bar-view) 94%, transparent); }
 .topbar.bar-list { background: color-mix(in srgb, var(--bar-list) 94%, transparent); }
 .topbar.bar-edit { background: color-mix(in srgb, var(--bar-edit) 94%, transparent); }
@@ -871,6 +872,8 @@ const current = () => UI.stack[UI.stack.length - 1];
 /* 画面の履歴をブラウザの履歴と連動させ、スマホの「戻る」操作でも1つ前の画面に戻れるようにする */
 const historyOk = (() => { try { return typeof history.pushState === "function"; } catch { return false; } })();
 const atDepth = () => historyOk && history.state && history.state.depth === UI.stack.length;
+/* 選択モード中は履歴が1つ多く積まれているので、まとめて戻るときはその分も戻る */
+const selExtra = () => (historyOk && history.state && history.state.select ? 1 : 0);
 function go(screen) {
   UI.stack.push(screen);
   if (historyOk) try { history.pushState({ depth: UI.stack.length }, ""); } catch {}
@@ -884,18 +887,20 @@ function back() {
 function backTo(depth) {
   const steps = UI.stack.length - depth;
   if (steps <= 0) return;
-  if (atDepth()) { history.go(-steps); return; }
+  if (atDepth()) { history.go(-(steps + selExtra())); return; }
   UI.stack.length = depth; render();
 }
 /* 「創作メモ帳」をタップ → 最初の画面（検索条件もリセット） */
 function goHome() {
+  // 編集中で未保存の変更があれば、先に確認する
+  if (UI.leaveGuard && UI.leaveGuard(goHome)) return;
   if (UI.select.on) { UI.select.on = false; UI.select.ids.clear(); }
   Object.assign(UI.search, { q: "", committed: "", tab: "memos", genre: "" });
-  if (UI.stack.length > 1) resetTo(); else { render(); window.scrollTo(0, 0); }
+  if (UI.stack.length > 1 || selExtra()) resetTo(); else { render(); window.scrollTo(0, 0); }
 }
 let pendingReset = null;
 function resetTo(screen) {
-  const steps = UI.stack.length - 1;
+  const steps = UI.stack.length - 1 + selExtra();
   if (steps > 0 && atDepth()) { pendingReset = { screen: screen || null }; history.go(-steps); return; }
   UI.stack = [{ name: "search" }]; render(); window.scrollTo(0, 0);
   if (screen && screen.name !== "search") go(screen);
@@ -904,6 +909,7 @@ window.addEventListener("popstate", (e) => {
   const depth = (e.state && e.state.depth) || 1;
   if (pendingReset) {
     const p = pendingReset; pendingReset = null;
+    UI.select.on = false; UI.select.ids.clear();
     UI.stack = [UI.stack[0]]; render(); window.scrollTo(0, 0);
     if (p.screen && p.screen.name !== "search") go(p.screen);
     return;
@@ -1019,10 +1025,17 @@ function isDark() { const t = document.documentElement.getAttribute("data-theme"
 function applyTheme() { const p = lsGet("sm.theme", null); if (p) document.documentElement.setAttribute("data-theme", p); else if (hostTheme) document.documentElement.setAttribute("data-theme", hostTheme); }
 function themeSwitch() {
   const btn = h("button", { class: "switch", role: "switch", "aria-checked": String(isDark()), title: "ダークモード",
-    onclick: () => { const next = isDark() ? "light" : "dark"; lsSet("sm.theme", next); document.documentElement.setAttribute("data-theme", next); btn.setAttribute("aria-checked", String(next === "dark")); btn.querySelector(".sw-state").textContent = next === "dark" ? "ON" : "OFF"; } },
+    onclick: () => { const next = isDark() ? "light" : "dark"; lsSet("sm.theme", next); document.documentElement.setAttribute("data-theme", next); syncThemeColor(); btn.setAttribute("aria-checked", String(next === "dark")); btn.querySelector(".sw-state").textContent = next === "dark" ? "ON" : "OFF"; } },
     h("span", { class: "sw-state" }, isDark() ? "ON" : "OFF"), h("span", { class: "track" }, h("span", { class: "knob" })));
   return btn;
 }
+
+/* スマホ上端の時計などが並ぶ帯の色を、いまの画面の上部バーの色に合わせる（どの画面か見分けやすくする） */
+function syncThemeColor() {
+  const c = getComputedStyle(document.documentElement).getPropertyValue("--bar-" + (current().name || "search")).trim();
+  if (c) document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.removeAttribute("media"); m.content = c; });
+}
+try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncThemeColor); } catch {}
 
 /* =========================================================
    Render
@@ -1038,8 +1051,9 @@ function render() {
   const s = current();
   if (s.name === "search") app.append(renderSearch());
   else if (s.name === "view") { if (!Manager.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderView(s)); }
-  else if (s.name === "edit") app.append(renderEdit(s));
+  else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) { UI.stack.pop(); return render(); } app.append(renderListScreen(s)); }
+  syncThemeColor();
 }
 
 /* ---------- メモ検索画面 ---------- */
@@ -1487,7 +1501,6 @@ let activeEditor = null; // for autosave on leave
 function renderEdit(s) {
   const isNew = !s.id;
   const base = isNew ? null : Manager.get(s.id);
-  if (!isNew && !base) { UI.stack.pop(); return renderSearch(); }
   const d = s.draft || (s.draft = {
     id: base ? base.id : uid("m"), isNew,
     title: base ? base.title : "", genres: base ? [...base.genres] : [],
@@ -1964,7 +1977,7 @@ function renderEdit(s) {
     return { id: d.id, title: d.title.trim(), genres: d.genres, bodyHtml: d.bodyHtml, bodyText: htmlToText(d.bodyHtml), attachments: d.attachments, links: d.links, listIds: d.listIds, parentId: d.parentId || null, tags: (tagIn.value.trim() ? (addTag(tagIn.value), tagIn.value = "", d.tags) : d.tags) };
   };
   let saving = false;
-  async function save({ auto } = {}) {
+  async function save({ auto, stay } = {}) {
     if (saving) return false;
     const data = collect();
     if (!auto && !data.genres.length) { genreErr.hidden = false; genreErr.scrollIntoView({ block: "center", behavior: "smooth" }); return false; }
@@ -1976,8 +1989,9 @@ function renderEdit(s) {
       d.dirty = false; d.savedOnce = true; dirtyEl.textContent = "";
       if (auto) return true;
       toast("保存完了");
-      if (d.isNew) { resetTo(); }
-      else { activeEditor = null; back(); }
+      if (stay) return true;
+      // 新しいメモも、編集したメモも、保存したら1つ前の画面（リスト・親メモなど）に戻る
+      activeEditor = null; back();
       return true;
     } catch (e) {
       toast(e && e.code === "quota_exceeded" ? "保存容量がいっぱいのため保存できませんでした。不要なメモや添付を削除してください。" : "保存できませんでした。通信状態を確認してもう一度お試しください。", true);
@@ -1991,16 +2005,22 @@ function renderEdit(s) {
     try { await Manager.deleteMemo(d.id); toast("メモを削除しました"); resetTo(); }
     catch { toast("削除できませんでした。通信状態を確認してもう一度お試しください。", true); }
   }
-  async function goBack() {
-    if (d.dirty) {
-      const v = await modal({ title: "変更が保存されていません", message: "このまま戻ると、今回の変更は失われます。", buttons: [{ label: "キャンセル", value: null }, { label: "破棄して戻る", value: "discard", cls: "danger" }, { label: "保存して戻る", value: "save", cls: "primary" }] });
-      if (!v) return;
-      if (v === "save") { await save(); return; } // 保存に成功すると save() が前の画面へ戻る
-      d.dirty = false;
-    }
-    activeEditor = null; back();
+  /* 未保存の変更があれば確認する。画面を離れてよければ true */
+  async function confirmLeave() {
+    if (!d.dirty) return true;
+    const v = await modal({ title: "変更が保存されていません", message: "このまま戻ると、今回の変更は失われます。", buttons: [{ label: "キャンセル", value: null }, { label: "破棄して戻る", value: "discard", cls: "danger" }, { label: "保存して戻る", value: "save", cls: "primary" }] });
+    if (!v) return false;
+    if (v === "save") return save({ stay: true });
+    d.dirty = false;
+    return true;
   }
-  UI.leaveGuard = () => { if (d.dirty) { goBack(); return true; } return false; };
+  async function goBack() { if (await confirmLeave()) { activeEditor = null; back(); } }
+  // 戻る操作やパンくずで画面を離れるとき: 確認が必要なら true を返し、確認後に proceed（既定は1つ戻る）を行う
+  UI.leaveGuard = (proceed) => {
+    if (!d.dirty) return false;
+    confirmLeave().then(ok => { if (ok) { activeEditor = null; (proceed || back)(); } });
+    return true;
+  };
   cleanupFns.push(() => { UI.leaveGuard = null; });
 
   const saveBtn = h("button", { class: "btn primary", onclick: () => save() }, "保存");
