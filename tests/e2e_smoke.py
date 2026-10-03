@@ -96,6 +96,7 @@ with sync_playwright() as p:
 
     # 本文エディタ（本文より上は題名とジャンルだけ・書式ボタンは1行）
     pg.click(".tabs >> text=メモ"); pg.click(".fab")
+    check("メモ画面の下部の見出しは「タグ」「リスト」だけ", "そのほかの設定" not in pg.inner_text("main") and "自由に付けられます" not in pg.inner_text("main") and "リストに入れる" not in pg.inner_text("main"))
     check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
     check("タグ・リストは本文より下・階層の欄はない", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&!document.querySelector('.parent-box')})()"))
     check("書式ボタンが1行に収まる", pg.evaluate("(()=>{const f=document.querySelector('.fmt-bar');return f.scrollWidth<=f.clientWidth+1})()"))
@@ -179,6 +180,22 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("戻る操作で検索パネルが閉じる（画面はそのまま）", not pg.locator(".search-panel").is_visible() and pg.locator(".search-toggle").count() == 1)
     pg.click(".filter-chip button"); time.sleep(0.2)
     check("メモのカードに1件ずつの色の帯がある", pg.evaluate("parseFloat(getComputedStyle(document.querySelector('.memo-card')).borderLeftWidth) >= 5"))
+
+    # まとめ: キーワードなしでも作れて、作成日時の期間（今日など）で絞れる
+    pg.click(".report-btn"); pg.wait_for_selector(".rp-tools")
+    check("キーワードなしで全メモのまとめ", pg.inner_text(".rp-title") == "すべてのメモのまとめ")
+    pg.select_option("#rp-period", "today"); time.sleep(0.3)
+    import datetime as _dt
+    check("期間「今日」でまとめられる", pg.inner_text(".rp-title") == _dt.date.today().strftime("%Y/%m/%d") + "のまとめ")
+    pg.select_option("#rp-period", "lastmonth"); time.sleep(0.3)
+    check("期間に該当なしなら案内が出る", "まとめるメモがありません" in pg.inner_text(".rp-holder"))
+    pg.go_back(); pg.wait_for_selector(".search-toggle")
+
+    # ダークモードでも画面ごとのバーが背景とはっきり違う色
+    pg.evaluate("document.documentElement.dataset.theme='dark'")
+    check("ダークモードのバーが背景と見分けられる", pg.evaluate("""(()=>{const L=c=>{const m=c.match(/\\d+/g).slice(0,3).map(x=>{x/=255;return x<=.03928?x/12.92:((x+.055)/1.055)**2.4});return .2126*m[0]+.7152*m[1]+.0722*m[2]};
+      const a=L(getComputedStyle(document.querySelector('.topbar')).backgroundColor),b=L(getComputedStyle(document.body).backgroundColor);return (Math.max(a,b)+.05)/(Math.min(a,b)+.05)>1.8})()"""))
+    pg.evaluate("document.documentElement.dataset.theme='light'")
 
     # 検索画面: 「null」が出ない・「選択」は上部の固定バー
     check("検索画面に「null」が出ない", "null" not in pg.inner_text("body"))
