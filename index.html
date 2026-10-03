@@ -25,7 +25,7 @@
   --line: #dfe2ec;
   --ink: #2c2f3d;
   --ink-2: #636879;
-  --ink-3: #9297a8;
+  --ink-3: #6e7386;
   --accent: #6f7bc4;
   --accent-soft: #e4e7f7;
   --accent-ink: #4b56a0;
@@ -47,7 +47,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #1b1c23; --surface: #24262f; --surface-2: #2c2f3a; --line: #363a47;
-    --ink: #e7e8f0; --ink-2: #b2b6c5; --ink-3: #7f8496;
+    --ink: #e7e8f0; --ink-2: #b2b6c5; --ink-3: #a3a8b9;
     --accent: #a5aeea; --accent-soft: #333852; --accent-ink: #c4caf5;
     --g-exp: #4a352e; --g-exp-ink: #f3c4ae;
     --g-learn: #2b4239; --g-learn-ink: #a9e1c8;
@@ -55,7 +55,7 @@
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
     --scrim: rgba(0,0,0,.55);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --bar-report: #45401a; --danger: #e48a9a;
+    --bar-search: #2b4a86; --bar-view: #1e6457; --bar-list: #5b3a8c; --bar-edit: #7a4e1e; --bar-report: #6a5d12; --danger: #e48a9a;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
@@ -63,7 +63,7 @@
 }
 :root[data-theme="dark"] {
   --bg: #1b1c23; --surface: #24262f; --surface-2: #2c2f3a; --line: #363a47;
-  --ink: #e7e8f0; --ink-2: #b2b6c5; --ink-3: #7f8496;
+  --ink: #e7e8f0; --ink-2: #b2b6c5; --ink-3: #a3a8b9;
   --accent: #a5aeea; --accent-soft: #333852; --accent-ink: #c4caf5;
   --g-exp: #4a352e; --g-exp-ink: #f3c4ae;
   --g-learn: #2b4239; --g-learn-ink: #a9e1c8;
@@ -71,11 +71,17 @@
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
   --scrim: rgba(0,0,0,.55);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --bar-report: #45401a; --danger: #e48a9a;
+  --bar-search: #2b4a86; --bar-view: #1e6457; --bar-list: #5b3a8c; --bar-edit: #7a4e1e; --bar-report: #6a5d12; --danger: #e48a9a;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
 }
+
+/* ダークモード: 屋外でも画面を見分けられるよう、バーは色を濃く（明るく）し、バーの上の文字・アイコンは明るくする */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; }
+}
+:root[data-theme="dark"] :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; }
 
 * { box-sizing: border-box; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -499,6 +505,9 @@ body.editing-body .edit-actions { display: none; }
 .rp-tools { display: grid; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .rp-tool-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .rp-tool-row.rp-actions { flex-wrap: nowrap; gap: 2px; }
+.rp-tools .genre-select { height: 38px; font-size: 14.5px; }
+.rp-range { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.rp-date { padding: 0 6px; min-width: 0; }
 .rp-actions .btn.primary { margin-right: 6px; }
 .rp-actions .btn svg { width: 18px; height: 18px; }
 .rp-seg button { padding: 4px 12px; font-size: 13.5px; }
@@ -1020,7 +1029,8 @@ function crumbLabel(sc) {
   if (sc.name === "search") return "創作メモ帳";
   if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "リスト「" + clip(l ? l.name : "削除済み", 10) + "」"; }
   if (sc.name === "view") { const m = Manager.get(sc.id); return clip(m ? (m.title || "無題のメモ") : "削除済み"); }
-  if (sc.name === "report") { if (sc.listId) { const l = Manager.lists.get(sc.listId); return "まとめ：" + clip(l ? l.name : "", 8); } return "まとめ" + ((sc.q || sc.genre) ? "「" + clip(sc.q || sc.genre, 8) + "」" : ""); }
+  // リストから開いたまとめは、1つ前の「リスト「…」」と重複するので「まとめ」だけにする（長いとパンくずの先頭が隠れる）
+  if (sc.name === "report") { if (sc.listId) return "まとめ"; return "まとめ" + ((sc.q || sc.genre) ? "「" + clip(sc.q || sc.genre, 8) + "」" : ""); }
   if (sc.name === "edit") { if (!sc.id) return "新しいメモ"; const m = Manager.get(sc.id); return "編集：" + clip(m ? (m.title || "無題のメモ") : "", 10); }
   return "";
 }
@@ -1175,7 +1185,7 @@ function renderSearch() {
     if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
     metaRow.append(h("span", { class: "result-meta" }, `${items.length}件`));
     // 検索・絞り込みの結果を1つの新しいメモにまとめる（空の要素を append すると「null」と表示されるので条件で分ける）
-    if (items.length && !selecting && (terms.length || st.genre)) metaRow.append(h("span", { class: "spacer" }),
+    if (items.length && !selecting) metaRow.append(h("span", { class: "spacer" }),
       iconBtn("report", "まとめる", () => go({ name: "report", q: st.committed, genre: st.genre }), "report-btn"));
     results.append(metaRow);
     // 「選択」は上部の固定バー（タブの行）の右端に置き、スクロールしても押せるようにする
@@ -1428,16 +1438,49 @@ async function renameList(l, redraw) {
 /* ---------- 情報まとめ画面 ----------
    検索と同じ条件（キーワード・ジャンル）またはリストをもとに、該当するメモから文章・画像・ファイルを抜き出し、
    元のメモの題名などは載せずに「1つの新しいメモ（資料）」として組み立てる。新しいメモとして保存・ファイル保存・印刷ができる */
+/* 作成日時での期間（今日のメモ・過去の出来事などをまとめるため） */
+const PERIODS = [["all", "すべての期間"], ["today", "今日"], ["yesterday", "昨日"], ["week", "過去7日間"], ["month", "今月"], ["lastmonth", "先月"], ["year", "今年"], ["custom", "日付を指定"]];
+const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+const parseYmd = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
+function periodRange(o) {
+  const now = new Date(), day0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const slash = (d) => fmtDate(d.getTime()).slice(0, 10);
+  switch (o.period) {
+    case "today": return { from: day0, to: addDays(day0, 1), label: slash(day0) };
+    case "yesterday": { const y = addDays(day0, -1); return { from: y, to: day0, label: slash(y) }; }
+    case "week": return { from: addDays(day0, -6), to: addDays(day0, 1), label: "過去7日間" };
+    case "month": return { from: new Date(now.getFullYear(), now.getMonth(), 1), to: new Date(now.getFullYear(), now.getMonth() + 1, 1), label: `${now.getFullYear()}年${now.getMonth() + 1}月` };
+    case "lastmonth": { const f = new Date(now.getFullYear(), now.getMonth() - 1, 1); return { from: f, to: new Date(now.getFullYear(), now.getMonth(), 1), label: `${f.getFullYear()}年${f.getMonth() + 1}月` }; }
+    case "year": return { from: new Date(now.getFullYear(), 0, 1), to: new Date(now.getFullYear() + 1, 0, 1), label: `${now.getFullYear()}年` };
+    case "custom": {
+      const f = parseYmd(o.from), t = parseYmd(o.to);
+      if (!f && !t) return null;
+      return { from: f, to: t ? addDays(t, 1) : null, label: (f ? slash(f) : "") + "〜" + (t ? slash(t) : "") };
+    }
+    default: return null;
+  }
+}
 function reportSource(s) {
+  const o = s.opts || {};
+  let items, terms = [], base = [], listId = null;
   if (s.listId) {
     const l = Manager.lists.get(s.listId);
-    const items = l ? Manager.sorted.filter(m => (m.listIds || []).includes(l.id)) : [];
-    return { title: l ? `${l.name}のまとめ` : "まとめ", items: filterByGenre(items, s.genre), terms: [], listId: l ? l.id : null };
+    items = l ? Manager.sorted.filter(m => (m.listIds || []).includes(l.id)) : [];
+    if (l) { base.push(l.name); listId = l.id; }
+    items = filterByGenre(items, s.genre);
+  } else {
+    terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
+    items = filterByGenre(Manager.sorted, s.genre);
+    if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
+    if (s.q) base.push(s.q);
   }
-  const terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
-  let items = filterByGenre(Manager.sorted, s.genre);
-  if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
-  return { title: (s.q || s.genre || "すべてのメモ") + "のまとめ", items, terms, listId: null };
+  if (s.genre) base.push(s.genre);
+  const pr = periodRange(o);
+  if (pr) items = items.filter(m => (!pr.from || m.createdAt >= pr.from.getTime()) && (!pr.to || m.createdAt < pr.to.getTime()));
+  const b = base.join("・");
+  const title = pr ? (b ? `${b}のまとめ（${pr.label}）` : `${pr.label}のまとめ`) : (b ? `${b}のまとめ` : "すべてのメモのまとめ");
+  return { title, items, terms, listId };
 }
 const BLOCK_TAGS = new Set(["DIV", "P", "UL", "OL", "BLOCKQUOTE", "H2", "H3", "H4"]);
 /* 本文を段落ごとに分ける（入力欄の HTML は「1行目の文字 + <div>2行目</div>…」の形が多い） */
@@ -1540,14 +1583,14 @@ async function reportFileHtml(doc, title) {
 </style></head><body>${clone.outerHTML}</body></html>`;
 }
 function renderReport(s) {
-  s.opts = s.opts || { body: s.listId ? "full" : "excerpt", images: true };
+  s.opts = s.opts || { body: s.listId ? "full" : "excerpt", images: true, period: "all", from: "", to: "" };
   const o = s.opts;
   const src = reportSource(s);
   const holder = h("div", { class: "rp-holder" }, h("p", { class: "ai-hint" }, "まとめを作っています…"));
   let doc = null, dg = null;
   const draw = () => {
     dg = digest(s, src); doc = digestDoc(dg);
-    holder.replaceChildren(src.items.length ? doc : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "検索の言葉を変えるか、ジャンルの絞り込みを外してください。"));
+    holder.replaceChildren(src.items.length ? doc : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "期間や検索の言葉を変えるか、ジャンルの絞り込みを外してください。"));
   };
   ensureFileUrls(src.items.flatMap(m => m.attachments || [])).then(draw, draw);
   // ファイル名は「まとめの題名_日付」（同じ日に同じまとめを保存し直した場合は上書きでよい、という利用者の方針）
@@ -1569,7 +1612,14 @@ function renderReport(s) {
   const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.html", { type: "text/html" })] })); } catch { return false; } })();
   const seg = h("div", { class: "tabs rp-seg", role: "group", "aria-label": "本文" }, [["excerpt", "関連部分だけ"], ["full", "全文"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o.body === v), "aria-selected": String(o.body === v),
     onclick: (e) => { o.body = v; seg.querySelectorAll("button").forEach(b => { const on = b === e.currentTarget; b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-selected", String(on)); }); draw(); } }, l)));
+  // 期間（作成日時）: 変えたら画面ごと作り直す（題名・対象のメモが変わるため）
+  const periodSel = h("select", { id: "rp-period", class: "genre-select" + (o.period !== "all" ? " on" : ""), "aria-label": "期間", onchange: () => { o.period = periodSel.value; render(); } },
+    PERIODS.map(([v, l]) => h("option", { value: v }, l)));
+  periodSel.value = o.period;
+  const dateIn = (key, label) => h("input", { type: "date", class: "genre-select rp-date", "aria-label": label, value: o[key] || "", max: ymd(new Date()), onchange: (e) => { o[key] = e.target.value; render(); } });
   const tools = h("div", { class: "rp-tools" },
+    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
+      o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg,
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
@@ -2135,7 +2185,7 @@ function renderEdit(s) {
       } }, newIn, h("button", { class: "btn", type: "submit", style: "padding:4px 10px" }, "追加")));
   };
   drawListsPick();
-  const listField = h("div", { class: "field" }, h("div", { class: "label" }, "リストに入れる"), listBox);
+  const listField = h("div", { class: "field" }, h("div", { class: "label" }, "リスト"), listBox);
 
   // free tags
   const tagBox = h("div", { class: "chips" });
@@ -2159,7 +2209,7 @@ function renderEdit(s) {
   tagIn.addEventListener("change", () => { if (tagIn.value.trim()) { addTag(tagIn.value); tagIn.value = ""; } });
   tagIn.addEventListener("input", () => { if (/[,、，]$/.test(tagIn.value)) { addTag(tagIn.value); tagIn.value = ""; } });
   drawTags();
-  const tagField = h("div", { class: "field" }, h("label", { for: "taginput" }, "タグ（自由に付けられます）"), tagBox,
+  const tagField = h("div", { class: "field" }, h("label", { for: "taginput" }, "タグ"), tagBox,
     h("div", { class: "tag-add" }, tagIn, h("button", { class: "btn", type: "button", onclick: () => { addTag(tagIn.value); tagIn.value = ""; tagIn.focus(); } }, "追加")), tagList, sugg);
 
   // save / delete
@@ -2242,7 +2292,7 @@ function renderEdit(s) {
   return h("div", { class: "screen" },
     editHeader,
     h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, bodyField, attField,
-      h("section", { class: "more-sec" }, h("div", { class: "more-head" }, "そのほかの設定（あとからでもOK）"), tagField, listField)),
+      h("section", { class: "more-sec" }, tagField, listField)),
     h("div", { class: "edit-actions" }, h("div", { class: "edit-actions-in" }, dirtyEl, h("span", { class: "spacer" }), saveBtn)));
 }
 
