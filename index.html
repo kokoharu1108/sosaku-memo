@@ -115,6 +115,10 @@ a { color: var(--accent-ink); }
   display: inline-grid; place-items: center; color: var(--ink-2); padding: 0 8px; font-size: 14px;
 }
 .icon-btn:hover { background: var(--surface-2); }
+.icon-btn.ico { color: var(--ink-2); }
+.icon-btn.ico svg { width: 21px; height: 21px; }
+.icon-btn:disabled { opacity: .45; }
+.head-actions { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
 .icon-btn.back { font-size: 22px; color: var(--ink); }
 .btn {
   border: 1px solid var(--line); background: var(--surface); color: var(--ink);
@@ -177,11 +181,14 @@ a.btn { text-decoration: none; }
 }
 .memo-card:hover { border-color: var(--accent); }
 .card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.card-title { font-weight: 700; font-size: 16px; margin-top: 4px; overflow-wrap: anywhere; }
+.card-head { display: flex; align-items: baseline; gap: 10px; }
+.card-title { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
+.card-date { font-size: 12px; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .card-title.untitled { color: var(--ink-3); font-weight: 500; }
 .card-sum { font-size: 13.5px; color: var(--ink-2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .card-sum mark { background: var(--accent-soft); color: var(--accent-ink); border-radius: 3px; padding: 0 1px; }
-.card-foot { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.card-foot { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
+.btn.add-memos { width: 100%; justify-content: center; margin-bottom: 10px; border-style: dashed; color: var(--accent-ink); background: transparent; }
 .list-tag.link { background: none; font-family: inherit; cursor: pointer; }
 .list-tag.link:hover { border-color: var(--accent); color: var(--accent-ink); }
 .list-tag { font-size: 12px; color: var(--ink-2); border: 1px dashed var(--line); border-radius: 6px; padding: 0 7px; }
@@ -275,32 +282,6 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .filter-row { margin-top: 8px !important; margin-bottom: 0 !important; }
 .fr-label { font-size: 12px; color: var(--ink-3); }
 .search-tools .tab-row { margin: 6px 0 8px; }
-/* tree */
-.tree { list-style: none; margin: 0; padding: 0 0 0 18px; border-left: 1px dashed var(--line); margin-left: 13px; }
-.tree.tree-top { padding-left: 0; border-left: 0; margin-left: 0; }
-.tree li { margin: 0; }
-.tree-row { display: flex; align-items: center; gap: 2px; min-height: 38px; border-radius: 8px; }
-.tree-row.current { background: var(--accent-soft); }
-.tree-leaf { width: 22px; text-align: center; color: var(--ink-3); flex: 0 0 auto; }
-.tree-title { border: 0; background: none; text-align: left; padding: 6px 6px; border-radius: 6px; color: var(--ink); font-size: 15px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
-.tree-row.has-kids .tree-title { font-weight: 700; }
-.tree-title .tree-count { margin-right: 0; font-weight: 400; }
-.tree-tog { width: 22px; text-align: center; color: var(--ink-3); font-size: 12px; flex: 0 0 auto; }
-.tree-open { border: 1px solid var(--line); background: var(--surface); color: var(--accent-ink); width: 34px; height: 30px; border-radius: 8px; font-size: 18px; line-height: 1; flex: 0 0 auto; }
-.tree-open:hover { border-color: var(--accent); }
-.tree-title:hover { background: var(--surface-2); color: var(--accent-ink); }
-.tree-count { font-size: 11.5px; color: var(--ink-3); background: var(--surface-2); border-radius: 999px; padding: 0 7px; margin-right: 6px; font-variant-numeric: tabular-nums; }
-.tree-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 6px 8px; }
-.tree-path { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 4px; font-size: 13px; color: var(--ink-3); margin-top: 6px; }
-.tp-root { font-size: 13px; }
-.tp-item { border: 0; background: none; padding: 1px 4px; border-radius: 6px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; font-size: 13px; }
-.tp-item.static { text-decoration: none; color: var(--ink-2); }
-.tp-sep { color: var(--ink-3); }
-.tp-self { color: var(--ink-2); font-weight: 700; padding: 1px 4px; }
-.tree-path.edit { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; margin: 0; }
-.child-sec { margin-top: 28px; }
-.child-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-.child-sec .tree.tree-top { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 6px 8px; }
 .ref-item.on { border-color: var(--accent); background: var(--accent-soft); }
 /* attachments (view) */
 .att-details { margin-top: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
@@ -582,6 +563,18 @@ const fmtDate = (ms) => {
 const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
 const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+/* 小さなアイコン（文字の代わりに使い、画面の情報量を減らす） */
+const ICONS = {
+  report: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
+  select: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  save: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
+  print: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/>',
+  share: '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>',
+};
+const iconBtn = (name, label, onclick, cls) => h("button", { class: "icon-btn ico" + (cls ? " " + cls : ""), type: "button", "aria-label": label, title: label, onclick }, svgIcon(ICONS[name]));
 const svgIcon = (d) => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor"); s.setAttribute("stroke-width", "2"); s.setAttribute("stroke-linecap", "round"); s.innerHTML = d; return s; };
 
 /* =========================================================
@@ -913,7 +906,6 @@ function resolveBodyHtml(html, attachments) {
 const UI = {
   stack: [{ name: "search" }],
   search: { q: "", committed: "", tab: "memos", sort: "upd-desc", genre: "", open: false },
-  treeOpen: new Set(),
   listView: { sort: "upd-desc", genre: "" },
   select: { on: false, scope: "", ids: new Set() },
 };
@@ -1001,7 +993,7 @@ function selectBar(visibleIds, actions, redraw) {
 async function bulkDelete() {
   const ids = [...UI.select.ids].filter(id => Manager.get(id));
   if (!ids.length) return;
-  const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のメモを削除します。元に戻すことはできません。下の階層のメモは、ひとつ上の階層に移ります。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
+  const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のメモを削除します。元に戻すことはできません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
   if (!ok) return;
   let done = 0;
   for (const id of ids) { try { await Manager.deleteMemo(id); done++; } catch {} }
@@ -1143,7 +1135,7 @@ function renderSearch() {
   function drawResults() {
     toolbar.replaceChildren(); results.replaceChildren(); filterRow.replaceChildren();
     toolbar.append(h("div", { class: "tabs", role: "tablist" },
-      [["memos", "メモ"], ["tree", "ツリー"], ["lists", "リスト"]].map(([k, l]) => h("button", { role: "tab", "aria-selected": String(st.tab === k), onclick: () => switchTab(k) }, l))));
+      [["memos", "メモ"], ["lists", "リスト"]].map(([k, l]) => h("button", { role: "tab", "aria-selected": String(st.tab === k), onclick: () => switchTab(k) }, l))));
     filterRow.append(...[h("span", { class: "fr-label" }, "絞り込み"), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
       sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
     searchBtn.classList.toggle("active", !!(st.committed || st.genre));
@@ -1153,7 +1145,6 @@ function renderSearch() {
     fabLabel.textContent = st.tab === "lists" ? "新規リスト" : "新規メモ";
     fab.setAttribute("aria-label", fabLabel.textContent);
     if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
-    if (st.tab === "tree") { results.append(renderTreeTab(drawResults)); return; }
 
     let items = filterByGenre(Manager.sorted, st.genre);
     const terms = st.committed.toLowerCase().split(/\s+/).filter(Boolean);
@@ -1164,13 +1155,13 @@ function renderSearch() {
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
     if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
-    metaRow.append(h("span", { class: "result-meta" }, (terms.length || st.genre) ? `${items.length}件見つかりました` : `全${items.length}件`));
+    metaRow.append(h("span", { class: "result-meta" }, `${items.length}件`));
     // 検索・絞り込みの結果を1つの新しいメモにまとめる（空の要素を append すると「null」と表示されるので条件で分ける）
     if (items.length && !selecting && (terms.length || st.genre)) metaRow.append(h("span", { class: "spacer" }),
-      h("button", { class: "btn ghost sel-start report-btn", type: "button", onclick: () => go({ name: "report", q: st.committed, genre: st.genre }) }, "📄 まとめる"));
+      iconBtn("report", "まとめる", () => go({ name: "report", q: st.committed, genre: st.genre }), "report-btn"));
     results.append(metaRow);
     // 「選択」は上部の固定バー（タブの行）の右端に置き、スクロールしても押せるようにする
-    if (items.length && !selecting) toolbar.append(h("span", { class: "spacer" }), h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect("search") }, "選択"));
+    if (items.length && !selecting) toolbar.append(h("span", { class: "spacer" }), iconBtn("select", "選択", () => enterSelect("search"), "select-btn"));
 
     if (!items.length) {
       results.append(Manager.memos.size === 0
@@ -1199,7 +1190,7 @@ function renderSearch() {
       h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "創作メモ帳"), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       searchBtn,
-      h("button", { class: "icon-btn", "aria-label": "設定", title: "設定", onclick: openSettings }, "⚙")),
+      iconBtn("gear", "設定", openSettings)),
       h("div", { class: "search-tools" },
         panel,
         toolbar)),
@@ -1217,22 +1208,6 @@ function renderSearch() {
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
   return scr;
-}
-function renderTreeTab(redraw) {
-  const st = UI.search;
-  const wrap = h("div");
-  // 下の階層を持つ最上位のメモだけを表示（階層のないメモは出さない）
-  const roots = sortMemos(Manager.roots.filter(m => (Manager.kids.get(m.id) || []).length), st.sort);
-  if (!roots.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "階層のあるメモはまだありません"), "メモを開いて「＋ 子メモを作成」を押すか、メモ画面の「階層（このメモの親）」で親メモを選ぶと、ここにツリーで表示されます。")); return wrap; }
-  const withKids = Manager.sorted.filter(m => (Manager.kids.get(m.id) || []).length);
-  const allOpen = withKids.length > 0 && withKids.every(m => UI.treeOpen.has(m.id));
-  wrap.append(
-    h("div", { class: "toolbar-row", style: "margin-top:0" },
-      h("span", { class: "result-meta" }, `階層のあるメモ ${roots.length}件`),
-      h("span", { class: "spacer" }),
-      withKids.length ? h("button", { class: "btn ghost sel-start", type: "button", onclick: () => { if (allOpen) UI.treeOpen.clear(); else withKids.forEach(m => UI.treeOpen.add(m.id)); redraw(); } }, allOpen ? "すべて閉じる" : "すべて開く") : null),
-    h("div", { class: "tree-card" }, treeList(roots, { open: UI.treeOpen, sort: st.sort, redraw })));
-  return wrap;
 }
 /* ふりかえり: 「n年前の今日」か、しばらく見ていない過去のメモを1件出す */
 let recallOffset = 0;
@@ -1274,20 +1249,20 @@ function snippet(m, terms) {
   return frag;
 }
 function genreChips(m) { return (m.genres && m.genres.length) ? m.genres.map(g => h("span", { class: "genre g-" + g }, g)) : [h("span", { class: "genre none" }, "ジャンル未選択")]; }
+const shortDate = (ms) => fmtDate(ms).slice(0, 10);
 function dateLine(m) {
   const edited = m.updatedAt - m.createdAt > 60000;
-  return h("span", { class: "dates" }, "作成 " + fmtDate(m.createdAt), edited ? h("span", { class: "upd" }, " ・ 更新 " + fmtDate(m.updatedAt)) : null);
+  return h("span", { class: "dates" }, shortDate(m.createdAt) + " 作成", edited ? h("span", { class: "upd" }, " ・ " + shortDate(m.updatedAt) + " 更新") : null);
 }
 function memoCard(m, terms = [], sel) {
-  const names = listNames(m);
   const picked = sel && sel.ids.has(m.id);
   return h("button", { class: "memo-card" + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null,
     onclick: () => (sel ? sel.toggle(m.id) : go({ name: "view", id: m.id })) },
     sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? "✓" : "") : null,
-    h("div", { class: "card-top" }, dateLine(m), names.map(n => h("span", { class: "list-tag" }, "▸ " + n))),
-    h("div", { class: "card-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
+    // カードは「題名・日付／本文の冒頭／ジャンル・タグ2つ・添付数」だけにして見やすくする
+    h("div", { class: "card-head" }, h("div", { class: "card-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"), h("span", { class: "card-date" }, shortDate(m.createdAt))),
     h("div", { class: "card-sum" }, snippet(m, terms)),
-    h("div", { class: "card-foot" }, genreChips(m), (m.tags || []).slice(0, 4).map(t => h("span", { class: "tag-mini" }, "#" + t)),
+    h("div", { class: "card-foot" }, genreChips(m), (m.tags || []).slice(0, 2).map(t => h("span", { class: "tag-mini" }, "#" + t)),
       m.attachments.length ? h("span", { class: "att-count" }, `📎 ${m.attachments.length}`) : null));
 }
 function renderLists(redraw) {
@@ -1302,14 +1277,14 @@ function renderLists(redraw) {
     rows.append(h("div", { class: "list-row" },
       h("button", { class: "open", onclick: () => go({ name: "list", id: l.id }) },
         h("div", { class: "list-name" }, l.name),
-        h("div", { class: "list-sub" }, `${count}件 ・ ${fmtDate(l.updatedAt)}`)),
-      h("button", { class: "icon-btn", title: "名前を変更", "aria-label": "名前を変更", onclick: () => renameList(l, redraw) }, "✎"),
-      h("button", { class: "icon-btn", title: "リストを削除", "aria-label": "リストを削除", onclick: async () => {
+        h("div", { class: "list-sub" }, `${count}件 ・ ${shortDate(l.updatedAt)} 更新`)),
+      iconBtn("edit", "名前を変更", () => renameList(l, redraw)),
+      h("button", { class: "icon-btn ico", title: "リストを削除", "aria-label": "リストを削除", onclick: async () => {
         const ok = await modal({ title: "本当に削除しますか？", message: `リスト「${l.name}」を削除します。中のメモは削除されません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
         if (!ok) return;
         try { await Manager.deleteList(l.id); toast("リストを削除しました"); redraw(); }
         catch { toast("リストを削除できませんでした。", true); }
-      } }, "🗑")));
+      } }, svgIcon(ICONS.trash))));
   }
   wrap.append(rows);
   return wrap;
@@ -1346,17 +1321,18 @@ function renderListScreen(s) {
     const members = Manager.sorted.filter(m => (m.listIds || []).includes(l.id));
     let items = sortMemos(filterByGenre(members, st.genre), st.sort);
     const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); draw(); } } : null;
+    // 「まとめる」「選択」「名前の変更」は上部バーのアイコンに。本文側は件数と絞り込みの1行だけにする
+    headActions.replaceChildren(...[
+      items.length && !selecting ? iconBtn("report", "まとめる", () => go({ name: "report", listId: l.id, genre: st.genre }), "report-btn") : null,
+      items.length && !selecting ? iconBtn("select", "選択", () => enterSelect(scope), "select-btn") : null,
+      iconBtn("edit", "リスト名を変更", () => renameList(l, render))].filter(Boolean));
     body.replaceChildren(...[
       h("div", { class: "toolbar-row", style: "margin-top:0" },
-        selecting ? null : h("button", { class: "btn primary", onclick: () => pickMemosForList(l, draw) }, "＋ 保存済みのメモを入れる"),
+        h("span", { class: "result-meta" }, st.genre ? `${items.length}件／${members.length}件` : `${members.length}件`),
         h("span", { class: "spacer" }),
         members.length ? genreSelect(st, draw, "genre-list") : null,
         members.length ? sortSelect(st, draw, "sort-list") : null),
-      h("div", { class: "toolbar-row", style: "margin:0 0 8px" },
-        h("span", { class: "result-meta" }, st.genre ? `${items.length}件（全${members.length}件中）` : `全${members.length}件 ・ 更新 ${fmtDate(l.updatedAt)}`),
-        items.length && !selecting ? [h("span", { class: "spacer" }),
-          h("button", { class: "btn ghost sel-start report-btn", type: "button", onclick: () => go({ name: "report", listId: l.id, genre: st.genre }) }, "📄 まとめる"),
-          h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect(scope) }, "選択")] : null),
+      selecting ? null : h("button", { class: "btn add-memos", type: "button", onclick: () => pickMemosForList(l, draw) }, "＋ 保存済みのメモを入れる"),
       !members.length
         ? h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
             Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書くと、このリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。")
@@ -1372,12 +1348,13 @@ function renderListScreen(s) {
         { label: "削除", cls: "danger-solid", run: bulkDelete }], draw) : null].filter(Boolean));
   };
   const fabEl = h("button", { class: "fab", onclick: () => go({ name: "edit", id: null, presetList: l.id }) }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "新規メモ"));
+  const headActions = h("div", { class: "head-actions" });
   draw();
   return h("div", { class: "screen" },
     h("header", { class: "topbar bar-list" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("div", { style: "flex:1;min-width:0" }, h("div", { class: "list-head-label" }, "リスト"), h("h1", { style: "line-height:1.3" }, l.name)),
-      h("button", { class: "icon-btn", title: "名前を変更", "aria-label": "リスト名を変更", onclick: () => renameList(l, render) }, "✎")), crumbBar()),
+      headActions), crumbBar()),
     h("main", { class: "wrap" }, body),
     fabEl);
 }
@@ -1554,7 +1531,8 @@ function renderReport(s) {
     holder.replaceChildren(src.items.length ? doc : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "検索の言葉を変えるか、ジャンルの絞り込みを外してください。"));
   };
   ensureFileUrls(src.items.flatMap(m => m.attachments || [])).then(draw, draw);
-  const fileName = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `${src.title.replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_|_$/g, "")}_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.html`; };
+  // 保存のたびに別の名前にする（日付だけだと同じ日に保存したファイルが上書きされるため、時刻まで付ける）
+  const fileName = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `${src.title.replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_|_$/g, "")}_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.html`; };
   const makeFile = async () => new File([await reportFileHtml(doc, src.title)], fileName(), { type: "text/html" });
   const busy = async (btn, fn) => { btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } };
   const save = (btn) => doc && busy(btn, async () => {
@@ -1577,9 +1555,10 @@ function renderReport(s) {
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     h("div", { class: "rp-tool-row" },
       h("button", { class: "btn primary", type: "button", onclick: () => { if (dg && src.items.length) go({ name: "edit", id: null, draft: digestDraft(dg, src) }); } }, "新しいメモとして保存"),
-      h("button", { class: "btn", type: "button", onclick: (e) => save(e.currentTarget) }, "ファイルに保存"),
-      h("button", { class: "btn", type: "button", onclick: () => window.print() }, "印刷・PDF"),
-      canShare ? h("button", { class: "btn", type: "button", onclick: (e) => share(e.currentTarget) }, "共有") : null));
+      h("span", { class: "spacer" }),
+      iconBtn("save", "ファイルに保存", (e) => save(e.currentTarget)),
+      iconBtn("print", "印刷・PDF", () => window.print()),
+      canShare ? iconBtn("share", "共有", (e) => share(e.currentTarget)) : null));
   return h("div", { class: "screen report-screen" },
     h("header", { class: "topbar bar-report" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
@@ -1607,28 +1586,17 @@ function renderView(s) {
   document.addEventListener("click", closeMenu); cleanupFns.push(() => document.removeEventListener("click", closeMenu));
 
   const body = h("div", { class: "view-body", html: resolveBodyHtml(m.bodyHtml, m.attachments) });
-  const childSection = h("section", { class: "child-sec" });
-  const drawChildren = () => {
-    const kids = Manager.childrenOf(m.id, "cre-asc");
-    const total = Manager.descendantIds(m.id).size;
-    childSection.replaceChildren(
-      h("div", { class: "child-head" }, h("span", { class: "section-h", style: "margin:0" }, kids.length ? `下の階層のメモ（${total}件）` : "下の階層のメモ"),
-        h("span", { class: "spacer" }), h("button", { class: "btn", type: "button", onclick: () => go({ name: "edit", id: null, presetParent: m.id }) }, "＋ 子メモを作成")),
-      kids.length ? treeList(kids, { open: UI.treeOpen, sort: "cre-asc", redraw: drawChildren }) : h("p", { class: "ai-hint", style: "margin:4px 0 0" }, "このメモの下に、関連するメモを階層でぶら下げられます。"));
-  };
-  drawChildren();
   body.addEventListener("click", (e) => { if (e.target.tagName === "IMG") lightbox(e.target.src); });
 
   const doc = h("article", { class: "view-doc" },
-    h("div", { class: "view-meta" }, h("span", {}, "作成 " + fmtDate(m.createdAt)), h("span", {}, "更新 " + fmtDate(m.updatedAt))),
-    Manager.ancestors(m.id).length ? treePath(m) : null,
+    // 日付は1行にまとめ、ジャンル・リスト・タグも1行に並べて情報を整理する
+    h("div", { class: "view-meta" }, dateLine(m)),
     h("h2", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
     h("div", { class: "view-meta" }, genreChips(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
-      h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name))),
-    (m.tags || []).length ? h("div", { class: "view-meta tag-row" }, m.tags.map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))) : null,
+      h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name)),
+      (m.tags || []).map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))),
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
-    m.attachments.length ? attList(m.attachments) : null,
-    childSection);
+    m.attachments.length ? attList(m.attachments) : null);
 
   const main = h("div", { class: "view-main" }, doc);
   return h("div", { class: "screen view-screen" },
@@ -1677,33 +1645,6 @@ function attList(atts) {
       h("span", { class: "att-size" }, fmtSize(a.size)),
       h("span", { class: "att-go", "aria-hidden": "true" }, "›")))));
 }
-/* 階層（ツリー）表示 */
-function treeList(nodes, ctx, depth = 0) {
-  const ul = h("ul", { class: "tree" + (depth ? "" : " tree-top") });
-  for (const m of nodes) {
-    const kids = Manager.childrenOf(m.id, ctx.sort);
-    const open = ctx.open.has(m.id);
-    const toggle = () => { open ? ctx.open.delete(m.id) : ctx.open.add(m.id); ctx.redraw(); };
-    // 下の階層があるメモ: 行をタップで開閉、右端の「›」でメモを開く。下の階層がないメモ: タップでメモを開く
-    const li = h("li", {},
-      h("div", { class: "tree-row" + (ctx.current === m.id ? " current" : "") + (kids.length ? " has-kids" : "") },
-        kids.length ? h("span", { class: "tree-tog", "aria-hidden": "true" }, open ? "▾" : "▸") : h("span", { class: "tree-leaf", "aria-hidden": "true" }, "・"),
-        kids.length
-          ? h("button", { class: "tree-title", type: "button", "aria-expanded": String(open), onclick: toggle }, m.title || "無題のメモ", h("span", { class: "tree-count" }, String(kids.length)))
-          : h("button", { class: "tree-title", type: "button", onclick: () => go({ name: "view", id: m.id }) }, m.title || "無題のメモ"),
-        kids.length ? h("button", { class: "tree-open", type: "button", "aria-label": (m.title || "無題のメモ") + " を開く", title: "このメモを開く", onclick: () => go({ name: "view", id: m.id }) }, "›") : null));
-    if (open && kids.length) li.append(treeList(kids, ctx, depth + 1));
-    ul.append(li);
-  }
-  return ul;
-}
-function treePath(m, opts = {}) {
-  const anc = Manager.ancestors(m.id);
-  return h("nav", { class: "tree-path", "aria-label": "階層" },
-    h("span", { class: "tp-root" }, "🗂"),
-    anc.flatMap(a => [h("button", { class: "tp-item", type: "button", onclick: () => go({ name: "view", id: a.id }) }, clip(a.title || "無題のメモ", 16)), h("span", { class: "tp-sep" }, "/")]),
-    h("span", { class: "tp-self" }, clip(opts.selfLabel || m.title || "無題のメモ", 18)));
-}
 function tagSearch(tag) {
   Object.assign(UI.search, { q: "#" + tag, committed: "#" + tag, tab: "memos", genre: "" });
   Manager.pushHistory("#" + tag);
@@ -1742,7 +1683,7 @@ function renderEdit(s) {
   // 直近の題名は、題名の欄を触っている間だけ1行で出す（常に出すと本文が下に押し出されるため）
   const recents = Manager.recentTitles();
   const recentRow = recents.length ? h("div", { class: "recent-titles", hidden: true }, h("span", {}, "直近の題名："),
-    recents.map(t => h("button", { class: "chip-btn", type: "button", title: t, onmousedown: (e) => e.preventDefault(), onclick: () => { titleIn.value = t; d.title = t; markDirty(); drawParent(); } }, t))) : null;
+    recents.map(t => h("button", { class: "chip-btn", type: "button", title: t, onmousedown: (e) => e.preventDefault(), onclick: () => { titleIn.value = t; d.title = t; markDirty(); } }, t))) : null;
   if (recentRow) {
     titleIn.addEventListener("focus", () => { recentRow.hidden = false; });
     titleIn.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== titleIn) recentRow.hidden = true; }, 200));
@@ -2159,40 +2100,6 @@ function renderEdit(s) {
   drawAtts();
   const attField = h("div", { class: "field" }, h("div", { class: "label" }, "添付ファイル"), attHolder, h("div", { style: "height:8px" }), drop, uploading);
 
-  // 階層（親メモ）
-  const parentBox = h("div", { class: "parent-box" });
-  const drawParent = () => {
-    const p = d.parentId && Manager.get(d.parentId);
-    const chain = p ? [...Manager.ancestors(p.id), p] : [];
-    parentBox.replaceChildren(
-      h("div", { class: "tree-path edit" }, h("span", { class: "tp-root" }, "🗂"), chain.flatMap(x => [h("span", { class: "tp-item static" }, clip(x.title || "無題のメモ", 14)), h("span", { class: "tp-sep" }, "/")]),
-        h("span", { class: "tp-self" }, clip(d.title || "このメモ", 16))),
-      h("div", { class: "chips", style: "margin-top:8px" },
-        h("button", { class: "chip-btn", type: "button", onclick: pickParent }, p ? "親メモを変更" : "＋ 親メモを選ぶ"),
-        p ? h("button", { class: "chip-btn", type: "button", onclick: () => { d.parentId = null; markDirty(); drawParent(); } }, "最上位にする") : null));
-  };
-  async function pickParent() {
-    const exclude = Manager.descendantIds(d.id); exclude.add(d.id);
-    await modal({ wide: true, title: "親メモを選ぶ", body: (close) => {
-      const q = h("input", { id: "parentq", class: "text-input", placeholder: "題名や本文で絞り込み" });
-      const listEl = h("div", { class: "picker-list" });
-      const pathOf = (m) => [...Manager.ancestors(m.id), m].map(x => clip(x.title || "無題のメモ", 12)).join(" / ");
-      const draw = () => {
-        const t = q.value.trim().toLowerCase();
-        const items = Manager.sorted.filter(m => !exclude.has(m.id) && (!t || m._search.includes(t)));
-        listEl.replaceChildren(...(items.length ? items.map(m => h("button", { class: "ref-item" + (d.parentId === m.id ? " on" : ""), type: "button", onclick: () => { d.parentId = m.id; markDirty(); drawParent(); close(true); } },
-          h("span", { class: "t" }, pathOf(m)), h("span", { class: "d" }, fmtDate(m.updatedAt))))
-          : [h("p", { class: "ai-hint" }, "親にできる保存済みのメモがありません。")]));
-      };
-      q.addEventListener("input", draw); draw();
-      return h("div", { style: "display:flex;flex-direction:column;min-height:0;flex:1" }, q, listEl,
-        h("div", { class: "modal-actions" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル")));
-    } });
-  }
-  drawParent();
-  titleIn.addEventListener("input", drawParent);
-  const linkField = h("div", { class: "field" }, h("div", { class: "label" }, "階層（このメモの親）"), parentBox);
-
   // lists
   const listBox = h("div", { class: "chips" });
   const drawListsPick = () => {
@@ -2315,7 +2222,7 @@ function renderEdit(s) {
   return h("div", { class: "screen" },
     editHeader,
     h("main", { class: "wrap", style: "padding-bottom:40px" }, titleField, genreField, bodyField, attField,
-      h("section", { class: "more-sec" }, h("div", { class: "more-head" }, "そのほかの設定（あとからでもOK）"), tagField, linkField, listField)),
+      h("section", { class: "more-sec" }, h("div", { class: "more-head" }, "そのほかの設定（あとからでもOK）"), tagField, listField)),
     h("div", { class: "edit-actions" }, h("div", { class: "edit-actions-in" }, dirtyEl, h("span", { class: "spacer" }), saveBtn)));
 }
 

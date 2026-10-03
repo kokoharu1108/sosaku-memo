@@ -36,7 +36,7 @@
 - Storage … IndexedDB `sosaku-memo`（v1）。ストア: `memos` / `lists` / `meta`（key `app`） / `files`（添付ファイルの Blob）
 - Manager（メモ管理機能） … メモ・リストの保存/削除、検索用索引、階層（ツリー）索引、毎日0時の整理（`maintain`）、旧「参照メモ」→親子への一度きりの移行（`migrateTree`）
 - UI state & navigation … 画面スタック `UI.stack` とブラウザ履歴を連動（Android の戻る操作対応）。`go / back / backTo / resetTo / goHome`。選択モード（まとめて削除）、パンくず `crumbBar()`
-- Render … 画面: `renderSearch`（タブ: メモ／ツリー／リスト、🔍で開閉する検索パネル）、`renderListScreen`、`renderReport`（情報まとめ）、`renderView`、`renderEdit`
+- Render … 画面: `renderSearch`（タブ: メモ／リスト、🔍で開閉する検索パネル）、`renderListScreen`、`renderReport`（情報まとめ）、`renderView`、`renderEdit`
 - 情報まとめ … 検索結果・リスト画面の「まとめる」→ `{name:"report", q, genre}` / `{name:"report", listId}`。`reportSource`（検索と同じ条件）→ `digest`（段落分割 `bodyBlocks`・抽出 `pickBlocks`、ジャンル別の箇条書き＋画像＋ファイル）→ 画面表示 `digestDoc`。**元メモの題名・日付・タグは載せない**（まとめ自体を1つの新しいメモとして扱う）。「新しいメモとして保存」は `digestDraft` で編集画面の下書きに（添付は同じ fileId を共有）。ファイル保存は `reportFileHtml` で画像を data URL にした1つの HTML（CSS はアプリの `.rp-*` 等の規則を書き出す）
 - 設定 … ダークモード、バックアップ書き出し／読み込み（JSON に添付ファイルも data URL で含める）
 - Boot
@@ -46,7 +46,7 @@
 `{ id, title, genres[], bodyHtml, bodyText, attachments[{id,name,type,size,fileId}], tags[], parentId, listIds[], links[](旧参照・現在は未使用), createdAt, updatedAt }`
 
 - `createdAt` は作成時から不変、`updatedAt` は保存のたびに更新。
-- 階層は `parentId` のみで表す。親が消えた／循環している場合は最上位扱い（`effParent`）。親を削除すると子は1つ上の階層へ移る。
+- 階層（ツリー）機能は**画面からは廃止**（v15）。`parentId` はデータとして残しており、索引・削除時の付け替え処理も残っている（復活させる場合に備えて消さない）。
 - localStorage は端末ごとの小さな設定だけ: `sm.theme`、`sm.recallHidden`。
 
 ## 本文エディタの注意点（不具合が出やすい箇所）
@@ -80,5 +80,7 @@ python3 tests/e2e_smoke.py          # 主要操作の確認（Playwright が必�
 - 文字サイズ変更ボタンは撤廃済み（ピンチ操作で代替）。
 - バックアップを促す常時表示は出さない（設定内に前回の書き出し日時を表示）。
 - ダークモード切替は設定内。
+- ツリー（階層・子メモ・親メモ選択）は**廃止済み**（使用場面がほぼないため）。再追加しない。
+- 画面の情報量は少なく保つ。補助的な操作（まとめる・選択・名前変更・保存・印刷・共有・設定）は文字ではなくアイコン（`ICONS` / `iconBtn`、`aria-label` と `title` 付き）。メモのカードは「題名・作成日／本文の冒頭／ジャンル・タグ2つ・添付数」だけ。
 - ジャンルは「体験」「学び」「アイデア」の3つ固定（1つ以上必須。自動保存時のみ未選択可）。
 - Googleドライブ連携は**未着手**。直接保存はオフライン不可になるため見送り、「端末保存＋裏でドライブへ自動同期」を候補として提案済み（Google Cloud 登録 or GAS 方式は未決定）。
