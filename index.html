@@ -36,7 +36,7 @@
   --ng: #f8dde0; --ng-ink: #a23b4b;
   --scrim: rgba(40, 42, 58, .38);
   --shadow: 0 1px 2px rgba(44,47,61,.06), 0 6px 20px rgba(44,47,61,.07);
-  --bar-search: #d5e2fb; --bar-view: #c9ece3; --bar-list: #ead6f7; --bar-edit: #fadfc0;
+  --bar-search: #d5e2fb; --bar-view: #c9ece3; --bar-list: #ead6f7; --bar-edit: #fadfc0; --bar-report: #f5eaa6;
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #c9566a;
@@ -55,7 +55,7 @@
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
     --scrim: rgba(0,0,0,.55);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --danger: #e48a9a;
+    --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --bar-report: #45401a; --danger: #e48a9a;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
@@ -71,7 +71,7 @@
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
   --scrim: rgba(0,0,0,.55);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --danger: #e48a9a;
+  --bar-search: #1f2d4d; --bar-view: #153f39; --bar-list: #3b2553; --bar-edit: #4b331d; --bar-report: #45401a; --danger: #e48a9a;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
@@ -214,10 +214,14 @@ a.btn { text-decoration: none; }
 .crumb-sep { color: var(--ink-3); flex: 0 0 auto; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
 /* bar colors per screen（屋外でも見分けやすいよう、画面ごとに色相を分ける） */
-.topbar.bar-search { background: color-mix(in srgb, var(--bar-search) 94%, transparent); }
-.topbar.bar-view { background: color-mix(in srgb, var(--bar-view) 94%, transparent); }
-.topbar.bar-list { background: color-mix(in srgb, var(--bar-list) 94%, transparent); }
-.topbar.bar-edit { background: color-mix(in srgb, var(--bar-edit) 94%, transparent); }
+.topbar.bar-search { background: var(--bar-search); }
+.topbar.bar-view { background: var(--bar-view); }
+.topbar.bar-list { background: var(--bar-list); }
+.topbar.bar-edit { background: var(--bar-edit); }
+.topbar.bar-report { background: var(--bar-report); }
+/* 画面下に固定されるバー（選択モード）も、その画面の色にする */
+.screen:has(.bar-search) { --sel-bar: var(--bar-search); }
+.screen:has(.bar-list) { --sel-bar: var(--bar-list); }
 /* sticky search tools (inside the sticky header) */
 .search-tools { max-width: 760px; margin: 0 auto; padding: 4px 16px 0; }
 .search-tools .toolbar-row { margin: 8px 0 8px; flex-wrap: nowrap; }
@@ -251,7 +255,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .memo-card.picked { border-color: var(--accent); background: var(--accent-soft); }
 .memo-card.picked .pick-box { background: var(--accent); border-color: var(--accent); }
 .memo-list.with-bar { padding-bottom: 90px; }
-.select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line); box-shadow: var(--shadow); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
+.select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--sel-bar, var(--surface)); border-top: 1px solid var(--line); box-shadow: var(--shadow); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
 .select-bar-in { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .sel-count { font-size: 14px; }
 .btn.danger-solid { background: var(--danger); border-color: var(--danger); color: var(--surface); }
@@ -452,9 +456,10 @@ body.editing-body .edit-actions { display: none; }
 .attach-pick button { text-align: left; border: 0; background: none; padding: 8px 10px; border-radius: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .attach-pick button:hover { background: var(--surface-2); }
 
-.drop { border: 1.5px dashed var(--line); border-radius: var(--radius); padding: 14px; text-align: center; color: var(--ink-3); font-size: 13px; background: var(--surface); }
+.drop { border-radius: var(--radius); }
+.drop .add-file { cursor: pointer; }
 .drop.over { border-color: var(--accent); background: var(--accent-soft); }
-.drop label { color: var(--accent-ink); font-weight: 700; cursor: pointer; text-decoration: underline; }
+
 .uploading { font-size: 12.5px; color: var(--ink-3); margin-top: 6px; }
 
 .chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
@@ -465,7 +470,7 @@ body.editing-body .edit-actions { display: none; }
 .list-toggle { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 3px 12px; font-size: 13px; color: var(--ink-2); }
 .list-toggle[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); }
 
-.edit-actions { position: sticky; bottom: 0; background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 10; }
+.edit-actions { position: sticky; bottom: 0; background: var(--bar-edit); border-top: 1px solid var(--line); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 10; }
 .edit-actions-in { max-width: 760px; margin: 0 auto; display: flex; gap: 8px; align-items: center; }
 .dirty-dot { font-size: 12px; color: var(--ink-3); }
 
@@ -503,6 +508,56 @@ body.editing-body .edit-actions { display: none; }
 @media (max-width: 520px) {
   .brand small { display: none; }
   .view-doc { padding-inline: 16px 22px; }
+}
+/* ---------- 情報まとめ ---------- */
+.report-btn { color: var(--ink-2); }
+.rp-tools { display: grid; gap: 8px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.rp-tool-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rp-seg button { padding: 4px 12px; font-size: 13.5px; }
+.rp-check { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; color: var(--ink-2); margin-left: auto; }
+.rp-doc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 18px 16px; max-width: 760px; }
+.rp-head { border-bottom: 2px solid var(--ink); padding-bottom: 14px; margin-bottom: 18px; }
+.rp-kicker { font-size: 11.5px; letter-spacing: .12em; color: var(--ink-3); font-weight: 700; }
+.rp-title { font-family: var(--font-title); font-size: 1.7em; line-height: 1.35; margin: 4px 0 6px; overflow-wrap: anywhere; }
+.rp-meta { font-size: 12.5px; color: var(--ink-3); }
+.rp-stats { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; font-size: 13px; color: var(--ink-2); }
+.rp-stat b { font-size: 20px; margin-right: 2px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.rp-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; }
+.rp-label { font-size: 12px; font-weight: 700; color: var(--ink-3); letter-spacing: .06em; }
+.rp-tag { font-size: 12.5px; color: var(--accent-ink); }
+.rp-toc { background: var(--surface-2); border-radius: 10px; padding: 10px 14px; margin-bottom: 22px; font-size: 14px; }
+.rp-toc-h { font-weight: 700; margin-top: 6px; font-size: 13px; color: var(--ink-2); }
+.rp-toc ol { margin: 2px 0 4px; padding-left: 1.6em; }
+.rp-toc a { color: var(--accent-ink); }
+.rp-sec { margin-bottom: 18px; }
+.rp-sec-h { font-family: var(--font-title); font-size: 1.25em; margin: 18px 0 10px; padding: 4px 10px; border-left: 5px solid var(--accent); background: var(--accent-soft); border-radius: 0 8px 8px 0; display: flex; align-items: baseline; gap: 8px; }
+.rp-sec-n { font-family: var(--font-body); font-size: 12px; color: var(--ink-3); font-weight: 500; }
+.rp-memo { padding: 12px 0 16px; border-bottom: 1px dashed var(--line); break-inside: avoid-page; scroll-margin-top: 120px; }
+.rp-memo:last-child { border-bottom: 0; }
+.rp-memo-head { display: flex; align-items: center; gap: 8px; }
+.rp-memo-title { font-size: 1.12em; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.rp-open { font-size: 13px; padding: 2px 8px; color: var(--accent-ink); }
+.rp-memo-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; color: var(--ink-3); margin: 4px 0 8px; font-variant-numeric: tabular-nums; }
+.rp-body { font-size: 15px; line-height: 1.85; overflow-wrap: anywhere; }
+.rp-body > * { margin: 0 0 .5em; }
+.rp-body h2 { font-size: 1.2em; } .rp-body h3 { font-size: 1.08em; } .rp-body h4 { font-size: 1em; color: var(--ink-2); }
+.rp-body img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 6px 0; }
+.rp-body ul, .rp-body ol { padding-left: 1.4em; }
+.rp-gap { color: var(--ink-3); text-align: center; letter-spacing: .3em; margin: 0 0 .4em; }
+mark.rp-hit { background: var(--hl-yellow); color: inherit; border-radius: 3px; padding: 0 1px; }
+.rp-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-top: 8px; }
+.rp-gallery figure { margin: 0; }
+.rp-gallery img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; display: block; background: var(--surface-2); }
+.rp-gallery figcaption { font-size: 11.5px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rp-files { list-style: none; padding: 0; margin: 8px 0 0; font-size: 13.5px; }
+.rp-files a { color: var(--accent-ink); }
+.rp-foot { margin-top: 18px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-3); text-align: center; }
+@media print {
+  .topbar, .crumbs, .rp-tools, .rp-noexport, .toast-host, .fab { display: none !important; }
+  body { background: #fff; }
+  .wrap { max-width: none; padding: 0; }
+  .rp-doc { border: 0; padding: 0; }
+  .rp-gallery img { aspect-ratio: auto; max-height: 260px; object-fit: contain; }
 }
 .settings-sec { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; display: grid; gap: 8px; }
 .settings-sec h4 { margin: 0; font-size: 13px; color: var(--ink-2); }
@@ -692,7 +747,7 @@ const Manager = {
   },
   reindex() {
     this.sorted = [...this.memos.values()].sort((a, b) => b.updatedAt - a.updatedAt);
-    for (const m of this.sorted) m._search = [m.title, m.bodyText, (m.genres || []).join(" "), listNames(m).join(" "), (m.tags || []).map(t => "#" + t).join(" ")].join("\n").toLowerCase();
+    for (const m of this.sorted) m._search = [m.title, m.bodyText, (m.genres || []).join(" "), listNames(m).join(" "), (m.tags || []).map(t => "#" + t).join(" "), (m.attachments || []).map(a => a.name).join(" ")].join("\n").toLowerCase();
     // 階層（親子）の索引
     this.kids = new Map(); this.roots = [];
     for (const m of this.sorted) {
@@ -981,6 +1036,7 @@ function crumbLabel(sc) {
   if (sc.name === "search") return "創作メモ帳";
   if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "リスト「" + clip(l ? l.name : "削除済み", 10) + "」"; }
   if (sc.name === "view") { const m = Manager.get(sc.id); return clip(m ? (m.title || "無題のメモ") : "削除済み"); }
+  if (sc.name === "report") { if (sc.listId) { const l = Manager.lists.get(sc.listId); return "まとめ：" + clip(l ? l.name : "", 8); } return "まとめ" + (sc.q ? "「" + clip(sc.q, 8) + "」" : ""); }
   if (sc.name === "edit") { if (!sc.id) return "新しいメモ"; const m = Manager.get(sc.id); return "編集：" + clip(m ? (m.title || "無題のメモ") : "", 10); }
   return "";
 }
@@ -1073,6 +1129,7 @@ function render() {
   else if (s.name === "view") { if (!Manager.get(s.id)) return dropMissing(); app.append(renderView(s)); }
   else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
+  else if (s.name === "report") app.append(renderReport(s));
   syncThemeColor();
 }
 
@@ -1128,7 +1185,10 @@ function renderSearch() {
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
     if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
     metaRow.append(h("span", { class: "result-meta" }, (terms.length || st.genre) ? `${items.length}件見つかりました` : `全${items.length}件`));
-    if (items.length && !selecting) metaRow.append(h("span", { class: "spacer" }), h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect("search") }, "選択"));
+    if (items.length && !selecting) metaRow.append(h("span", { class: "spacer" }),
+      // 検索・絞り込みの結果を1つのレポートにまとめる
+      (terms.length || st.genre) ? h("button", { class: "btn ghost sel-start report-btn", type: "button", onclick: () => go({ name: "report", q: st.committed, genre: st.genre }) }, "📄 まとめる") : null,
+      h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect("search") }, "選択"));
     results.append(metaRow);
 
     if (!items.length) {
@@ -1313,7 +1373,9 @@ function renderListScreen(s) {
         members.length ? sortSelect(st, draw, "sort-list") : null),
       h("div", { class: "toolbar-row", style: "margin:0 0 8px" },
         h("span", { class: "result-meta" }, st.genre ? `${items.length}件（全${members.length}件中）` : `全${members.length}件 ・ 更新 ${fmtDate(l.updatedAt)}`),
-        items.length && !selecting ? [h("span", { class: "spacer" }), h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect(scope) }, "選択")] : null),
+        items.length && !selecting ? [h("span", { class: "spacer" }),
+          h("button", { class: "btn ghost sel-start report-btn", type: "button", onclick: () => go({ name: "report", listId: l.id, genre: st.genre }) }, "📄 まとめる"),
+          h("button", { class: "btn ghost sel-start", type: "button", onclick: () => enterSelect(scope) }, "選択")] : null),
       !members.length
         ? h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
             Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書くと、このリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。")
@@ -1385,6 +1447,196 @@ async function renameList(l, redraw) {
   try { await Manager.saveList({ ...l, name }); Manager.reindex(); toast("リスト名を変更しました"); redraw(); }
   catch { toast("リスト名を変更できませんでした。", true); }
 }
+
+/* ---------- 情報まとめ画面 ----------
+   検索と同じ条件（キーワード・ジャンル）またはリストをもとに、該当するメモの文章と添付ファイルを
+   1つのレポート（ポートフォリオ）にまとめる。画面で読めるほか、画像入りの1つのファイルとして保存・印刷できる */
+function reportSource(s) {
+  if (s.listId) {
+    const l = Manager.lists.get(s.listId);
+    const items = l ? Manager.sorted.filter(m => (m.listIds || []).includes(l.id)) : [];
+    return { title: l ? `リスト「${l.name}」のまとめ` : "まとめ", label: l ? "リスト「" + l.name + "」" : "", items: filterByGenre(items, s.genre), terms: [] };
+  }
+  const terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
+  let items = filterByGenre(Manager.sorted, s.genre);
+  if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
+  const label = [s.q ? "「" + s.q + "」" : "", s.genre ? "ジャンル：" + s.genre : ""].filter(Boolean).join(" ・ ");
+  return { title: (s.q ? `「${s.q}」` : s.genre ? `「${s.genre}」` : "すべてのメモ") + "のまとめ", label, items, terms };
+}
+const BLOCK_TAGS = new Set(["DIV", "P", "UL", "OL", "BLOCKQUOTE", "H2", "H3", "H4"]);
+/* 本文を段落ごとに分ける（入力欄の HTML は「1行目の文字 + <div>2行目</div>…」の形が多い） */
+function bodyBlocks(html) {
+  const tpl = document.createElement("template"); tpl.innerHTML = html || "";
+  const blocks = []; let cur = null;
+  const flush = () => { if (cur && (cur.textContent.trim() || cur.querySelector("img"))) blocks.push(cur); cur = null; };
+  for (const n of [...tpl.content.childNodes]) {
+    if (n.nodeType === 1 && BLOCK_TAGS.has(n.tagName)) { flush(); if (n.textContent.trim() || n.querySelector("img")) blocks.push(n); }
+    else if (n.nodeType === 1 && n.tagName === "BR") flush();
+    else { if (!cur) cur = document.createElement("div"); cur.append(n); }
+  }
+  flush();
+  return blocks;
+}
+function markTerms(root, terms) {
+  if (!terms.length) return;
+  const re = new RegExp("(" + terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi");
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT); const nodes = []; let n;
+  while ((n = w.nextNode())) if (re.test(n.data)) { nodes.push(n); re.lastIndex = 0; }
+  for (const t of nodes) {
+    const frag = document.createDocumentFragment();
+    t.data.split(re).forEach((part, i) => { if (part) frag.append(i % 2 ? h("mark", { class: "rp-hit" }, part) : part); });
+    t.replaceWith(frag);
+  }
+}
+/* 1件のメモから、まとめに載せる本文を取り出す。excerpt=true なら関連する段落（と直前の見出し）だけ */
+function reportBody(m, terms, excerpt) {
+  const blocks = bodyBlocks(resolveBodyHtml(m.bodyHtml, m.attachments));
+  const hit = (b) => terms.some(t => b.textContent.toLowerCase().includes(t));
+  let keep = blocks.map(() => !excerpt);
+  if (excerpt && terms.length) {
+    blocks.forEach((b, i) => { if (hit(b)) { keep[i] = true; for (let j = i - 1; j >= 0; j--) if (/^H[2-4]$/.test(blocks[j].tagName)) { keep[j] = true; break; } } });
+    // 題名やタグだけが一致したメモは、冒頭の数段落を載せる
+    if (!keep.some(Boolean)) blocks.forEach((b, i) => { if (i < 3) keep[i] = true; });
+  }
+  const box = h("div", { class: "rp-body" });
+  let skipped = false;
+  blocks.forEach((b, i) => {
+    if (!keep[i]) { skipped = true; return; }
+    if (skipped) box.append(h("p", { class: "rp-gap" }, "…"));
+    skipped = false;
+    const el = b.cloneNode(true); markTerms(el, terms); box.append(el);
+  });
+  if (skipped && box.childNodes.length) box.append(h("p", { class: "rp-gap" }, "…"));
+  return box;
+}
+function buildReport(s, src) {
+  const o = s.opts;
+  const items = [...src.items].sort((a, b) => a.createdAt - b.createdAt);
+  const imgs = (m) => (m.attachments || []).filter(a => fileKind(a) === "image");
+  const files = (m) => (m.attachments || []).filter(a => fileKind(a) !== "image");
+  const nImg = items.reduce((n, m) => n + imgs(m).length, 0), nFile = items.reduce((n, m) => n + files(m).length, 0);
+  // 見出しのまとまり: ジャンル別（複数ジャンルのメモは最初のジャンル）か、年月ごと
+  const groups = new Map();
+  for (const m of items) {
+    const d = new Date(m.createdAt);
+    const key = o.group === "date" ? `${d.getFullYear()}年${d.getMonth() + 1}月` : (GENRES.find(g => (m.genres || []).includes(g)) || "ジャンル未選択");
+    if (!groups.has(key)) groups.set(key, []); groups.get(key).push(m);
+  }
+  const order = o.group === "date" ? [...groups.keys()] : [...GENRES, "ジャンル未選択"].filter(g => groups.has(g));
+  const tagCount = new Map(); items.forEach(m => (m.tags || []).forEach(t => tagCount.set(t, (tagCount.get(t) || 0) + 1)));
+  const topTags = [...tagCount.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(x => x[0]);
+  const genreCount = GENRES.map(g => [g, items.filter(m => (m.genres || []).includes(g)).length]).filter(x => x[1]);
+  const fmtDay = (ms) => fmtDate(ms).slice(0, 10);
+  const doc = h("article", { class: "rp-doc" },
+    h("header", { class: "rp-head" },
+      h("div", { class: "rp-kicker" }, "創作メモ帳 ・ 情報まとめ"),
+      h("h1", { class: "rp-title" }, src.title),
+      h("div", { class: "rp-meta" }, `作成 ${fmtDate(Date.now())}`, src.label ? ` ・ 条件 ${src.label}` : ""),
+      h("div", { class: "rp-stats" },
+        h("span", { class: "rp-stat" }, h("b", {}, String(items.length)), "件のメモ"),
+        nImg ? h("span", { class: "rp-stat" }, h("b", {}, String(nImg)), "枚の画像") : null,
+        nFile ? h("span", { class: "rp-stat" }, h("b", {}, String(nFile)), "件のファイル") : null,
+        items.length ? h("span", { class: "rp-stat" }, fmtDay(items[0].createdAt) + " 〜 " + fmtDay(items[items.length - 1].createdAt)) : null),
+      genreCount.length ? h("div", { class: "rp-chips" }, genreCount.map(([g, n]) => h("span", { class: "genre g-" + g }, `${g} ${n}`))) : null,
+      topTags.length ? h("div", { class: "rp-chips" }, h("span", { class: "rp-label" }, "よく出るタグ"), topTags.map(t => h("span", { class: "rp-tag" }, "#" + t))) : null),
+    items.length > 1 ? h("nav", { class: "rp-toc" }, h("div", { class: "rp-label" }, "目次"),
+      order.map(g => h("div", { class: "rp-toc-group" }, h("div", { class: "rp-toc-h" }, g),
+        h("ol", {}, groups.get(g).map(m => h("li", {}, h("a", { href: "#rp-" + m.id, onclick: (e) => { e.preventDefault(); const t = document.getElementById("rp-" + m.id); if (t) t.scrollIntoView({ behavior: "smooth", block: "start" }); } }, m.title || "無題のメモ"))))))) : null,
+    order.map(g => h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, g, h("span", { class: "rp-sec-n" }, `${groups.get(g).length}件`)),
+      groups.get(g).map(m => {
+        const body = reportBody(m, src.terms, o.body === "excerpt");
+        const inline = new Set([...body.querySelectorAll("img")].map(i => i.getAttribute("src")));
+        const gallery = o.images ? imgs(m).filter(a => !inline.has(attUrl(a))) : [];
+        if (!o.images) body.querySelectorAll("img").forEach(i => i.remove());
+        const fl = files(m);
+        return h("article", { class: "rp-memo", id: "rp-" + m.id },
+          h("div", { class: "rp-memo-head" },
+            h("h3", { class: "rp-memo-title" }, m.title || "無題のメモ"),
+            h("button", { class: "btn ghost rp-open rp-noexport", type: "button", onclick: () => go({ name: "view", id: m.id }) }, "開く ›")),
+          h("div", { class: "rp-memo-meta" }, h("span", {}, fmtDate(m.createdAt)), genreChips(m), listNames(m).map(n => h("span", { class: "list-tag" }, "▸ " + n)),
+            (m.tags || []).map(t => h("span", { class: "rp-tag" }, "#" + t))),
+          body.childNodes.length ? body : null,
+          gallery.length ? h("div", { class: "rp-gallery" }, gallery.map(a => h("figure", {}, h("img", { src: attUrl(a), alt: a.name, "data-file": a.fileId || "" }), h("figcaption", {}, a.name)))) : null,
+          fl.length ? h("ul", { class: "rp-files" }, fl.map(a => h("li", {}, h("a", { class: "rp-file", href: attUrl(a), download: a.name, "data-file": a.fileId || "", "data-size": String(a.size || 0) }, KIND_ICON[fileKind(a)] + " " + a.name), h("span", { class: "att-size" }, " " + fmtSize(a.size))))) : null);
+      }))),
+    h("footer", { class: "rp-foot" }, `創作メモ帳で作成 ・ ${fmtDate(Date.now())}`));
+  if (src.terms.length) doc.querySelectorAll(".rp-memo-title, .rp-files, .rp-tag").forEach(el => markTerms(el, src.terms));
+  return doc;
+}
+/* 画面のまとめを、画像入りの1つの HTML ファイルにする（オフラインでも開け、そのまま印刷・PDF化できる） */
+async function reportFileHtml(doc, title) {
+  const clone = doc.cloneNode(true);
+  clone.querySelectorAll(".rp-noexport").forEach(el => el.remove());
+  const toData = async (url) => { try { return await blobToDataUrl(await (await fetch(url)).blob()); } catch { return ""; } };
+  for (const img of clone.querySelectorAll("img")) { const src = img.getAttribute("src") || ""; if (src.startsWith("blob:")) { const d = await toData(src); if (d) img.setAttribute("src", d); else img.remove(); } }
+  // 画像以外の添付は 5MB までファイルに同梱（クリックで保存できる）。大きいものは名前だけ
+  for (const a of clone.querySelectorAll("a.rp-file")) {
+    const href = a.getAttribute("href") || "";
+    if (href.startsWith("blob:") && +a.dataset.size <= 5 * 1048576) { const d = await toData(href); if (d) a.setAttribute("href", d); else a.removeAttribute("href"); }
+    else if (href.startsWith("blob:")) { a.removeAttribute("href"); a.title = "ファイルが大きいため、アプリ内でのみ開けます"; }
+  }
+  clone.querySelectorAll("[data-file],[data-size]").forEach(el => { el.removeAttribute("data-file"); el.removeAttribute("data-size"); });
+  // アプリの見た目（明るい配色）のうち、まとめに使う部分だけを書き出す
+  let css = "";
+  for (const sh of document.styleSheets) { let rules; try { rules = sh.cssRules; } catch { continue; }
+    for (const r of rules) {
+      if (r.selectorText === ":root" && r.cssText.includes("--bg:")) css += r.cssText + "\n";
+      else if (r.selectorText && /\.(rp-|tc-|hl-|genre|list-tag|att-size)/.test(r.selectorText)) css += r.cssText + "\n";
+    } }
+  const esc = (t) => t.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)}</title>
+<style>${css}
+* { box-sizing: border-box; } body { margin: 0; padding: 16px; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.75; }
+@media print { body { padding: 0; background: #fff; } .rp-doc { border: 0; } }
+.rp-doc { margin: 0 auto; } a { color: var(--accent-ink); } img { max-width: 100%; }
+</style></head><body>${clone.outerHTML}</body></html>`;
+}
+function renderReport(s) {
+  s.opts = s.opts || { body: s.listId ? "full" : "excerpt", group: "genre", images: true };
+  const o = s.opts;
+  const src = reportSource(s);
+  const holder = h("div", { class: "rp-holder" }, h("p", { class: "ai-hint" }, "まとめを作っています…"));
+  let doc = null;
+  const draw = () => { doc = buildReport(s, src); holder.replaceChildren(src.items.length ? doc : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "検索の言葉を変えるか、ジャンルの絞り込みを外してください。")); };
+  ensureFileUrls(src.items.flatMap(m => m.attachments || [])).then(draw, draw);
+  const seg = (key, opts) => h("div", { class: "tabs rp-seg", role: "group" }, opts.map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o[key] === v), "aria-selected": String(o[key] === v), onclick: () => { o[key] = v; tools.replaceWith(tools = mkTools()); draw(); } }, l)));
+  const fileName = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `${src.title.replace(/[「」]/g, "").replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_|_$/g, "")}_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.html`; };
+  const makeFile = async () => new File([await reportFileHtml(doc, src.title)], fileName(), { type: "text/html" });
+  const save = async (btn) => {
+    if (!doc) return; btn.disabled = true;
+    try {
+      const f = await makeFile();
+      const a = h("a", { href: URL.createObjectURL(f), download: f.name }); document.body.append(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+      toast("まとめをファイルに保存しました（ダウンロードフォルダ）");
+    } catch { toast("ファイルを作れませんでした", true); } finally { btn.disabled = false; }
+  };
+  const share = async (btn) => {
+    if (!doc) return; btn.disabled = true;
+    try { const f = await makeFile(); await navigator.share({ files: [f], title: src.title }); }
+    catch (e) { if (!e || e.name !== "AbortError") toast("共有できませんでした。「ファイルに保存」をお使いください", true); }
+    finally { btn.disabled = false; }
+  };
+  const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.html", { type: "text/html" })] })); } catch { return false; } })();
+  const mkTools = () => h("div", { class: "rp-tools" },
+    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg("body", [["excerpt", "関連部分だけ"], ["full", "全文"]])),
+    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "並べ方"), seg("group", [["genre", "ジャンル別"], ["date", "日付順"]]),
+      h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
+    h("div", { class: "rp-tool-row" },
+      h("button", { class: "btn primary", type: "button", onclick: (e) => save(e.currentTarget) }, "ファイルに保存"),
+      h("button", { class: "btn", type: "button", onclick: () => window.print() }, "印刷・PDF"),
+      canShare ? h("button", { class: "btn", type: "button", onclick: (e) => share(e.currentTarget) }, "共有") : null));
+  let tools = mkTools();
+  return h("div", { class: "screen report-screen" },
+    h("header", { class: "topbar bar-report" }, h("div", { class: "topbar-in" },
+      h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
+      h("h1", {}, "情報まとめ")), crumbBar()),
+    h("main", { class: "wrap" }, tools, holder));
+}
+/* まとめを印刷するときは、ダークモードでも明るい配色で印刷する */
+let printTheme = null;
+window.addEventListener("beforeprint", () => { if (isDark()) { printTheme = document.documentElement.getAttribute("data-theme") || ""; document.documentElement.setAttribute("data-theme", "light"); } });
+window.addEventListener("afterprint", () => { if (printTheme != null) { if (printTheme) document.documentElement.setAttribute("data-theme", printTheme); else document.documentElement.removeAttribute("data-theme"); printTheme = null; } });
 
 /* ---------- メモ閲覧画面 ---------- */
 function renderView(s) {
@@ -1648,10 +1900,43 @@ function renderEdit(s) {
     });
   };
   const toHexRgb = (c) => { c = (c || "").trim().toLowerCase(); const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/.exec(c); return m ? `rgb(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)})` : ""; };
+  /* 付いている色（クラス）を一旦目印の色コードに戻す。こうするとブラウザが選択範囲に合わせて色の要素を正しく分割できる
+     （クラスのままだと、「なし」「標準」が色の要素の内側に入るだけで、外側の色が見えたままになる） */
+  const toMarks = () => editor.querySelectorAll("[class*='tc-'], [class*='hl-']").forEach(el => {
+    for (const c of [...el.classList]) {
+      const m = /^(tc|hl)-(.+)$/.exec(c); if (!m) continue;
+      const i = (m[1] === "tc" ? TC_NAMES : HL_NAMES).indexOf(m[2]); if (i < 0) continue;
+      if (m[1] === "tc") el.style.color = markHex("tc", i); else el.style.backgroundColor = markHex("hl", i);
+      el.classList.remove(c);
+    }
+    if (!el.classList.length) el.removeAttribute("class");
+  });
+  /* 「標準」「なし」は外側に同じ種類の色がなければ不要なので取り除く */
+  const dropPlain = () => editor.querySelectorAll(".tc-default, .hl-none").forEach(el => {
+    for (const [cls, kind] of [["tc-default", "tc"], ["hl-none", "hl"]]) {
+      if (!el.classList.contains(cls)) continue;
+      const outer = el.parentElement && el.parentElement.closest(`[class*='${kind}-']`);
+      if (!outer || !editor.contains(outer)) el.classList.remove(cls);
+    }
+    if (el.tagName === "SPAN" && !el.classList.length && !el.getAttribute("style")) el.replaceWith(...el.childNodes);
+  });
   const applyClass = (kind, name) => {
     const i = (kind === "tc" ? TC_NAMES : HL_NAMES).indexOf(name);
+    restoreRange();
+    const sel = window.getSelection();
+    const collapsed = !sel.rangeCount || sel.isCollapsed;
+    if (collapsed && (name === "none" || name === "default")) {
+      // カーソルだけのとき: 色の付いた部分の中なら、その外にカーソルを出して以降の文字を色なしにする
+      const n = sel.rangeCount ? sel.anchorNode : null;
+      const el0 = n && (n.nodeType === 1 ? n : n.parentElement);
+      const owner = el0 && el0.closest(`[class*='${kind}-']:not(.${kind}-${name})`);
+      if (owner && editor.contains(owner)) exitInline(owner, sel.getRangeAt(0), kind);
+      markDirty(); updateStates(); return;
+    }
+    if (!collapsed) toMarks();
     exec(kind === "tc" ? "foreColor" : "hiliteColor", markHex(kind, i));
-    convertMarks(true);
+    convertMarks(false);
+    dropPlain();
     markDirty(); updateStates();
   };
   // 日本語入力の変換中に本文をいじると入力が壊れるため、変換が確定してから整える
@@ -1697,21 +1982,29 @@ function renderEdit(s) {
       const el = document.createElement(FMT[cmd][0]); const t = document.createTextNode(ZW); el.append(t);
       range.insertNode(el); putCaret(t, 1);
     } else {
-      // 書式を外す: カーソル位置で書式の要素を分け、外側（他の書式は保ったまま）にカーソルを出す
-      const chain = [];
-      let el = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
-      while (el && el !== owner) { if (INLINE.has(el.tagName)) chain.push(el); el = el.parentElement; }
-      const r2 = document.createRange(); r2.setStart(range.startContainer, range.startOffset); r2.setEnd(owner, owner.childNodes.length);
-      const tail = r2.extractContents();
-      const t = document.createTextNode(ZW); let wrap = t;
-      for (const anc of chain) { const c = anc.cloneNode(false); c.append(wrap); wrap = c; }
-      owner.after(wrap);
-      if (tail.textContent.replace(/\u200B/g, "")) { const owner2 = owner.cloneNode(false); owner2.append(tail); wrap.after(owner2); }
-      if (!owner.textContent.replace(/\u200B/g, "") && !owner.querySelector("img")) owner.remove();
-      putCaret(t, 1);
+      exitInline(owner, range);
     }
     markDirty(); updateStates();
   };
+  /* 書式を外す: カーソル位置で書式の要素を分け、外側（他の書式は保ったまま）にカーソルを出す。
+     kind（"tc"/"hl"）を渡すと、途中の要素からもその種類の色を外す */
+  function exitInline(owner, range, kind) {
+    const chain = [];
+    let el = range.startContainer.nodeType === 1 ? range.startContainer : range.startContainer.parentElement;
+    while (el && el !== owner) { if (INLINE.has(el.tagName)) chain.push(el); el = el.parentElement; }
+    const r2 = document.createRange(); r2.setStart(range.startContainer, range.startOffset); r2.setEnd(owner, owner.childNodes.length);
+    const tail = r2.extractContents();
+    const t = document.createTextNode(ZW); let wrap = t;
+    for (const anc of chain) {
+      const c = anc.cloneNode(false);
+      if (kind) { [...c.classList].forEach(x => { if (x.startsWith(kind + "-")) c.classList.remove(x); }); if (c.tagName === "SPAN" && !c.classList.length) continue; }
+      c.append(wrap); wrap = c;
+    }
+    owner.after(wrap);
+    if (tail.textContent.replace(/\u200B/g, "")) { const owner2 = owner.cloneNode(false); owner2.append(tail); wrap.after(owner2); }
+    if (!owner.textContent.replace(/\u200B/g, "") && !owner.querySelector("img")) owner.remove();
+    putCaret(t, 1);
+  }
   const setBlock = (tag) => { exec("formatBlock", "<" + tag + ">"); };
 
   /* ポップアップ（色・リンクなど）は画面に固定して表示 */
@@ -1895,7 +2188,8 @@ function renderEdit(s) {
     markDirty(); drawAtts();
   }) : "");
   const fileIn = h("input", { id: "file", type: "file", multiple: true, hidden: true, onchange: (e) => { addFiles(e.target.files); e.target.value = ""; } });
-  const drop = h("div", { class: "drop" }, "画像やファイルをここにドロップ、または ", h("label", { for: "file" }, "端末から選ぶ"), fileIn);
+  // スマホ操作が中心なので「ドロップ」の表記はせず、押しやすいボタンにする（PCでのドロップはそのまま使える）
+  const drop = h("div", { class: "drop" }, h("label", { for: "file", class: "btn add-file" }, "📎 写真・ファイルを追加"), fileIn);
   ["dragover", "dragenter"].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
   ["dragleave", "drop"].forEach(ev => drop.addEventListener(ev, () => drop.classList.remove("over")));
   drop.addEventListener("drop", (e) => { e.preventDefault(); if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
