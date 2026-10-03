@@ -276,6 +276,10 @@ fire('touchend',x1,false);}"""
     pc.route(FakeGas.URL, lambda r: r.fulfill(status=200, content_type="text/html", body="<html><body>スクリプト関数が見つかりません: doPost</body></html>"))
     qc = pc.new_page(); qc.goto(URL); qc.wait_for_selector(".fab")
     check("古い接続先のときは直し方を表示", "プログラムが古いまま" in sync_on(qc))
+    pc.unroute(FakeGas.URL); pc.route(FakeGas.URL, lambda r: r.fulfill(status=404, content_type="text/html", body="<html><head><title>ページが見つかりません</title></head></html>"))
+    qc.click("[aria-label=設定]"); qc.click(".sync-btn"); qc.wait_for_timeout(300); qc.click(".modal >> text=閉じる")
+    st404 = sync_on(qc)
+    check("404 のときは段階とGoogleの表示を添える", "接続確認" in st404 and "ページが見つかりません" in st404, st404)
     pc.close()
     pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(2500)
     check("削除も他の端末に反映・同期のオンは開き直しても続く", pa.locator(".memo-card").count() == 0 and pa.evaluate("localStorage.getItem('sm.syncOn')") == "true")
@@ -295,6 +299,18 @@ fire('touchend',x1,false);}"""
     pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(5000)
     got = pa.evaluate("""() => new Promise(res => { const r = indexedDB.open('sosaku-memo'); r.onsuccess = () => { const q = r.result.transaction('files').objectStore('files').getAll(); q.onsuccess = () => res(q.result.map(f => f.blob.size)); }; })""")
     check("大きな添付を別の端末で小分けに受け取れる", len(big) in got, str(got))
+
+    # アプリを画面に戻したとき: 同期オンなら他の端末のメモを取り込む・オフなら何もしない
+    RESUME = "() => { Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true }); document.dispatchEvent(new Event('visibilitychange')); }"
+    pa.wait_for_timeout(21000)   # 起動時の同期から20秒あける
+    import copy as _cp
+    other = _cp.deepcopy(gas.data); other["memos"].append({**other["memos"][0], "id": "m-from-other", "title": "別の端末で書いたメモ", "updatedAt": int(time.time() * 1000) + 5000, "attachments": []})
+    gas.data = other
+    pa.evaluate(RESUME); pa.wait_for_timeout(2500)
+    check("画面に戻すと他の端末のメモを取り込む（同期オン）", pa.locator(".memo-card", has_text="別の端末で書いたメモ").count() == 1)
+    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")   # pb はオフに
+    n = len(gas.calls); pb.wait_for_timeout(21000); pb.evaluate(RESUME); pb.wait_for_timeout(2000)
+    check("同期オフなら画面に戻しても通信しない", len(gas.calls) == n)
 
     # 古い接続先プログラム（版1）のときは更新を案内
     old = FakeGas(version=1); pd = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True); pd.route(FakeGas.URL, old.handle)
