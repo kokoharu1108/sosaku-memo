@@ -37,10 +37,10 @@ with sync_playwright() as p:
     new_memo(pg, "単独メモ", genre="学び")
     check("メモが一覧に出る", pg.locator(".memo-card").count() == 2)
 
-    # 検索パネル・履歴・ジャンル
+    # 検索パネル・ジャンル
     pg.click(".search-toggle"); pg.fill("#q", "火祭"); pg.keyboard.press("Enter"); time.sleep(0.2)
     check("キーワード検索", pg.locator(".memo-card").count() == 1)
-    check("履歴が絞り込みを隠さない", pg.evaluate("(()=>{const s=document.querySelector('#genre-search');const r=s.getBoundingClientRect();return document.elementFromPoint(r.left+5,r.top+5)===s})()"))
+    check("検索窓の下の絞り込みが隠れない", pg.evaluate("(()=>{const s=document.querySelector('#genre-search');const r=s.getBoundingClientRect();return document.elementFromPoint(r.left+5,r.top+5)===s})()"))
     pg.click(".filter-chip button"); pg.select_option("#genre-search", "学び"); time.sleep(0.1)
     check("ジャンル絞り込み", pg.locator(".memo-card").count() == 1)
     pg.select_option("#genre-search", ""); pg.click(".search-toggle")
@@ -88,7 +88,9 @@ with sync_playwright() as p:
     pg.go_back(); time.sleep(0.3)
     check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
 
-    pg.click(".tabs >> text=リスト"); pg.click(".list-row .open"); time.sleep(0.3)
+    pg.click(".tabs >> text=リスト")
+    check("リスト一覧の更新日は「更新」の文字ではなくアイコン", pg.locator(".list-sub .upd-ico svg").count() >= 1 and "更新" not in pg.inner_text(".list-sub"))
+    pg.click(".list-row .open"); time.sleep(0.3)
     # リスト → 閲覧 → 編集で削除すると、リスト画面に戻り「戻る」もずれない
     pg.locator(".memo-card", has_text="リスト内メモ").click(); pg.wait_for_selector(".view-title")
     pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.click(".topbar .btn.danger"); time.sleep(0.2)
@@ -124,6 +126,10 @@ with sync_playwright() as p:
     check("添付の縮小画像がファイル名に重ならない", pg.evaluate("(()=>{const t=document.querySelector('.att-tile');return t.querySelector('img').getBoundingClientRect().bottom<=t.querySelector('.name').getBoundingClientRect().top+1})()"))
     pg.click("#title"); pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
     pg.locator(".memo-card", has_text="書式").click(); pg.wait_for_selector(".view-title")
+    check("閲覧画面の本文は16px・行間は詰めめ", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.view-body'));return c.fontSize==='16px'&&parseFloat(c.lineHeight)/16<=1.65})()"))
+    pg.click("text=添付ファイル（1件）"); pg.click(".att-row"); pg.wait_for_selector(".lightbox img")
+    pg.click(".lightbox img"); time.sleep(0.2)
+    check("画像を押しても原寸表示にならず、拡大表示が閉じる", pg.locator(".lightbox").count() == 0 and "原寸" not in pg.content())
     body = pg.inner_html(".view-body")
     check("保存後も書式・見出しが残る", "<b>" in body and "<h2>" in body and "tc-rose" in body, body[:200])
     check("ゼロ幅スペースが残らない", "​" not in body)
@@ -179,13 +185,18 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("リストからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=メモ")
 
-    # 検索パネルはスマホの戻る操作で閉じる・検索履歴は直近3件だけ（消去ボタンなし）
+    # 検索パネルはスマホの戻る操作で閉じる・検索履歴は出さない（撤廃）
     pg.click(".search-toggle")
     for q in ["一", "二", "三", "四"]: pg.fill("#q", q); pg.keyboard.press("Enter"); time.sleep(0.15)
-    check("検索履歴は直近3件だけ", pg.locator(".hist-chips .chip-btn").all_inner_texts() == ["四", "三", "二"] and pg.locator(".hist-clear").count() == 0)
+    check("検索履歴は出さない", pg.locator(".hist-row, .hist-chips").count() == 0 and "最近" not in pg.inner_text(".search-panel"))
     pg.go_back(); time.sleep(0.3)
     check("戻る操作で検索パネルが閉じる（画面はそのまま）", not pg.locator(".search-panel").is_visible() and pg.locator(".search-toggle").count() == 1)
     pg.click(".filter-chip button"); time.sleep(0.2)
+    # 検索ボタンを2回押して閉じたら、押したままの見た目が残らない（スマホ）
+    pg.tap(".search-toggle"); time.sleep(0.3); pg.tap(".search-toggle"); time.sleep(0.3)
+    check("検索パネルを閉じると検索ボタンは押していない見た目に戻る", pg.evaluate("getComputedStyle(document.querySelector('.search-toggle')).backgroundColor") == "rgba(0, 0, 0, 0)")
+    check("メモ／リストのタブは選んでいる方が塗りつぶし", pg.evaluate("(()=>{const [a,b]=document.querySelectorAll('.tabs button');const c=e=>getComputedStyle(e).backgroundColor;return c(a)!==c(b)&&c(a)!=='rgba(0, 0, 0, 0)'})()"))
+    check("タグは鮮やかな青", pg.evaluate("getComputedStyle(document.querySelector('.tag-mini')||document.body).color") == "rgb(29, 155, 240)" if pg.locator(".tag-mini").count() else True)
     check("メモのカードに1件ずつの色の帯がある", pg.evaluate("parseFloat(getComputedStyle(document.querySelector('.memo-card')).borderLeftWidth) >= 5"))
 
     # まとめ: キーワードなしでも作れて、作成日時の期間（今日など）で絞れる
@@ -246,7 +257,9 @@ fire('touchend',x1,false);}"""
     ctx.set_offline(False)
 
     # まとめて削除
-    pg.click(".select-btn"); pg.locator(".memo-card").first.click(); pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
+    pg.click(".select-btn"); pg.locator(".memo-card").first.click()
+    check("選択のチェックは太い線の印", pg.evaluate("(()=>{const s=document.querySelector('.memo-card.picked .pick-box svg');return !!s&&parseFloat(s.getAttribute('stroke-width'))>=3})()"))
+    pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
     # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
     gas = FakeGas()
