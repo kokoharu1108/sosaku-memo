@@ -1531,8 +1531,8 @@ function renderReport(s) {
     holder.replaceChildren(src.items.length ? doc : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "検索の言葉を変えるか、ジャンルの絞り込みを外してください。"));
   };
   ensureFileUrls(src.items.flatMap(m => m.attachments || [])).then(draw, draw);
-  // 保存のたびに別の名前にする（日付だけだと同じ日に保存したファイルが上書きされるため、時刻まで付ける）
-  const fileName = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `${src.title.replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_|_$/g, "")}_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.html`; };
+  // ファイル名は「まとめの題名_日付」（同じ日に同じまとめを保存し直した場合は上書きでよい、という利用者の方針）
+  const fileName = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `${src.title.replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_|_$/g, "")}_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.html`; };
   const makeFile = async () => new File([await reportFileHtml(doc, src.title)], fileName(), { type: "text/html" });
   const busy = async (btn, fn) => { btn.disabled = true; try { await fn(); } finally { btn.disabled = false; } };
   const save = (btn) => doc && busy(btn, async () => {
