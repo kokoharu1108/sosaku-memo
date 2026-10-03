@@ -10,6 +10,8 @@
 import os, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from fake_gas import FakeGas
 
 URL = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8765/"
 ICON = str(Path(__file__).resolve().parent.parent / "icons" / "icon-192.png")
@@ -245,6 +247,31 @@ fire('touchend',x1,false);}"""
     # まとめて削除
     pg.click(".select-btn"); pg.locator(".memo-card").first.click(); pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
+    # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
+    gas = FakeGas()
+    def device():
+        c = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+        c.route(FakeGas.URL, gas.handle)
+        q = c.new_page(); q.on("pageerror", lambda e: errors.append(str(e))); q.goto(URL); q.wait_for_selector(".fab"); return q
+    def sync_on(q, key="aikotoba-123"):
+        q.click("[aria-label=設定]")
+        if q.locator(".sync-setup").get_attribute("open") is None: q.click(".sync-setup summary")
+        q.fill("#sync-url", FakeGas.URL); q.fill("#sync-key", key); q.click(".sync-btn"); q.wait_for_timeout(1500)
+        st = q.inner_text(".sync-status"); q.click(".modal >> text=閉じる"); return st
+    pa = device()
+    pa.click(".fab"); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); pa.set_input_files("#file", ICON); pa.wait_for_selector(".att-tile")
+    pa.click(".edit-actions .btn.primary"); pa.wait_for_timeout(5000)
+    check("同期がオフの間はドライブへ送らない", gas.calls == [])
+    st = sync_on(pa)
+    check("「同期」を押すとドライブへ送る", st.startswith("オン") and gas.data and len(gas.data["memos"]) == 1 and len(gas.files) == 1, st)
+    pb = device()
+    check("合言葉が違うと分かる", "合言葉が違います" in sync_on(pb, "machigai"))
+    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")
+    sync_on(pb); pb.wait_for_timeout(500)
+    check("別の端末で同期するとメモと添付が戻る", pb.locator(".memo-card", has_text="同期のメモ").count() == 1 and "📎 1" in pb.inner_text(".memo-card"))
+    pb.locator(".memo-card").first.click(); pb.click(".menu-btn"); pb.click(".menu >> text=削除"); pb.click(".modal >> text=Yes"); pb.wait_for_timeout(5500)
+    pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(2500)
+    check("削除も他の端末に反映・同期のオンは開き直しても続く", pa.locator(".memo-card").count() == 0 and pa.evaluate("localStorage.getItem('sm.syncOn')") == "true")
     b.close()
 
 real_errors = [e for e in errors if "fonts.g" not in e]
