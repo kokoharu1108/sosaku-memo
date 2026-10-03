@@ -1,0 +1,47 @@
+# 自動確認（CI）: プルリクエストのたびに、アプリが壊れていないかを自動で確かめる
+name: 自動確認
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: JavaScript の書き間違いがないか
+        run: |
+          python3 -c "import re;s=open('index.html',encoding='utf-8').read();open('/tmp/app.js','w').write(re.search(r'<script>(.*)</script>',s,re.S).group(1))"
+          node --check /tmp/app.js
+          node --check sw.js
+
+      - name: index.html を変えたら sw.js の版番号も上がっているか
+        if: github.event_name == 'pull_request'
+        run: |
+          base=${{ github.event.pull_request.base.sha }}
+          if git diff --quiet "$base" HEAD -- index.html; then echo "index.html の変更なし"; exit 0; fi
+          old=$(git show "$base:sw.js" | grep -o 'sosaku-memo-v[0-9]*' | head -1)
+          new=$(grep -o 'sosaku-memo-v[0-9]*' sw.js | head -1)
+          echo "版番号: $old → $new"
+          [ "${old#sosaku-memo-v}" -lt "${new#sosaku-memo-v}" ] || { echo "::error::index.html を変更したのに sw.js の CACHE の番号が上がっていません"; exit 1; }
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: ブラウザ自動操作の準備
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: スマホ幅で主要操作を確認
+        run: |
+          python -m http.server 8765 >/dev/null 2>&1 &
+          sleep 1
+          python tests/e2e_smoke.py

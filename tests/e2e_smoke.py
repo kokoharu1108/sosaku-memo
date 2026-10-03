@@ -136,6 +136,14 @@ with sync_playwright() as p:
     pg.click(".edit-actions .btn.primary"); time.sleep(0.5)
     check("編集保存後は閲覧画面に戻る", pg.locator(".view-title").count() == 1 and pg.inner_text(".view-title") == "書式（改）")
 
+    # バックアップの書き出し → 「前回の書き出し」がその場で更新される
+    pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
+    with pg.expect_download() as dl: pg.click(".modal >> text=バックアップを書き出す")
+    check("バックアップを書き出せる", dl.value.suggested_filename.startswith("sosaku-memo-backup-"))
+    time.sleep(0.3)
+    check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
+    pg.click(".modal >> text=閉じる")
+
     # オフライン起動
     pg.goto(URL); pg.wait_for_selector(".fab"); time.sleep(1)
     ctx.set_offline(True); pg.reload(); pg.wait_for_selector(".memo-card", timeout=8000)

@@ -2102,6 +2102,13 @@ async function storeFile(file) {
    ========================================================= */
 function openSettings() {
   modal({ wide: true, title: "設定", body: (close) => {
+    // 書き出したら、その場で「前回の書き出し」を更新する（連打で二重に書き出さないよう、終わるまでボタンを止める）
+    const lastText = () => "前回の書き出し：" + (Manager.meta.lastBackup ? fmtDate(Manager.meta.lastBackup) : "まだありません");
+    const lastEl = h("p", { class: "ai-hint", style: "margin:0" }, lastText());
+    const expBtn = h("button", { class: "btn", type: "button", onclick: async () => {
+      expBtn.disabled = true;
+      try { await exportBackup(); } finally { expBtn.disabled = false; lastEl.textContent = lastText(); }
+    } }, "バックアップを書き出す");
     const impIn = h("input", { id: "importfile", type: "file", accept: "application/json,.json", hidden: true, onchange: async (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) { close(true); await importBackup(f); } } });
     return h("div", { style: "overflow:auto;min-height:0" },
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
@@ -2110,13 +2117,13 @@ function openSettings() {
       h("div", { class: "settings-sec" },
         h("h4", {}, "バックアップ"),
         h("p", { class: "ai-hint", style: "margin:0" }, "メモはこの端末の中だけに保存されています。機種変更や別の端末への移行に備えて、ときどき書き出しておいてください。"),
-        h("p", { class: "ai-hint", style: "margin:0" }, "前回の書き出し：" + (Manager.meta.lastBackup ? fmtDate(Manager.meta.lastBackup) : "まだありません")),
+        lastEl,
         (() => { const el = h("p", { class: "ai-hint", style: "margin:0" }, "端末内の保存の保護：確認中…");
           (async () => { try { const ok = navigator.storage && navigator.storage.persisted ? await navigator.storage.persisted() : false;
             el.textContent = "端末内の保存の保護：" + (ok ? "有効（空き容量が少なくなっても自動で消されません）" : "未設定（ホーム画面に追加したアプリから開くと有効になりやすくなります）"); } catch { el.textContent = "端末内の保存の保護：確認できませんでした"; } })();
           return el; })(),
         h("div", { class: "row" },
-          h("button", { class: "btn", type: "button", onclick: () => exportBackup() }, "バックアップを書き出す"),
+          expBtn,
           h("button", { class: "btn", type: "button", onclick: () => impIn.click() }, "バックアップを読み込む"), impIn)),
       h("div", { class: "modal-actions", style: "margin-top:16px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "閉じる")));
   } });
@@ -2135,6 +2142,7 @@ async function exportBackup() {
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     Manager.meta.lastBackup = Date.now(); Storage.putMeta(Manager.meta).catch(() => {});
+    toast("バックアップを書き出しました（ダウンロードフォルダに保存されます）");
   } catch { toast("バックアップを作成できませんでした", true); }
 }
 async function importBackup(file) {
