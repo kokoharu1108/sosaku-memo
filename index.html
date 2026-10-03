@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>創作メモ帳</title>
+<title>ヒフミヨ</title>
 <meta name="description" content="体験・学び・アイデアを記録して創作に活かすメモアプリ">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
@@ -13,9 +13,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="創作メモ帳">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<meta name="apple-mobile-web-app-title" content="ヒフミヨ">
 <style>
 /* Layout: one-column notebook (max 760px) for 検索・メモ画面; 閲覧画面 splits into 本文 + resizable AI panel on the right edge. */
 :root {
@@ -40,8 +38,9 @@
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #c9566a;
-  --font-body: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
-  --font-title: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  /* X（旧Twitter）と同じく端末標準のゴシック体（Android は Noto Sans JP、iPhone はヒラギノ、PC は游ゴシック/メイリオ等） */
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", Meiryo, Helvetica, Arial, sans-serif;
+  --font-title: var(--font-body);
   --radius: 12px;
 }
 @media (prefers-color-scheme: dark) {
@@ -196,7 +195,7 @@ a.btn { text-decoration: none; }
 .card-title { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
 .card-date { font-size: 13px; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .card-title.untitled { color: var(--ink-3); font-weight: 500; }
-.card-sum { font-size: 14.5px; color: var(--ink-2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.card-sum { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .card-sum mark { background: var(--accent-soft); color: var(--accent-ink); border-radius: 3px; padding: 0 1px; }
 .card-foot { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
 .btn.add-memos { width: 100%; justify-content: center; margin-bottom: 10px; border-style: dashed; color: var(--accent-ink); background: transparent; }
@@ -342,10 +341,18 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .view-shell { flex: 1; display: flex; min-height: 0; position: relative; }
 .view-main { flex: 1; min-width: 0; overflow: auto; }
 .view-doc { max-width: 720px; margin: 0 auto; padding-inline: 20px 36px; padding-block: 20px 120px; }
-.view-title { font-family: var(--font-title); font-size: 1.65em; line-height: 1.4; margin: 6px 0 8px; text-wrap: balance; overflow-wrap: anywhere; letter-spacing: .02em; }
+/* 閲覧画面の上部バー: 題名（2行まで）＋ジャンル・タグ（1行、横にスクロール） */
+.view-head { flex: 1; min-width: 0; padding: 2px 0; }
+.topbar .view-title { font-family: var(--font-title); font-size: 18px; font-weight: 700; line-height: 1.4; margin: 0; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.view-head-chips { display: flex; gap: 6px; align-items: center; margin-top: 4px; overflow-x: auto; scrollbar-width: none; }
+.view-head-chips::-webkit-scrollbar { display: none; }
+.view-head-chips > * { flex: 0 0 auto; }
+.view-head-chips .tag-chip { background: transparent; font-size: 13px; padding: 0 9px; }
+.view-screen .topbar-in { align-items: flex-start; }
+.view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 2px; }
 .view-title.untitled { color: var(--ink-3); }
 .view-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.view-body { margin-top: 18px; font-size: var(--read-size, 17px); line-height: 1.9; overflow-wrap: anywhere; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+.view-body { margin-top: 18px; font-size: var(--read-size, 17px); line-height: 1.85; letter-spacing: .02em; overflow-wrap: anywhere; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 .view-body img, .editor img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 8px 0; cursor: zoom-in; }
 .editor img { cursor: pointer; }
 .editor img.img-selected { outline: 3px solid var(--accent); outline-offset: 2px; }
@@ -355,7 +362,9 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .img-size .row .btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); }
 .img-size input[type=range] { width: 100%; accent-color: var(--accent); }
 .img-size .cap { font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; }
-.view-body p, .editor p { margin: 0 0 .6em; }
+.view-body p, .editor p { margin: 0 0 .7em; }
+/* 改行で区切った行どうしにも少し間をあけ、詰まって見えないようにする */
+.view-body > div + div, .editor > div + div { margin-top: .15em; }
 .section-h { font-size: 12px; letter-spacing: .08em; color: var(--ink-3); margin: 28px 0 8px; font-weight: 700; }
 .att-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 8px; }
 .att-tile { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; overflow: hidden; display: flex; flex-direction: column; min-width: 0; position: relative; }
@@ -439,7 +448,7 @@ body.editing-body .edit-actions { display: none; }
 .view-body h4, .editor h4 { font-size: 1em; line-height: 1.6; margin: .9em 0 .3em; color: var(--ink-2); }
 .view-body > :first-child, .editor > :first-child { margin-top: 0; }
 .fmt-bar .sep { width: 1px; background: var(--line); margin: 6px 4px; }
-.editor { min-height: 240px; padding: 14px 16px; font-size: 16px; line-height: 1.85; outline: none; overflow-wrap: anywhere; }
+.editor { min-height: 240px; padding: 14px 16px; font-size: 16px; line-height: 1.8; letter-spacing: .02em; outline: none; overflow-wrap: anywhere; }
 .editor:empty::before { content: attr(data-placeholder); color: var(--ink-3); }
 .pop { position: fixed; z-index: 70; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); padding: 10px; }
 .swatches { display: grid; grid-template-columns: repeat(4, 58px); gap: 6px; }
@@ -512,7 +521,7 @@ body.editing-body .edit-actions { display: none; }
 .rp-tool-row.rp-actions { flex-wrap: nowrap; gap: 2px; }
 .rp-tools .genre-select { height: 38px; font-size: 14.5px; max-width: 100%; }
 .rp-tool-row > .fr-label { min-width: 3em; }
-.swipe-area { min-height: calc(100vh - 170px); }
+.swipe-area { min-height: calc(100vh - 170px); touch-action: pan-y; overflow-x: clip; }
 .rp-range { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .rp-date { padding: 0 6px; min-width: 0; }
 .rp-actions .btn.primary { margin-right: 6px; }
@@ -524,7 +533,7 @@ body.editing-body .edit-actions { display: none; }
 .rp-meta { font-size: 12.5px; color: var(--ink-3); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .rp-sec { margin-top: 20px; }
 .rp-sec-h { font-size: 1.15em; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--accent-soft); }
-.rp-list { margin: 0; padding-left: 1.3em; font-size: 15.5px; line-height: 1.85; overflow-wrap: anywhere; }
+.rp-list { margin: 0; padding-left: 1.3em; font-size: 15.5px; line-height: 1.8; letter-spacing: .02em; overflow-wrap: anywhere; }
 .rp-list > li { margin-bottom: 10px; }
 .rp-list > li::marker { color: var(--ink-3); }
 .rp-list > li > * { margin: 0; }
@@ -957,7 +966,7 @@ function backTo(depth) {
   if (atDepth()) { history.go(-(steps + selExtra())); return; }
   UI.stack.length = depth; render();
 }
-/* 「創作メモ帳」をタップ → 最初の画面（検索条件もリセット） */
+/* 「ヒフミヨ」（アプリ名）をタップ → 最初の画面（検索条件もリセット） */
 function goHome() {
   // 編集中で未保存の変更があれば、先に確認する
   if (UI.leaveGuard && UI.leaveGuard(goHome)) return;
@@ -1032,10 +1041,10 @@ async function bulkDelete() {
   exitSelect();
 }
 
-/* 現在地のパス表示（例：創作メモ帳 › リスト「京都」 › 鞍馬の火祭） */
+/* 現在地のパス表示（例：ヒフミヨ › リスト「京都」 › 鞍馬の火祭） */
 const clip = (t, n = 14) => (t.length > n ? t.slice(0, n) + "…" : t);
 function crumbLabel(sc) {
-  if (sc.name === "search") return "創作メモ帳";
+  if (sc.name === "search") return "ヒフミヨ";
   if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "リスト「" + clip(l ? l.name : "削除済み", 10) + "」"; }
   if (sc.name === "view") { const m = Manager.get(sc.id); return clip(m ? (m.title || "無題のメモ") : "削除済み"); }
   // リストから開いたまとめは、1つ前の「リスト「…」」と重複するので「まとめ」だけにする（長いとパンくずの先頭が隠れる）
@@ -1043,10 +1052,13 @@ function crumbLabel(sc) {
   if (sc.name === "edit") { if (!sc.id) return "新しいメモ"; const m = Manager.get(sc.id); return "編集：" + clip(m ? (m.title || "無題のメモ") : "", 10); }
   return "";
 }
-function crumbBar() {
+function crumbBar(opts = {}) {
   const items = [];
-  UI.stack.forEach((sc, i) => {
-    const last = i === UI.stack.length - 1;
+  // omitCurrent: 今の画面の名前が上部バーにすでに大きく出ている場合（閲覧画面の題名など）は、パンくずから省く
+  const stack = opts.omitCurrent ? UI.stack.slice(0, -1) : UI.stack;
+  if (opts.omitCurrent && stack.length < 2) return null;
+  stack.forEach((sc, i) => {
+    const last = !opts.omitCurrent && i === stack.length - 1;
     if (i) items.push(h("span", { class: "crumb-sep", "aria-hidden": "true" }, "›"));
     items.push(last ? h("span", { class: "crumb current", "aria-current": "page" }, crumbLabel(sc))
       : h("button", { class: "crumb" + (i === 0 ? " home" : ""), type: "button", onclick: () => (i === 0 ? goHome() : backTo(i + 1)) }, crumbLabel(sc)));
@@ -1224,7 +1236,7 @@ function renderSearch() {
 
   const scr = h("div", { class: "screen" },
     h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
-      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "創作メモ帳"), h("small", {}, "体験・学び・アイデアの記録")),
+      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "ヒフミヨ"), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       searchBtn,
       iconBtn("gear", "設定", openSettings)),
@@ -1244,23 +1256,42 @@ function renderSearch() {
     filterRow);
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
-  /* 画面を横にスライドして「メモ」「リスト」タブを切り替える。
+  /* 画面を横にスライドして「メモ」「リスト」タブを切り替える。指の動きに合わせて一覧が横に動き、
+     離した位置（または素早いはらい）で次のタブへ滑らかに切り替わる。足りなければ元に戻る。
      画面の端から始まる操作はスマホの「戻る」なので無視し、横スクロールする部分の上でも反応しない */
   const area = scr.querySelector(".swipe-area");
-  let t0 = null;
+  const ORDER = ["memos", "lists"];
+  let sw = null;
+  const setX = (x, op, anim) => { results.style.transition = anim ? `transform ${anim}s ease, opacity ${anim}s ease` : "none"; results.style.transform = x ? `translateX(${x}px)` : ""; results.style.opacity = op == null ? "" : String(op); };
   area.addEventListener("touchstart", (e) => {
     const t = e.touches[0];
-    t0 = (e.touches.length === 1 && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".hist-chips, .tag-sugg, input, select, textarea")) ? { x: t.clientX, y: t.clientY, at: Date.now() } : null;
+    sw = (e.touches.length === 1 && !UI.select.on && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".hist-chips, .tag-sugg, input, select, textarea"))
+      ? { x: t.clientX, y: t.clientY, at: Date.now(), dx: 0, lock: null } : null;
   }, { passive: true });
-  area.addEventListener("touchend", (e) => {
-    if (!t0 || UI.select.on) { t0 = null; return; }
-    const t = e.changedTouches[0], dx = t.clientX - t0.x, dy = t.clientY - t0.y;
-    const fast = Date.now() - t0.at < 700; t0 = null;
-    if (!fast || Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
-    const order = ["memos", "lists"], i = order.indexOf(st.tab);
-    const next = order[i + (dx < 0 ? 1 : -1)];
-    if (next) switchTab(next);
+  area.addEventListener("touchmove", (e) => {
+    if (!sw) return;
+    const t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
+    if (!sw.lock) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; sw.lock = Math.abs(dx) > Math.abs(dy) * 1.2 ? "x" : "y"; }
+    if (sw.lock !== "x") return;
+    const i = ORDER.indexOf(st.tab), atEnd = (dx > 0 && i === 0) || (dx < 0 && i === ORDER.length - 1);
+    sw.dx = atEnd ? dx / 4 : dx;   // それ以上タブがない方向は、引っぱりを弱くして「端」と分かるようにする
+    setX(sw.dx, 1 - Math.min(Math.abs(sw.dx) / window.innerWidth, 1) * 0.5);
   }, { passive: true });
+  const endSwipe = () => {
+    if (!sw || sw.lock !== "x") { sw = null; return; }
+    const { dx, at } = sw; sw = null;
+    const W = window.innerWidth, i = ORDER.indexOf(st.tab), next = ORDER[i + (dx < 0 ? 1 : -1)];
+    const flick = Date.now() - at < 300 && Math.abs(dx) > 50;
+    if (!next || (Math.abs(dx) < W * 0.22 && !flick)) { setX(0, null, 0.2); return; }
+    setX(dx < 0 ? -W : W, 0, 0.18);
+    setTimeout(() => {
+      switchTab(next);
+      setX(dx < 0 ? W * 0.35 : -W * 0.35, 0);
+      requestAnimationFrame(() => requestAnimationFrame(() => setX(0, null, 0.22)));
+    }, 180);
+  };
+  area.addEventListener("touchend", endSwipe, { passive: true });
+  area.addEventListener("touchcancel", endSwipe, { passive: true });
   return scr;
 }
 /* ふりかえり: 「n年前の今日」か、しばらく見ていない過去のメモを1件出す */
@@ -1466,7 +1497,7 @@ async function renameList(l, redraw) {
    検索と同じ条件（キーワード・ジャンル）またはリストをもとに、該当するメモから文章・画像・ファイルを抜き出し、
    元のメモの題名などは載せずに「1つの新しいメモ（資料）」として組み立てる。新しいメモとして保存・ファイル保存・印刷ができる */
 /* 作成日時での期間（今日のメモ・過去の出来事などをまとめるため） */
-const PERIODS = [["all", "すべての期間"], ["today", "今日"], ["yesterday", "昨日"], ["week", "過去7日間"], ["month", "今月"], ["lastmonth", "先月"], ["year", "今年"], ["custom", "日付を指定"]];
+const PERIODS = [["all", "未選択"], ["today", "今日"], ["yesterday", "昨日"], ["week", "過去7日間"], ["month", "今月"], ["lastmonth", "先月"], ["year", "今年"], ["custom", "日付を指定"]];
 const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const parseYmd = (v) => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ""); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; };
 function periodRange(o) {
@@ -1656,13 +1687,14 @@ function renderReport(s) {
   periodSel.value = o.period;
   const dateIn = (key, label) => h("input", { type: "date", class: "genre-select rp-date", "aria-label": label, value: o[key] || "", max: ymd(new Date()), onchange: (e) => { o[key] = e.target.value; render(); } });
   const listSel = h("select", { id: "rp-list", class: "genre-select" + (o.listId ? " on" : ""), "aria-label": "リスト", onchange: () => { o.listId = listSel.value; render(); } },
-    h("option", { value: "" }, "すべて"), [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt).map(x => h("option", { value: x.id }, x.name)));
+    h("option", { value: "" }, "未選択"), [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt).map(x => h("option", { value: x.id }, x.name)));
   listSel.value = Manager.lists.has(o.listId) ? o.listId : "";
   const tools = h("div", { class: "rp-tools" },
     Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "リスト"), listSel) : null,
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
-    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg,
+    // 「関連部分だけ／全文」はキーワードで探したときだけ意味があるので、キーワードなし（リストや期間だけ）のときは出さない
+    h("div", { class: "rp-tool-row" }, src.terms.length ? [h("span", { class: "fr-label" }, "本文"), seg] : null,
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
     h("div", { class: "rp-tool-row rp-actions" },
@@ -1701,12 +1733,9 @@ function renderView(s) {
   body.addEventListener("click", (e) => { if (e.target.tagName === "IMG") lightbox(e.target.src); });
 
   const doc = h("article", { class: "view-doc" },
-    // 日付は1行にまとめ、ジャンル・リスト・タグも1行に並べて情報を整理する
-    h("div", { class: "view-meta" }, dateLine(m)),
-    h("h2", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
-    h("div", { class: "view-meta" }, genreChips(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
-      h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name)),
-      (m.tags || []).map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))),
+    // 題名・ジャンル・タグは上部バーへ。本文の上は日付と所属リストだけにする
+    h("div", { class: "view-meta" }, dateLine(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
+      h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name))),
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
     m.attachments.length ? attList(m.attachments) : null);
 
@@ -1714,8 +1743,11 @@ function renderView(s) {
   return h("div", { class: "screen view-screen" },
     h("header", { class: "topbar bar-view" }, h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
-      h("h1", {}, "メモを読む"),
-      h("div", { class: "menu-wrap" }, menuBtn, menu)), crumbBar()),
+      h("div", { class: "view-head" },
+        h("h1", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
+        h("div", { class: "view-head-chips" }, genreChips(m),
+          (m.tags || []).map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t)))),
+      h("div", { class: "menu-wrap" }, menuBtn, menu)), crumbBar({ omitCurrent: true })),
     h("div", { class: "view-shell" }, main));
 }
 /* 閲覧画面の添付ファイル: 折りたたみの一覧。タップで中身を確認 */
@@ -2410,7 +2442,7 @@ async function exportBackup() {
       memos: [...Manager.memos.values()].map(stripRuntime), lists: [...Manager.lists.values()], meta: Manager.meta, files };
     const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
     const d = new Date(), p = (n) => String(n).padStart(2, "0");
-    const a = h("a", { href: URL.createObjectURL(blob), download: `sosaku-memo-backup-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.json` });
+    const a = h("a", { href: URL.createObjectURL(blob), download: `hifumiyo-backup-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.json` });
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 60000);
     Manager.meta.lastBackup = Date.now(); Storage.putMeta(Manager.meta).catch(() => {});
@@ -2420,7 +2452,7 @@ async function exportBackup() {
 async function importBackup(file) {
   let data;
   try { data = JSON.parse(await file.text()); } catch { toast("バックアップファイルを読み込めませんでした", true); return; }
-  if (!data || data.app !== "sosaku-memo") { toast("創作メモ帳のバックアップファイルではありません", true); return; }
+  if (!data || data.app !== "sosaku-memo") { toast("ヒフミヨのバックアップファイルではありません", true); return; }
   const ok = await modal({ title: "バックアップを読み込みますか？", message: `メモ${(data.memos || []).length}件・リスト${(data.lists || []).length}件を読み込みます。同じメモがある場合はバックアップの内容で上書きされます。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
   if (!ok) return;
   try {
