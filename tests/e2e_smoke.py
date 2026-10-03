@@ -43,18 +43,12 @@ with sync_playwright() as p:
     check("ジャンル絞り込み", pg.locator(".memo-card").count() == 1)
     pg.select_option("#genre-search", ""); pg.click(".search-toggle")
 
-    # 階層（子メモ）とツリー
+    # ツリー（階層）は廃止: タブ・閲覧画面・編集画面に出ない
+    new_memo(pg, "鞍馬の火祭")
+    check("ツリーのタブがない", pg.locator(".tabs >> text=ツリー").count() == 0)
+    check("カードは題名・日付・冒頭・ジャンルだけ（リスト名・時刻なし）", pg.locator(".memo-card .list-tag").count() == 0 and ":" not in pg.locator(".memo-card .card-date").first.inner_text())
     pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
-    pg.click(".child-head .btn"); pg.fill("#title", "鞍馬の火祭"); pg.click(".genre-pick >> text=体験")
-    pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".view-title"); time.sleep(0.2)
-    check("子メモ保存後は親メモに戻る", pg.inner_text(".view-title") == "京都取材" and pg.locator(".child-sec .tree-title", has_text="鞍馬の火祭").count() == 1)
-    pg.go_back(); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
-    pg.click(".tabs >> text=ツリー")
-    check("ツリーは階層のあるメモだけ", pg.locator(".tree .tree-title").count() == 1)
-    pg.locator(".tree-title", has_text="京都取材").click()
-    check("ツリーを開くと子が出る", pg.locator(".tree .tree-title", has_text="鞍馬の火祭").count() == 1)
-    pg.locator(".tree-title", has_text="鞍馬の火祭").click(); pg.wait_for_selector(".view-title")
-    check("階層パス表示", "京都取材" in pg.inner_text(".tree-path"))
+    check("閲覧画面に階層の欄がない", pg.locator(".child-sec, .tree-path").count() == 0 and "階層" not in pg.inner_text(".view-doc"))
 
     # 戻る操作（Android のスワイプと同じ）
     pg.go_back(); time.sleep(0.3)
@@ -85,7 +79,7 @@ with sync_playwright() as p:
     check("リストで作ったメモは保存後リスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 1)
 
     # 選択モードのままパンくずで戻っても、その後の「戻る」が効く
-    pg.click(".sel-start >> text=選択"); pg.click(".crumb.home"); time.sleep(0.4)
+    pg.click(".select-btn"); pg.click(".crumb.home"); time.sleep(0.4)
     pg.click(".tabs >> text=メモ"); pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
     pg.go_back(); time.sleep(0.3)
     check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
@@ -103,7 +97,7 @@ with sync_playwright() as p:
     # 本文エディタ（本文より上は題名とジャンルだけ・書式ボタンは1行）
     pg.click(".tabs >> text=メモ"); pg.click(".fab")
     check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
-    check("タグ・階層は本文より下", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&document.querySelector('.parent-box').getBoundingClientRect().top>e})()"))
+    check("タグ・リストは本文より下・階層の欄はない", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&!document.querySelector('.parent-box')})()"))
     check("書式ボタンが1行に収まる", pg.evaluate("(()=>{const f=document.querySelector('.fmt-bar');return f.scrollWidth<=f.clientWidth+1})()"))
     pg.click("#title"); check("題名を触ると直近の題名が出る", pg.locator(".recent-titles").is_visible())
     pg.click(".topbar .back"); pg.wait_for_selector(".search-toggle")
@@ -160,10 +154,13 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.click(".search-toggle"); pg.fill("#q", "火祭"); pg.keyboard.press("Enter"); time.sleep(0.2)
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc"); time.sleep(0.3)
     check("まとめは新しい資料として抜き出した文章だけ（元の題名は出ない）", "火祭" in pg.inner_text(".rp-doc") and "京都取材" not in pg.inner_text(".rp-doc .rp-sec"))
-    with pg.expect_download() as dl: pg.click(".rp-tools >> text=ファイルに保存")
+    with pg.expect_download() as dl: pg.click(".rp-tools [aria-label=ファイルに保存]")
     import shutil; out = Path(__file__).resolve().parent / "_report_test.html"; shutil.copy(dl.value.path(), out)
     html = out.read_text(encoding="utf-8"); out.unlink()
     check("まとめを1つのファイルに保存できる", dl.value.suggested_filename.endswith(".html") and "rp-doc" in html and "blob:" not in html)
+    name1 = dl.value.suggested_filename; time.sleep(1.1)
+    with pg.expect_download() as dl2: pg.click(".rp-tools [aria-label=ファイルに保存]")
+    check("保存のたびに別のファイル名になる", dl2.value.suggested_filename != name1, name1)
     pg.click(".rp-tools >> text=新しいメモとして保存"); pg.wait_for_selector(".editor")
     check("まとめを新しいメモの下書きにできる", pg.input_value("#title") == "火祭のまとめ" and "火祭" in pg.inner_text(".editor"))
     pg.click(".topbar .back"); time.sleep(0.3)
@@ -177,7 +174,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
 
     # 検索画面: 「null」が出ない・「選択」は上部の固定バー
     check("検索画面に「null」が出ない", "null" not in pg.inner_text("body"))
-    check("「選択」は上部の固定バーにある", pg.locator("header .sel-start", has_text="選択").count() == 1)
+    check("「選択」は上部の固定バーのアイコン", pg.locator("header .select-btn").count() == 1)
 
     # バックアップの書き出し → 「前回の書き出し」がその場で更新される
     pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
@@ -194,7 +191,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     ctx.set_offline(False)
 
     # まとめて削除
-    pg.click(".sel-start >> text=選択"); pg.locator(".memo-card").first.click(); pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
+    pg.click(".select-btn"); pg.locator(".memo-card").first.click(); pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
     b.close()
 
