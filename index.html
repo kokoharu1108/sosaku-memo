@@ -167,34 +167,39 @@ a.btn { text-decoration: none; }
 
 .toolbar-row { display: flex; align-items: center; gap: 8px; margin-block: 14px 10px; flex-wrap: wrap; }
 .tabs { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; }
-.tabs button { border: 0; background: transparent; border-radius: 8px; padding: 5px 14px; font-size: 14px; color: var(--ink-2); }
+.tabs button { border: 0; background: transparent; border-radius: 8px; padding: 5px 14px; font-size: 15px; color: var(--ink-2); }
 .tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
 .spacer { flex: 1; }
-.result-meta { font-size: 13px; color: var(--ink-3); }
-.filter-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 13px; }
+.result-meta { font-size: 14.5px; color: var(--ink-2); }
+.filter-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 14.5px; }
 .filter-chip button { border: 0; background: none; color: inherit; width: 22px; height: 22px; border-radius: 50%; }
 
-.memo-list { display: grid; gap: 10px; }
+.memo-list { display: grid; gap: 12px; }
 .memo-card {
   display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--surface);
   border-radius: var(--radius); padding: 12px 14px; color: inherit;
 }
 .memo-card:hover { border-color: var(--accent); }
+/* 1件ごとの境界を分かりやすく: 左端にジャンルの色の帯＋はっきりした枠と影 */
+.memo-card { border-color: color-mix(in srgb, var(--line) 70%, var(--ink-3)); border-left: 6px solid var(--card-accent, color-mix(in srgb, var(--line) 50%, var(--ink-3))); box-shadow: 0 1px 3px rgba(0, 0, 0, .07); }
+.memo-card.cg-体験 { --card-accent: color-mix(in srgb, var(--g-exp-ink) 65%, var(--surface)); }
+.memo-card.cg-学び { --card-accent: color-mix(in srgb, var(--g-learn-ink) 65%, var(--surface)); }
+.memo-card.cg-アイデア { --card-accent: color-mix(in srgb, var(--g-idea-ink) 65%, var(--surface)); }
 .card-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .card-head { display: flex; align-items: baseline; gap: 10px; }
 .card-title { font-weight: 700; font-size: 16px; overflow-wrap: anywhere; flex: 1; min-width: 0; }
-.card-date { font-size: 12px; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.card-date { font-size: 13px; color: var(--ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .card-title.untitled { color: var(--ink-3); font-weight: 500; }
-.card-sum { font-size: 13.5px; color: var(--ink-2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.card-sum { font-size: 14.5px; color: var(--ink-2); margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .card-sum mark { background: var(--accent-soft); color: var(--accent-ink); border-radius: 3px; padding: 0 1px; }
 .card-foot { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; align-items: center; }
 .btn.add-memos { width: 100%; justify-content: center; margin-bottom: 10px; border-style: dashed; color: var(--accent-ink); background: transparent; }
 .list-tag.link { background: none; font-family: inherit; cursor: pointer; }
 .list-tag.link:hover { border-color: var(--accent); color: var(--accent-ink); }
 .list-tag { font-size: 12px; color: var(--ink-2); border: 1px dashed var(--line); border-radius: 6px; padding: 0 7px; }
-.att-count { font-size: 12px; color: var(--ink-3); }
+.att-count { font-size: 13px; color: var(--ink-3); }
 
-.genre { display: inline-flex; align-items: center; font-size: 12px; font-weight: 500; border-radius: 999px; padding: 1px 9px; line-height: 1.6; }
+.genre { display: inline-flex; align-items: center; font-size: 13px; font-weight: 500; border-radius: 999px; padding: 1px 9px; line-height: 1.6; }
 .genre.g-体験 { background: var(--g-exp); color: var(--g-exp-ink); }
 .genre.g-学び { background: var(--g-learn); color: var(--g-learn-ink); }
 .genre.g-アイデア { background: var(--g-idea); color: var(--g-idea-ink); }
@@ -233,11 +238,11 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .search-tools { max-width: 760px; margin: 0 auto; padding: 4px 16px 0; }
 .search-tools .toolbar-row { margin: 8px 0 8px; flex-wrap: nowrap; }
 .search-tools .tabs { flex: 0 0 auto; }
-.search-tools .tabs button { padding: 5px 10px; white-space: nowrap; }
+.search-tools .tabs button { padding: 6px 14px; white-space: nowrap; }
 .search-tools .spacer { min-width: 0; }
-.search-tools .genre-select { padding: 0 4px; font-size: 13px; min-width: 0; }
+.search-tools .genre-select { padding: 0 6px; font-size: 14.5px; height: 38px; min-width: 0; }
 /* tags */
-.tag-mini { font-size: 12px; color: var(--accent-ink); }
+.tag-mini { font-size: 13.5px; color: var(--accent-ink); }
 .tag-row { margin-top: 6px; }
 .tag-chip { border: 1px solid var(--line); background: var(--surface); color: var(--accent-ink); border-radius: 999px; padding: 1px 10px; font-size: 13px; }
 .tag-chip:hover { border-color: var(--accent); }
@@ -278,9 +283,8 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .hist-chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; flex: 1; min-width: 0; }
 .hist-chips::-webkit-scrollbar { display: none; }
 .hist-chips .chip-btn { flex: 0 0 auto; max-width: 12em; }
-.hist-clear { border: 0; background: none; color: var(--ink-3); font-size: 12px; padding: 4px 2px; flex: 0 0 auto; }
 .filter-row { margin-top: 8px !important; margin-bottom: 0 !important; }
-.fr-label { font-size: 12px; color: var(--ink-3); }
+.fr-label { font-size: 14px; color: var(--ink-2); font-weight: 500; flex: 0 0 auto; }
 .search-tools .tab-row { margin: 6px 0 8px; }
 .ref-item.on { border-color: var(--accent); background: var(--accent-soft); }
 /* attachments (view) */
@@ -307,7 +311,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .list-row { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 4px 4px 4px 0; }
 .list-row > button.open { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 8px 14px; color: inherit; }
 .list-name { font-weight: 700; overflow-wrap: anywhere; }
-.list-sub { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.list-sub { font-size: 13.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .new-list { display: flex; gap: 8px; margin-bottom: 12px; }
 .text-input { width: 100%; min-width: 0; height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); padding: 0 12px; font-size: 16px; }
 .text-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -362,7 +366,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .menu button.danger { color: var(--ng-ink); }
 
 /* AI panel */
-.ai-hint { font-size: 12.5px; color: var(--ink-3); }
+.ai-hint { font-size: 13.5px; color: var(--ink-3); }
 .view-screen { position: fixed; left: 0; right: 0; top: env(safe-area-inset-top, 0px); bottom: env(safe-area-inset-bottom, 0px); min-height: 0; }
 .view-screen .topbar { position: relative; top: 0; }
 .view-screen .view-shell { min-height: 0; overflow: hidden; }
@@ -370,7 +374,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 
 /* ---------- edit screen ---------- */
 .field { margin-bottom: 18px; }
-.field > label, .field > .label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-2); letter-spacing: .06em; margin-bottom: 6px; }
+.field > label, .field > .label { display: block; font-size: 13.5px; font-weight: 700; color: var(--ink-2); letter-spacing: .06em; margin-bottom: 6px; }
 .title-input { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; font-family: var(--font-title); font-size: 22px; padding: 6px 2px; }
 .title-input:focus { outline: none; border-bottom-color: var(--accent); }
 .recent-titles { display: flex; gap: 6px; margin-top: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; }
@@ -383,7 +387,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .field.genre-row > .field-err { flex-basis: 100%; margin-top: 0; }
 .more-sec { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 14px; }
 .more-head { font-size: 13px; font-weight: 700; color: var(--ink-2); margin-bottom: 12px; }
-.chip-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 11px; font-size: 13px; color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chip-btn { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 13px; font-size: 14.5px; color: var(--ink-2); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .chip-btn:hover { border-color: var(--accent); color: var(--accent-ink); }
 .genre-pick { display: flex; gap: 8px; flex-wrap: wrap; }
 .genre-pick button { border: 1.5px solid var(--line); background: var(--surface); border-radius: 999px; padding: 5px 16px; font-size: 14px; color: var(--ink-2); display: inline-flex; gap: 6px; align-items: center; }
@@ -494,6 +498,9 @@ body.editing-body .edit-actions { display: none; }
 .report-btn { color: var(--ink-2); }
 .rp-tools { display: grid; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .rp-tool-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rp-tool-row.rp-actions { flex-wrap: nowrap; gap: 2px; }
+.rp-actions .btn.primary { margin-right: 6px; }
+.rp-actions .btn svg { width: 18px; height: 18px; }
 .rp-seg button { padding: 4px 12px; font-size: 13.5px; }
 .rp-check { display: inline-flex; align-items: center; gap: 4px; font-size: 13.5px; color: var(--ink-2); margin-left: auto; }
 .rp-doc { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 20px 20px; max-width: 760px; }
@@ -520,7 +527,7 @@ body.editing-body .edit-actions { display: none; }
   .rp-sec { break-inside: auto; } .rp-list > li { break-inside: avoid; }
 }
 .settings-sec { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; display: grid; gap: 8px; }
-.settings-sec h4 { margin: 0; font-size: 13px; color: var(--ink-2); }
+.settings-sec h4 { margin: 0; font-size: 14px; color: var(--ink-2); }
 .settings-sec .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .settings-sec select { height: 42px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); padding: 0 10px; }
 .offline-pill { font-size: 11px; font-weight: 700; color: var(--g-exp-ink); background: var(--g-exp); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
@@ -565,6 +572,7 @@ const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == n
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
 /* 小さなアイコン（文字の代わりに使い、画面の情報量を減らす） */
 const ICONS = {
+  note: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/>',
   report: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/>',
   select: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
@@ -836,10 +844,10 @@ const Manager = {
   },
   async pushHistory(q) {
     q = q.trim(); if (!q) return;
-    this.meta.history = [q, ...(this.meta.history || []).filter(x => x !== q)].slice(0, 10);
+    // 検索履歴は直近3件だけ残す（4件目以降は自動で消える）
+    this.meta.history = [q, ...(this.meta.history || []).filter(x => x !== q)].slice(0, 3);
     Storage.putMeta(this.meta).catch(() => {});
   },
-  async clearHistory() { this.meta.history = []; Storage.putMeta(this.meta).catch(() => {}); },
   recentTitles() {
     const out = [];
     for (const m of this.sorted) { if (m.title && !out.includes(m.title)) out.push(m.title); if (out.length >= 5) break; }
@@ -936,8 +944,9 @@ function goHome() {
   // 編集中で未保存の変更があれば、先に確認する
   if (UI.leaveGuard && UI.leaveGuard(goHome)) return;
   if (UI.select.on) { UI.select.on = false; UI.select.ids.clear(); }
-  Object.assign(UI.search, { q: "", committed: "", tab: "memos", genre: "" });
-  if (UI.stack.length > 1 || selExtra()) resetTo(); else { render(); window.scrollTo(0, 0); }
+  const panelEntry = UI.stack.length === 1 && !selExtra() && historyOk && history.state && history.state.panel;
+  Object.assign(UI.search, { q: "", committed: "", tab: "memos", genre: "", open: false });
+  if (UI.stack.length > 1 || selExtra()) resetTo(); else { render(); window.scrollTo(0, 0); if (panelEntry) history.back(); }
 }
 let pendingReset = null;
 function resetTo(screen) {
@@ -952,6 +961,8 @@ window.addEventListener("popstate", (e) => {
     const p = pendingReset; pendingReset = null;
     UI.select.on = false; UI.select.ids.clear();
     UI.stack = [UI.stack[0]]; render(); window.scrollTo(0, 0);
+    // 戻った先が「検索パネルを開いた」履歴なら、もう1つ戻って空振りを防ぐ
+    if (e.state && e.state.panel && !UI.search.open && !(p.screen && p.screen.name !== "search")) { history.back(); return; }
     if (p.screen && p.screen.name !== "search") go(p.screen);
     return;
   }
@@ -959,6 +970,8 @@ window.addEventListener("popstate", (e) => {
     UI.select.on = false; UI.select.ids.clear();
     if (depth >= UI.stack.length) { render(); return; }
   }
+  // 検索パネルが開いていれば、戻る操作でまず閉じる
+  if (UI.search.open && current().name === "search" && depth >= UI.stack.length && !(e.state && e.state.panel)) { UI.search.open = false; render(); return; }
   if (depth >= UI.stack.length) return;
   // 画像の拡大表示や確認ウィンドウが開いていれば、まずそれを閉じる
   const overlay = [...document.querySelectorAll(".lightbox, .modal-scrim")].pop();
@@ -1114,11 +1127,10 @@ function renderSearch() {
   // 最近の検索: 絞り込みを隠さないよう、検索窓の下に横並びで表示する
   const histBox = h("div", { class: "hist-row" });
   function showHistory() {
-    const hist = Manager.meta.history || [];
+    const hist = (Manager.meta.history || []).slice(0, 3);
     histBox.hidden = !hist.length;
     histBox.replaceChildren(...(hist.length ? [h("span", { class: "fr-label" }, "最近"),
-      h("div", { class: "hist-chips" }, hist.map(q => h("button", { class: "chip-btn", type: "button", onclick: () => { st.q = q; input.value = q; commit(); } }, q))),
-      h("button", { class: "hist-clear", type: "button", "aria-label": "検索履歴を消去", title: "検索履歴を消去", onclick: () => { Manager.clearHistory(); showHistory(); } }, "消去")] : []));
+      h("div", { class: "hist-chips" }, hist.map(q => h("button", { class: "chip-btn", type: "button", onclick: () => { st.q = q; input.value = q; commit(); } }, q)))] : []));
   }
   showHistory();
   function commit() { st.committed = st.q.trim(); if (st.tab !== "memos") st.tab = "memos"; if (st.committed) Manager.pushHistory(st.committed); showHistory(); input.blur(); drawResults(); }
@@ -1129,8 +1141,14 @@ function renderSearch() {
   const filterRow = h("div", { class: "toolbar-row filter-row" });
   const panel = h("div", { class: "search-panel", hidden: !st.open });
   const searchBtn = h("button", { class: "icon-btn search-toggle", type: "button", "aria-label": "検索・絞り込み", "aria-expanded": String(!!st.open), title: "検索・絞り込み",
-    onclick: () => { st.open = !st.open; panel.hidden = !st.open; searchBtn.setAttribute("aria-expanded", String(st.open)); if (st.open) setTimeout(() => input.focus(), 50); } },
+    onclick: () => setPanel(!st.open) },
     svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), h("span", { class: "dot", "aria-hidden": "true" }));
+  // 検索パネルを開くと履歴を1つ積む。スマホの「戻る」操作（画面端からのスワイプ）で閉じられる
+  function setPanel(open) {
+    st.open = open; panel.hidden = !open; searchBtn.setAttribute("aria-expanded", String(open));
+    if (open) { if (historyOk) try { history.pushState({ depth: UI.stack.length, panel: true }, ""); } catch {} setTimeout(() => input.focus(), 50); }
+    else if (historyOk && history.state && history.state.panel) history.back();
+  }
   const switchTab = (t) => { if (UI.select.on) { UI.select.on = false; UI.select.ids.clear(); if (historyOk && history.state && history.state.select) history.back(); } st.tab = t; drawResults(); };
   function drawResults() {
     toolbar.replaceChildren(); results.replaceChildren(); filterRow.replaceChildren();
@@ -1256,7 +1274,8 @@ function dateLine(m) {
 }
 function memoCard(m, terms = [], sel) {
   const picked = sel && sel.ids.has(m.id);
-  return h("button", { class: "memo-card" + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null,
+  const g0 = GENRES.find(g => (m.genres || []).includes(g));
+  return h("button", { class: "memo-card" + (g0 ? " cg-" + g0 : "") + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null,
     onclick: () => (sel ? sel.toggle(m.id) : go({ name: "view", id: m.id })) },
     sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? "✓" : "") : null,
     // カードは「題名・日付／本文の冒頭／ジャンル・タグ2つ・添付数」だけにして見やすくする
@@ -1553,8 +1572,9 @@ function renderReport(s) {
   const tools = h("div", { class: "rp-tools" },
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg,
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
-    h("div", { class: "rp-tool-row" },
-      h("button", { class: "btn primary", type: "button", onclick: () => { if (dg && src.items.length) go({ name: "edit", id: null, draft: digestDraft(dg, src) }); } }, "新しいメモとして保存"),
+    // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
+    h("div", { class: "rp-tool-row rp-actions" },
+      h("button", { class: "btn primary", type: "button", title: "このまとめを新しいメモとして保存", onclick: () => { if (dg && src.items.length) go({ name: "edit", id: null, draft: digestDraft(dg, src) }); } }, svgIcon(ICONS.note), "メモにする"),
       h("span", { class: "spacer" }),
       iconBtn("save", "ファイルに保存", (e) => save(e.currentTarget)),
       iconBtn("print", "印刷・PDF", () => window.print()),
@@ -2311,7 +2331,7 @@ async function importBackup(file) {
     for (const m of data.memos || []) await Storage.putMemo(stripRuntime(normalizeMemo(m)));
     const hist = [...(Manager.meta.history || []), ...((data.meta && data.meta.history) || [])];
     await Manager.load();
-    Manager.meta.history = [...new Set(hist)].slice(0, 10); Storage.putMeta(Manager.meta).catch(() => {});
+    Manager.meta.history = [...new Set(hist)].slice(0, 3); Storage.putMeta(Manager.meta).catch(() => {});
     toast("バックアップを読み込みました"); resetTo();
   } catch (e) { toast(e && e.code === "quota_exceeded" ? "端末の空き容量が足りません" : "読み込みの途中で失敗しました", true); }
 }

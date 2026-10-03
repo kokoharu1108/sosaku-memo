@@ -160,7 +160,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("まとめを1つのファイルに保存できる", dl.value.suggested_filename.endswith(".html") and "rp-doc" in html and "blob:" not in html)
     import re as _re
     check("ファイル名は「まとめの題名_日付」", bool(_re.fullmatch(r"火祭のまとめ_\d{8}\.html", dl.value.suggested_filename)), dl.value.suggested_filename)
-    pg.click(".rp-tools >> text=新しいメモとして保存"); pg.wait_for_selector(".editor")
+    pg.click(".rp-tools >> text=メモにする"); pg.wait_for_selector(".editor")
     check("まとめを新しいメモの下書きにできる", pg.input_value("#title") == "火祭のまとめ" and "火祭" in pg.inner_text(".editor"))
     pg.click(".topbar .back"); time.sleep(0.3)
     if pg.locator(".modal").count(): pg.click(".modal >> text=破棄して戻る"); time.sleep(0.3)
@@ -170,6 +170,15 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
     check("リストからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=メモ")
+
+    # 検索パネルはスマホの戻る操作で閉じる・検索履歴は直近3件だけ（消去ボタンなし）
+    pg.click(".search-toggle")
+    for q in ["一", "二", "三", "四"]: pg.fill("#q", q); pg.keyboard.press("Enter"); time.sleep(0.15)
+    check("検索履歴は直近3件だけ", pg.locator(".hist-chips .chip-btn").all_inner_texts() == ["四", "三", "二"] and pg.locator(".hist-clear").count() == 0)
+    pg.go_back(); time.sleep(0.3)
+    check("戻る操作で検索パネルが閉じる（画面はそのまま）", not pg.locator(".search-panel").is_visible() and pg.locator(".search-toggle").count() == 1)
+    pg.click(".filter-chip button"); time.sleep(0.2)
+    check("メモのカードに1件ずつの色の帯がある", pg.evaluate("parseFloat(getComputedStyle(document.querySelector('.memo-card')).borderLeftWidth) >= 5"))
 
     # 検索画面: 「null」が出ない・「選択」は上部の固定バー
     check("検索画面に「null」が出ない", "null" not in pg.inner_text("body"))
