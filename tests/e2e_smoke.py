@@ -7,7 +7,7 @@
 
 日本語入力の再現には keyboard.insert_text() を使う（スマホの IME と同じくキーイベントが出ない）。
 """
-import sys, time
+import os, sys, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 
@@ -25,7 +25,7 @@ def new_memo(pg, title, genre="体験", body=None):
     pg.click("#title"); pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
 
 with sync_playwright() as p:
-    b = p.chromium.launch()
+    b = p.chromium.launch(executable_path=os.environ.get("PW_CHROMIUM") or None)
     ctx = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
     pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
     pg.goto(URL); pg.wait_for_selector(".fab")
@@ -46,7 +46,9 @@ with sync_playwright() as p:
     # 階層（子メモ）とツリー
     pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
     pg.click(".child-head .btn"); pg.fill("#title", "鞍馬の火祭"); pg.click(".genre-pick >> text=体験")
-    pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
+    pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".view-title"); time.sleep(0.2)
+    check("子メモ保存後は親メモに戻る", pg.inner_text(".view-title") == "京都取材" and pg.locator(".child-sec .tree-title", has_text="鞍馬の火祭").count() == 1)
+    pg.go_back(); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
     pg.click(".tabs >> text=ツリー")
     check("ツリーは階層のあるメモだけ", pg.locator(".tree .tree-title").count() == 1)
     pg.locator(".tree-title", has_text="京都取材").click()
@@ -57,6 +59,36 @@ with sync_playwright() as p:
     # 戻る操作（Android のスワイプと同じ）
     pg.go_back(); time.sleep(0.3)
     check("戻る操作で前の画面へ", pg.locator(".search-toggle").count() == 1)
+
+    # 上部バーの色（画面ごとに違う色・スマホ上端の帯も同じ色）
+    pg.click(".tabs >> text=メモ")
+    bars = {}
+    bars["search"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
+    tc_search = pg.evaluate("document.querySelector('meta[name=theme-color]').content")
+    pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
+    bars["view"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
+    check("スマホ上端の帯が画面に合わせて変わる", tc_search != pg.evaluate("document.querySelector('meta[name=theme-color]').content"))
+    pg.click(".menu-btn"); pg.click(".menu >> text=編集")
+    bars["edit"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
+    check("上部バーが画面ごとに違う色", len(set(bars.values())) == 3, str(bars))
+
+    # 編集中にパンくずで最初の画面へ → 未保存の確認が出る
+    pg.fill("#title", "京都取材（仮）"); pg.click(".crumb.home"); time.sleep(0.3)
+    check("未保存のままパンくずで離れると確認が出る", pg.locator(".modal").count() == 1)
+    pg.click(".modal >> text=破棄して戻る"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
+    check("破棄すると最初の画面へ・変更は保存されない", pg.locator(".memo-card", has_text="京都取材（仮）").count() == 0)
+
+    # リスト画面で新規メモ → 保存後はリスト画面に戻る
+    pg.click(".tabs >> text=リスト"); pg.click(".fab"); pg.fill("#newlist", "京都"); pg.click(".modal >> text=作成"); time.sleep(0.3)
+    if pg.locator(".modal").count(): pg.click(".modal >> text=キャンセル"); time.sleep(0.2)
+    pg.click(".fab"); pg.fill("#title", "リスト内メモ"); pg.click(".genre-pick >> text=学び"); pg.click(".edit-actions .btn.primary"); time.sleep(0.4)
+    check("リストで作ったメモは保存後リスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 1)
+
+    # 選択モードのままパンくずで戻っても、その後の「戻る」が効く
+    pg.click(".sel-start"); pg.click(".crumb.home"); time.sleep(0.4)
+    pg.click(".tabs >> text=メモ"); pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
+    pg.go_back(); time.sleep(0.3)
+    check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
 
     # 本文エディタ
     pg.click(".tabs >> text=メモ"); pg.click(".fab"); pg.fill("#title", "書式"); pg.click(".genre-pick >> text=アイデア"); pg.click(".editor")
@@ -91,7 +123,7 @@ with sync_playwright() as p:
     # オフライン起動
     pg.goto(URL); pg.wait_for_selector(".fab"); time.sleep(1)
     ctx.set_offline(True); pg.reload(); pg.wait_for_selector(".memo-card", timeout=8000)
-    check("オフラインで起動・一覧表示", pg.locator(".memo-card").count() >= 3)
+    check("オフラインで起動・一覧表示", pg.locator(".memo-card").count() >= 4)
     ctx.set_offline(False)
 
     # まとめて削除

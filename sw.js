@@ -1,10 +1,11 @@
 // 創作メモ帳 — オフライン起動用 Service Worker
 // アプリを更新したら CACHE の番号を上げると、次回起動時に新しい版へ切り替わります。
-const CACHE = "sosaku-memo-v9";
+const CACHE = "sosaku-memo-v10";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/apple-touch-icon.png"];
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // ブラウザの一時保存（HTTPキャッシュ）に残った古い版を拾わないよう、必ずサーバーから取り直す
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (e) => {
