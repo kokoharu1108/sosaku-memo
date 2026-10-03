@@ -2451,9 +2451,10 @@ const Sync = {
       const title = ((/<title>([^<]*)<\/title>/i.exec(body) || [])[1] || "").trim().slice(0, 60);
       let where = ""; try { where = new URL(res.url).hostname.replace(/^script\./, ""); } catch {}
       const info = `（${res.status}・${SYNC_STEP[action] || action}${where ? "・" + where : ""}${title ? "・" + title : ""}）`;
-      // 接続先のプログラムは動いたが、Google の「返事の受け取り口」（googleusercontent.com）で失敗した。
+      // 接続先のプログラムは動いたが、Google の「返事の受け取り口」（googleusercontent.com）で失敗した、
+      // または同じ同期の中で、ついさっきまで同じURLとつながっていた（＝URLは正しい）。
       // Google 側の一時的な不調なので、少し待ってやり直す（どの操作も、やり直しても二重にならない作り）
-      if (/googleusercontent/.test(where)) {
+      if (/googleusercontent/.test(where) || this.reached) {
         if (tries > 1) { await new Promise(r => setTimeout(r, 2000)); return this.call(action, extra, tries - 1); }
         const err = new Error("Googleからの返事を受け取れませんでした" + info + "。Google側の一時的な不調です。少したってから自動でやり直します");
         err.transient = true; throw err;
@@ -2472,6 +2473,7 @@ const Sync = {
     if (!j.ok) throw new Error(j.error === "auth" ? "合言葉が違います"
       : j.error === "nokey" ? "接続先のプログラムで合言葉（KEY）がまだ設定されていません。書き換えて保存し、新しいバージョンで公開し直してください"
       : (j.error || "エラー"));
+    this.reached = true;
     return j;
   },
   /* 一時的な失敗のあとは、1分後に自動でやり直す（続けて3回まで。成功したら数え直す） */
@@ -2483,6 +2485,7 @@ const Sync = {
     if (this.busy) { this.again = true; return false; }
     if (!navigator.onLine) { this.status = "電波がないため、つながったら同期します"; this.notify(); return false; }
     this.busy = true; this.error = ""; this.status = "同期しています…"; this.notify();
+    this.reached = false;
     try {
       const ver = (await this.call("ping")).version || 1;
       if (ver < 2) throw new Error("接続先のプログラムが古いままです。最新の gas/Code.gs を貼り付けて保存し、「デプロイを管理」→ 鉛筆 →「新しいバージョン」で公開し直してください");

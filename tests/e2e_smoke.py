@@ -251,7 +251,7 @@ fire('touchend',x1,false);}"""
     gas = FakeGas()
     def device():
         c = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
-        c.route(FakeGas.URL, gas.handle); c.route(FakeGas.ECHO, gas.echo)
+        c.route(FakeGas.URL, gas.handle)
         q = c.new_page(); q.on("pageerror", lambda e: errors.append(str(e))); q.goto(URL); q.wait_for_selector(".fab"); return q
     def sync_on(q, key="aikotoba-123", url=FakeGas.URL):
         q.click("[aria-label=設定]")
@@ -324,8 +324,7 @@ fire('touchend',x1,false);}"""
     pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(3000)
     gas.echo404 = {"listFiles": 3}
     st = sync_now(pa)
-    print("DEBUG", gas.calls[-14:], gas.echo404, gas.fail_next)
-    check("やり直しても404なら一時的な不調と知らせる", "一時的な不調" in st and "googleusercontent" in st, st)
+    check("やり直しても404なら一時的な不調と知らせる", "一時的な不調" in st and "添付の確認" in st, st)
     pa.wait_for_timeout(9000); pa.click("[aria-label=設定]"); st = pa.inner_text(".sync-status"); pa.click(".modal >> text=閉じる")
     check("少したつと自動でやり直して同期できる", st.startswith("オン"), st)
 
