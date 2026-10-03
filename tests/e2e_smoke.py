@@ -85,7 +85,7 @@ with sync_playwright() as p:
     check("リストで作ったメモは保存後リスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 1)
 
     # 選択モードのままパンくずで戻っても、その後の「戻る」が効く
-    pg.click(".sel-start"); pg.click(".crumb.home"); time.sleep(0.4)
+    pg.click(".sel-start >> text=選択"); pg.click(".crumb.home"); time.sleep(0.4)
     pg.click(".tabs >> text=メモ"); pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
     pg.go_back(); time.sleep(0.3)
     check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
@@ -159,19 +159,25 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     # 情報まとめ: 検索結果からまとめ → 画面表示・ファイル保存
     pg.click(".search-toggle"); pg.fill("#q", "火祭"); pg.keyboard.press("Enter"); time.sleep(0.2)
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc"); time.sleep(0.3)
-    check("まとめにメモと該当箇所の強調が出る", pg.locator(".rp-memo").count() >= 1 and pg.locator("mark.rp-hit").count() >= 1)
+    check("まとめは新しい資料として抜き出した文章だけ（元の題名は出ない）", "火祭" in pg.inner_text(".rp-doc") and "京都取材" not in pg.inner_text(".rp-doc .rp-sec"))
     with pg.expect_download() as dl: pg.click(".rp-tools >> text=ファイルに保存")
     import shutil; out = Path(__file__).resolve().parent / "_report_test.html"; shutil.copy(dl.value.path(), out)
     html = out.read_text(encoding="utf-8"); out.unlink()
-    check("まとめを1つのファイルに保存できる", dl.value.suggested_filename.endswith(".html") and "rp-memo" in html and "blob:" not in html)
-    pg.click(".rp-seg >> text=日付順"); time.sleep(0.2)
-    check("まとめの並べ方を切り替えられる", "年" in pg.inner_text(".rp-sec-h"))
+    check("まとめを1つのファイルに保存できる", dl.value.suggested_filename.endswith(".html") and "rp-doc" in html and "blob:" not in html)
+    pg.click(".rp-tools >> text=新しいメモとして保存"); pg.wait_for_selector(".editor")
+    check("まとめを新しいメモの下書きにできる", pg.input_value("#title") == "火祭のまとめ" and "火祭" in pg.inner_text(".editor"))
+    pg.click(".topbar .back"); time.sleep(0.3)
+    if pg.locator(".modal").count(): pg.click(".modal >> text=破棄して戻る"); time.sleep(0.3)
     pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".filter-chip button"); pg.click(".search-toggle")
     pg.click(".tabs >> text=リスト"); pg.click(".list-row .open"); time.sleep(0.2)
     pg.click("text=保存済みのメモを入れる"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
-    check("リストからもまとめを作れる", "リスト" in pg.inner_text(".rp-title"))
+    check("リストからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=メモ")
+
+    # 検索画面: 「null」が出ない・「選択」は上部の固定バー
+    check("検索画面に「null」が出ない", "null" not in pg.inner_text("body"))
+    check("「選択」は上部の固定バーにある", pg.locator("header .sel-start", has_text="選択").count() == 1)
 
     # バックアップの書き出し → 「前回の書き出し」がその場で更新される
     pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
@@ -188,7 +194,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     ctx.set_offline(False)
 
     # まとめて削除
-    pg.click(".sel-start"); pg.locator(".memo-card").first.click(); pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
+    pg.click(".sel-start >> text=選択"); pg.locator(".memo-card").first.click(); pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
     b.close()
 

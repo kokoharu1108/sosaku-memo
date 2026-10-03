@@ -37,7 +37,7 @@
 - Manager（メモ管理機能） … メモ・リストの保存/削除、検索用索引、階層（ツリー）索引、毎日0時の整理（`maintain`）、旧「参照メモ」→親子への一度きりの移行（`migrateTree`）
 - UI state & navigation … 画面スタック `UI.stack` とブラウザ履歴を連動（Android の戻る操作対応）。`go / back / backTo / resetTo / goHome`。選択モード（まとめて削除）、パンくず `crumbBar()`
 - Render … 画面: `renderSearch`（タブ: メモ／ツリー／リスト、🔍で開閉する検索パネル）、`renderListScreen`、`renderReport`（情報まとめ）、`renderView`、`renderEdit`
-- 情報まとめ … 検索結果・リスト画面の「まとめる」→ `{name:"report", q, genre}` / `{name:"report", listId}`。`reportSource`（検索と同じ条件）→ `buildReport`（段落分割 `bodyBlocks`・強調 `markTerms`）。保存は `reportFileHtml` で画像を data URL にした1つの HTML（CSS はアプリの `.rp-*` 等の規則を書き出す）
+- 情報まとめ … 検索結果・リスト画面の「まとめる」→ `{name:"report", q, genre}` / `{name:"report", listId}`。`reportSource`（検索と同じ条件）→ `digest`（段落分割 `bodyBlocks`・抽出 `pickBlocks`、ジャンル別の箇条書き＋画像＋ファイル）→ 画面表示 `digestDoc`。**元メモの題名・日付・タグは載せない**（まとめ自体を1つの新しいメモとして扱う）。「新しいメモとして保存」は `digestDraft` で編集画面の下書きに（添付は同じ fileId を共有）。ファイル保存は `reportFileHtml` で画像を data URL にした1つの HTML（CSS はアプリの `.rp-*` 等の規則を書き出す）
 - 設定 … ダークモード、バックアップ書き出し／読み込み（JSON に添付ファイルも data URL で含める）
 - Boot
 
