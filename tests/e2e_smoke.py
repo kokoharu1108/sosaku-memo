@@ -279,6 +279,28 @@ fire('touchend',x1,false);}"""
     pc.close()
     pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(2500)
     check("削除も他の端末に反映・同期のオンは開き直しても続く", pa.locator(".memo-card").count() == 0 and pa.evaluate("localStorage.getItem('sm.syncOn')") == "true")
+    # 大きな添付ファイルは小分けに送る・途中で通信が切れてもメモは同期され、次の同期で続きを送る
+    import base64 as _b64
+    big = bytes((i * 37) % 256 for i in range(1_200_000))
+    pb.click(".fab"); pb.fill("#title", "大きな添付"); pb.click(".genre-pick >> text=学び")
+    pb.set_input_files("#file", files=[{"name": "big.bin", "mimeType": "application/octet-stream", "buffer": big}]); pb.wait_for_selector(".att-tile")
+    gas.fail_next = 2   # 最初の送信は2回とも通信切れ（自動のやり直しも失敗）
+    pb.click(".edit-actions .btn.primary"); pb.wait_for_timeout(9000)
+    pb.click("[aria-label=設定]"); st = pb.inner_text(".sync-status")
+    check("通信が切れてもメモは先にドライブへ・失敗した添付は件数で知らせる", any(m["title"] == "大きな添付" for m in gas.data["memos"]) and "添付ファイル1件" in st, st)
+    pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".sync-btn"); pb.wait_for_timeout(4000)   # オフ→オンで今すぐ同期
+    pb.click(".modal >> text=閉じる")
+    sent = [d for t, d in gas.files.values() if len(d) > 1_000_000]
+    check("大きな添付は小分けで送られ、元通りにつながる", len(sent) == 1 and _b64.b64decode(sent[0]) == big and gas.calls.count("putChunk") >= 3)
+    pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(5000)
+    got = pa.evaluate("""() => new Promise(res => { const r = indexedDB.open('sosaku-memo'); r.onsuccess = () => { const q = r.result.transaction('files').objectStore('files').getAll(); q.onsuccess = () => res(q.result.map(f => f.blob.size)); }; })""")
+    check("大きな添付を別の端末で小分けに受け取れる", len(big) in got, str(got))
+
+    # 古い接続先プログラム（版1）のときは更新を案内
+    old = FakeGas(version=1); pd = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True); pd.route(FakeGas.URL, old.handle)
+    qd = pd.new_page(); qd.goto(URL); qd.wait_for_selector(".fab")
+    check("古い版の接続先は更新を案内", "最新の gas/Code.gs" in sync_on(qd)); pd.close()
+
     b.close()
 
 real_errors = [e for e in errors if "fonts.g" not in e]

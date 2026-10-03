@@ -2427,6 +2427,7 @@ function normalizeSyncUrl(u) {
   const m = /^https:\/\/script\.google\.com\/(?:a\/macros\/[^/]+|macros)(?:\/u\/\d+)?\/s\/([\w-]+)\/(exec|dev)\/?$/.exec(u);
   return m ? `https://script.google.com/macros/s/${m[1]}/${m[2]}` : u;
 }
+const syncErrText = (e) => /^メモは同期/.test(e) ? e : "同期できませんでした：" + e;
 const Sync = {
   busy: false, again: false, timer: null, status: "", error: "",
   url: () => normalizeSyncUrl(lsGet("sm.syncUrl", "")), key: () => lsGet("sm.syncKey", ""),
@@ -2434,8 +2435,15 @@ const Sync = {
   ready() { return this.on() && /^https:\/\/script\.google(usercontent)?\.com\//.test(this.url()) && !!this.key(); },
   listeners: new Set(),
   notify() { this.listeners.forEach(f => { try { f(); } catch {} }); },
-  async call(action, extra) {
-    const res = await fetch(this.url(), { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ key: this.key(), action, ...extra }) });
+  async call(action, extra, tries = 2) {
+    let res;
+    try {
+      res = await fetch(this.url(), { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ key: this.key(), action, ...extra }) });
+    } catch {
+      // 「Failed to fetch」「Load failed」= 通信が途中で切れた。少し待って1回だけやり直す
+      if (tries > 1) { await new Promise(r => setTimeout(r, 1500)); return this.call(action, extra, tries - 1); }
+      throw new Error("通信が途中で切れました。電波の良い場所で、もう一度「同期」を押してください");
+    }
     if (!res.ok) throw new Error(res.status === 404
       ? "接続先が見つかりません（404）。URLが https://script.google.com/macros/s/…/exec の形か、公開したデプロイが削除されていないか確かめてください。会社などのGoogleアカウント（Google Workspace）で作った場合は、管理者の設定で外から使えないことがあります（個人のGoogleアカウントで作り直すと確実です）"
       : "接続先でエラーが起きました（" + res.status + "）");
@@ -2458,15 +2466,19 @@ const Sync = {
     if (!navigator.onLine) { this.status = "電波がないため、つながったら同期します"; this.notify(); return false; }
     this.busy = true; this.error = ""; this.status = "同期しています…"; this.notify();
     try {
+      const ver = (await this.call("ping")).version || 1;
+      if (ver < 2) throw new Error("接続先のプログラムが古いままです。最新の gas/Code.gs を貼り付けて保存し、「デプロイを管理」→ 鉛筆 →「新しいバージョン」で公開し直してください");
       const remote = (await this.call("pull")).data || {};
       const changed = await this.merge(remote);
-      await this.syncFiles();
+      // メモ・リストのデータを先に保存する（添付ファイルの途中で失敗しても、メモ本体はドライブに残るように）
       await this.call("push", { data: this.snapshot() });
       Manager.meta.lastSync = Date.now(); await Storage.putMeta(Manager.meta).catch(() => {});
+      const failed = await this.syncFiles();
       this.status = "";
+      if (failed) this.error = `メモは同期しましたが、添付ファイル${failed}件を送受信できませんでした（${this.fileError || "通信が途中で切れました"}）。もう一度「同期」を押すと続きから送ります`;
       // ドライブ側から増えた・変わったメモを画面に反映（メモを書いている途中の画面は作り直さない）
       if (changed) { const n = current().name; if (n === "search" || n === "list" || n === "view") render(); }
-      return true;
+      return !failed;
     } catch (e) {
       this.error = (e && e.message) || "同期できませんでした";
       return false;
@@ -2503,26 +2515,42 @@ const Sync = {
     if (changed) await Manager.load();
     return changed;
   },
+  /* 添付ファイルを足りない側へ送る。大きなファイルも送れるよう小分け（約0.5MBずつ）にする。
+     1つ失敗しても残りは続け、失敗した件数を返す（次の同期で続きから） */
+  CHUNK: 700000,
   async syncFiles() {
     const need = new Map();
     for (const m of Manager.memos.values()) for (const a of m.attachments || []) if (a.fileId) need.set(a.fileId, a);
-    if (!need.size) return;
+    if (!need.size) return 0;
     const remoteIds = new Set((await this.call("listFiles")).ids || []);
     const localIds = new Set(await Storage.allFileIds());
-    let n = 0;
-    for (const [id, a] of need) {
-      if (localIds.has(id) && !remoteIds.has(id)) {
-        const rec = await Storage.getFile(id); if (!rec || !rec.blob) continue;
-        const data = (await blobToDataUrl(rec.blob)).split(",")[1] || "";
-        this.status = `添付ファイルを送っています（${++n}）…`; this.notify();
-        await this.call("putFile", { id, type: rec.type || a.type, data });
-      } else if (!localIds.has(id) && remoteIds.has(id)) {
-        this.status = `添付ファイルを受け取っています（${++n}）…`; this.notify();
-        const r = await this.call("getFile", { id });
-        const bin = atob(r.data || ""); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-        await Storage.putFile({ id, blob: new Blob([bytes], { type: r.type || a.type }), name: a.name, type: a.type, createdAt: Date.now() });
-      }
+    const todo = [...need].filter(([id]) => localIds.has(id) !== remoteIds.has(id));
+    let n = 0, failed = 0; this.fileError = "";
+    for (const [id, a] of todo) {
+      n++;
+      try {
+        if (localIds.has(id)) {
+          const rec = await Storage.getFile(id); if (!rec || !rec.blob) continue;
+          const data = (await blobToDataUrl(rec.blob)).split(",")[1] || "";
+          const total = Math.max(1, Math.ceil(data.length / this.CHUNK));
+          for (let i = 0; i < total; i++) {
+            this.status = `添付ファイルを送っています（${n}/${todo.length}${total > 1 ? `・${Math.round((i + 1) / total * 100)}%` : ""}）…`; this.notify();
+            await this.call("putChunk", { id, type: rec.type || a.type, index: i, total, data: data.slice(i * this.CHUNK, (i + 1) * this.CHUNK) });
+          }
+        } else {
+          let b64 = "", type = a.type, total = Infinity;
+          while (b64.length < total) {
+            this.status = `添付ファイルを受け取っています（${n}/${todo.length}${isFinite(total) && total > this.CHUNK ? `・${Math.round(b64.length / total * 100)}%` : ""}）…`; this.notify();
+            const r = await this.call("getChunk", { id, offset: b64.length, length: this.CHUNK });
+            total = r.total || 0; type = r.type || type; b64 += r.data || "";
+            if (!r.data) break;
+          }
+          const bin = atob(b64); const bytes = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          await Storage.putFile({ id, blob: new Blob([bytes], { type }), name: a.name, type: a.type, createdAt: Date.now() });
+        }
+      } catch (e) { failed++; this.fileError = (e && e.message) || ""; }
     }
+    return failed;
   },
 };
 window.addEventListener("online", () => { if (Sync.ready()) Sync.schedule(500); });
@@ -2577,7 +2605,7 @@ function syncSection() {
     lsSet("sm.syncUrl", url); lsSet("sm.syncKey", key); lsSet("sm.syncOn", true);
     draw();
     const ok = await Sync.run();
-    toast(ok ? "同期しました" : "同期できませんでした：" + (Sync.error || Sync.status), !ok);
+    toast(ok ? "同期しました" : syncErrText(Sync.error || Sync.status), !ok);
   } }, svgIcon(ICONS.sync), h("span", {}, "同期"));
   const setup = h("details", { class: "sync-setup" }, h("summary", {}, "接続の設定"),
     h("div", { class: "sync-fields" },
@@ -2593,7 +2621,7 @@ function syncSection() {
     urlIn.disabled = keyIn.disabled = on;
     setup.open = !on && !(Sync.url() && Sync.key());
     statusEl.textContent = !on ? "オフ（メモはこの端末の中だけ）"
-      : Sync.error ? "同期できませんでした：" + Sync.error
+      : Sync.error ? syncErrText(Sync.error)
       : Sync.status ? Sync.status
       : "オン：保存のたびに送ります" + (Manager.meta.lastSync ? "（最終 " + fmtDate(Manager.meta.lastSync) + "）" : "");
     statusEl.classList.toggle("ng", !!(on && Sync.error));
