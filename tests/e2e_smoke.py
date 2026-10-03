@@ -158,9 +158,8 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     import shutil; out = Path(__file__).resolve().parent / "_report_test.html"; shutil.copy(dl.value.path(), out)
     html = out.read_text(encoding="utf-8"); out.unlink()
     check("まとめを1つのファイルに保存できる", dl.value.suggested_filename.endswith(".html") and "rp-doc" in html and "blob:" not in html)
-    name1 = dl.value.suggested_filename; time.sleep(1.1)
-    with pg.expect_download() as dl2: pg.click(".rp-tools [aria-label=ファイルに保存]")
-    check("保存のたびに別のファイル名になる", dl2.value.suggested_filename != name1, name1)
+    import re as _re
+    check("ファイル名は「まとめの題名_日付」", bool(_re.fullmatch(r"火祭のまとめ_\d{8}\.html", dl.value.suggested_filename)), dl.value.suggested_filename)
     pg.click(".rp-tools >> text=新しいメモとして保存"); pg.wait_for_selector(".editor")
     check("まとめを新しいメモの下書きにできる", pg.input_value("#title") == "火祭のまとめ" and "火祭" in pg.inner_text(".editor"))
     pg.click(".topbar .back"); time.sleep(0.3)
