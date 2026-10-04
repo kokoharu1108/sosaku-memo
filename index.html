@@ -35,7 +35,8 @@
   --ng: #f8dde0; --ng-ink: #a23b4b;
   --scrim: rgba(40, 42, 58, .38);
   --shadow: 0 1px 2px rgba(44,47,61,.06), 0 6px 20px rgba(44,47,61,.07);
-  --bar-search: #d5e2fb; --bar-view: #c9ece3; --bar-list: #ead6f7; --bar-edit: #fadfc0; --bar-report: #f5eaa6;
+  --bar-search: #d5e2fb; --bar-list: #dde1e9; --bar-edit: #f8d5e3; --bar-report: #f5eaa6;
+  --bar-view: #e1e3ea; --bar-view-exp: #fbd8c3; --bar-view-learn: #c8ecd6; --bar-view-idea: #e1d5f6;   /* 閲覧画面はメモのジャンルの色 */
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #c9566a;
@@ -55,7 +56,7 @@
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
     --scrim: rgba(0,0,0,.55);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-search: #2b4a86; --bar-view: #1e6457; --bar-list: #5b3a8c; --bar-edit: #7a4e1e; --bar-report: #6a5d12; --danger: #e48a9a;
+    --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #7c4a2c; --bar-view-learn: #1f6a49; --bar-view-idea: #5b3c8e; --danger: #e48a9a;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
@@ -71,18 +72,18 @@
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
   --scrim: rgba(0,0,0,.55);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-search: #2b4a86; --bar-view: #1e6457; --bar-list: #5b3a8c; --bar-edit: #7a4e1e; --bar-report: #6a5d12; --danger: #e48a9a;
+  --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #7c4a2c; --bar-view-learn: #1f6a49; --bar-view-idea: #5b3c8e; --danger: #e48a9a;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
 }
 
-.topbar { --tag: #0b72c4; }
+.topbar { --tag: #1d9bf0; }
 /* ダークモード: 屋外でも画面を見分けられるよう、バーは色を濃く（明るく）し、バーの上の文字・アイコンは明るくする */
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; --tag: #9fd8ff; }
+  :root:not([data-theme="light"]) :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; --tag: #6cc4ff; }
 }
-:root[data-theme="dark"] :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; --tag: #9fd8ff; }
+:root[data-theme="dark"] :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; --tag: #6cc4ff; }
 
 * { box-sizing: border-box; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -177,9 +178,8 @@ a.btn { text-decoration: none; }
 .memo-card { border-color: color-mix(in srgb, var(--line) 70%, var(--ink-3)); box-shadow: 0 1px 3px rgba(0, 0, 0, .07); position: relative; overflow: hidden; padding-left: 42px;
   -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .genre-band { position: absolute; left: 0; top: 0; bottom: 0; width: 28px; display: flex; flex-direction: column; }
-/* 縦書きは端末の文字によって崩れることがあるため、1文字ずつ縦に積む */
-.genre-band .gb { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; line-height: 1.15; overflow: hidden; padding: 6px 0; }
-.genre-band .gb > span { display: block; }
+.genre-band .gb { flex: 1; display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+.genre-band .gb svg { width: 20px; height: 20px; stroke-width: 2.2; }
 .genre-band .gb + .gb { border-top: 1px solid var(--surface); }
 .gb.g-体験 { background: var(--g-exp); color: var(--g-exp-ink); }
 .gb.g-学び { background: var(--g-learn); color: var(--g-learn-ink); }
@@ -218,17 +218,20 @@ a.btn { text-decoration: none; }
 .gf[aria-pressed="true"].g-体験 { background: var(--g-exp); color: var(--g-exp-ink); border-color: var(--g-exp-ink); }
 .gf[aria-pressed="true"].g-学び { background: var(--g-learn); color: var(--g-learn-ink); border-color: var(--g-learn-ink); }
 .gf[aria-pressed="true"].g-アイデア { background: var(--g-idea); color: var(--g-idea-ink); border-color: var(--g-idea-ink); }
-.crumbs { display: flex; align-items: center; gap: 4px; padding: 0 16px 8px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; font-size: 12.5px; max-width: 760px; margin: 0 auto; }
-.crumbs.wide { max-width: none; }
+.crumbs { display: flex; align-items: flex-end; padding: 4px 12px 0; overflow-x: auto; white-space: nowrap; scrollbar-width: none; max-width: 760px; margin: 0 auto; }
 .crumbs::-webkit-scrollbar { display: none; }
-.crumb { border: 0; background: none; padding: 2px 4px; border-radius: 6px; color: var(--accent-ink); text-decoration: underline; text-underline-offset: 2px; flex: 0 0 auto; }
-.crumb.home { font-family: var(--font-title); font-weight: 700; text-decoration: none; }
-.crumb.current { color: var(--ink-2); text-decoration: none; font-weight: 700; }
-.crumb-sep { color: var(--ink-3); flex: 0 0 auto; }
+.crumb { position: relative; flex: 0 1 auto; min-width: 3.2em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; margin-right: -8px;
+  border: 1px solid color-mix(in srgb, var(--ink-3) 35%, transparent); border-bottom: 0; border-radius: 9px 9px 0 0;
+  background: color-mix(in srgb, var(--bg) 55%, transparent); color: var(--ink-2); padding: 4px 14px 5px 10px; font-size: 12px; text-align: left; }
+.crumb.home { flex: 0 0 auto; max-width: none; }
+.crumb.current { flex: 0 0 auto; max-width: 62%; z-index: 50; margin-right: 0; background: var(--bg); color: var(--ink); font-size: 13.5px; font-weight: 700; padding: 6px 14px; border-color: transparent; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
 /* bar colors per screen（屋外でも見分けやすいよう、画面ごとに色相を分ける） */
 .topbar.bar-search { background: var(--bar-search); }
 .topbar.bar-view { background: var(--bar-view); }
+.topbar.bar-view.g-体験 { background: var(--bar-view-exp); }
+.topbar.bar-view.g-学び { background: var(--bar-view-learn); }
+.topbar.bar-view.g-アイデア { background: var(--bar-view-idea); }
 .topbar.bar-list { background: var(--bar-list); }
 .topbar.bar-edit { background: var(--bar-edit); }
 .topbar.bar-report { background: var(--bar-report); }
@@ -355,10 +358,19 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 /* 閲覧画面の上部バー: 題名（2行まで）＋ジャンル・タグ（1行、横にスクロール） */
 .view-head { flex: 1; min-width: 0; padding: 2px 0; }
 .topbar .view-title { font-family: var(--font-title); font-size: 18px; font-weight: 700; line-height: 1.4; margin: 0; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
-.view-head-chips { display: flex; gap: 6px; align-items: center; margin-top: 4px; overflow-x: auto; scrollbar-width: none; }
+.view-head-chips { display: flex; gap: 2px 10px; align-items: center; margin-bottom: 2px; overflow-x: auto; scrollbar-width: none; }
 .view-head-chips::-webkit-scrollbar { display: none; }
 .view-head-chips > * { flex: 0 0 auto; }
-.view-head-chips .tag-chip { background: transparent; font-size: 13px; padding: 0 9px; }
+.view-head-chips .tag-chip { border: 0; background: transparent; font-size: 13.5px; padding: 2px 0; }
+/* 閲覧画面のバーの背景に、ジャンル名を大きく斜めに薄く */
+.genre-mark-wrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.view-screen .crumbs { position: relative; z-index: 1; }
+.view-screen .topbar-in { position: relative; z-index: 2; }
+.genre-mark { position: absolute; right: -6px; top: 50%; transform: translateY(-58%) rotate(-12deg) skewX(-12deg); font-family: var(--font-title); font-size: 66px; font-weight: 900; letter-spacing: -.02em; line-height: 1; white-space: nowrap; pointer-events: none; z-index: 0; opacity: .16; color: var(--ink); }
+.g-体験 .genre-mark { color: var(--g-exp-ink); opacity: .24; }
+.g-学び .genre-mark { color: var(--g-learn-ink); opacity: .24; }
+.g-アイデア .genre-mark { color: var(--g-idea-ink); opacity: .24; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .view-screen .topbar-in { align-items: flex-start; }
 .view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 2px; }
 .view-title.untitled { color: var(--ink-3); }
@@ -614,7 +626,11 @@ const ICONS = {
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   save: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
   print: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6"/>',
-  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
+  /* ジャンルのアイコン: 体験＝カメラ、学び＝開いた本、アイデア＝電球 */
+  g体験: '<path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  g学び: '<path d="M3 5.5c2.5-1 5.5-1 9 1 3.5-2 6.5-2 9-1v13c-2.5-1-5.5-1-9 1-3.5-2-6.5-2-9-1z"/><path d="M12 6.5v13"/>',
+  gアイデア: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/>',
   more: '<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   updated: '<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/>',
   folder: '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2.2h8.4A1.5 1.5 0 0 1 21 8.7v9.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
@@ -1009,7 +1025,7 @@ window.addEventListener("popstate", (e) => {
     if (depth >= UI.stack.length) { render(); return; }
   }
   // 検索パネルが開いていれば、戻る操作でまず閉じる
-  if (UI.search.open && current().name === "search" && depth >= UI.stack.length && !(e.state && e.state.panel)) { UI.search.open = false; render(); return; }
+  if (current().name === "search" && searchState().open && depth >= UI.stack.length && !(e.state && e.state.panel)) { searchState().open = false; render(); return; }
   if (depth >= UI.stack.length) return;
   // 画像の拡大表示や確認ウィンドウが開いていれば、まずそれを閉じる
   const overlay = [...document.querySelectorAll(".lightbox, .modal-scrim")].pop();
@@ -1056,7 +1072,7 @@ async function bulkDelete() {
 /* 現在地のパス表示（例：ヒフミヨ › リスト「京都」 › 鞍馬の火祭） */
 const clip = (t, n = 14) => (t.length > n ? t.slice(0, n) + "…" : t);
 function crumbLabel(sc) {
-  if (sc.name === "search") return "ヒフミヨ";
+  if (sc.name === "search") return sc.st ? "検索「" + clip(sc.st.committed || "", 10) + "」" : "ホーム";
   if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "リスト「" + clip(l ? l.name : "削除済み", 10) + "」"; }
   if (sc.name === "view") { const m = Manager.get(sc.id); return clip(m ? (m.title || "無題のメモ") : "削除済み"); }
   // リストから開いたまとめは、1つ前の「リスト「…」」と重複するので「まとめ」だけにする（長いとパンくずの先頭が隠れる）
@@ -1064,16 +1080,15 @@ function crumbLabel(sc) {
   if (sc.name === "edit") { if (!sc.id) return "新しいメモ"; const m = Manager.get(sc.id); return "編集：" + clip(m ? (m.title || "無題のメモ") : "", 10); }
   return "";
 }
-function crumbBar(opts = {}) {
-  const items = [];
-  // omitCurrent: 今の画面の名前が上部バーにすでに大きく出ている場合（閲覧画面の題名など）は、パンくずから省く
-  const stack = opts.omitCurrent ? UI.stack.slice(0, -1) : UI.stack;
-  if (opts.omitCurrent && stack.length < 2) return null;
-  stack.forEach((sc, i) => {
-    const last = !opts.omitCurrent && i === stack.length - 1;
-    if (i) items.push(h("span", { class: "crumb-sep", "aria-hidden": "true" }, "›"));
-    items.push(last ? h("span", { class: "crumb current", "aria-current": "page" }, crumbLabel(sc))
-      : h("button", { class: "crumb" + (i === 0 ? " home" : ""), type: "button", onclick: () => (i === 0 ? goHome() : backTo(i + 1)) }, crumbLabel(sc)));
+/* パス表示（ブラウザのタブのような形）: 「ホーム」から今の画面まで。今の画面のタブは普通の大きさで手前に、
+   前の画面のタブは詰めて後ろに重ねる。押すとその画面に戻る。画面が1つだけのときは出さない */
+function crumbBar() {
+  const stack = UI.stack;
+  if (stack.length < 2) return null;
+  const items = stack.map((sc, i) => {
+    const last = i === stack.length - 1;
+    return last ? h("span", { class: "crumb current", "aria-current": "page" }, crumbLabel(sc))
+      : h("button", { class: "crumb" + (i === 0 ? " home" : ""), type: "button", title: crumbLabel(sc), style: `z-index:${i + 1}`, onclick: () => (i === 0 ? goHome() : backTo(i + 1)) }, crumbLabel(sc));
   });
   const bar = h("nav", { class: "crumbs", "aria-label": "現在地" }, items);
   requestAnimationFrame(() => { bar.scrollLeft = bar.scrollWidth; });
@@ -1125,8 +1140,11 @@ function themeSwitch() {
 }
 
 /* スマホ上端の時計などが並ぶ帯の色を、いまの画面の上部バーの色に合わせる（どの画面か見分けやすくする） */
+const GENRE_KEY = { 体験: "exp", 学び: "learn", アイデア: "idea" };
 function syncThemeColor() {
-  const c = getComputedStyle(document.documentElement).getPropertyValue("--bar-" + (current().name || "search")).trim();
+  const s = current(); let name = "--bar-" + (s.name || "search");
+  if (s.name === "view") { const m = Manager.get(s.id); const g = m && GENRES.find(x => (m.genres || []).includes(x)); if (g) name = "--bar-view-" + GENRE_KEY[g]; }
+  const c = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   if (c) document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.removeAttribute("media"); m.content = c; });
 }
 try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", syncThemeColor); } catch {}
@@ -1148,7 +1166,7 @@ function render() {
   cleanupFns.forEach(f => { try { f(); } catch {} }); cleanupFns = [];
   const app = $("#app"); app.replaceChildren();
   const s = current();
-  if (s.name === "search") app.append(renderSearch());
+  if (s.name === "search") app.append(renderSearch(s));
   else if (s.name === "view") { if (!Manager.get(s.id)) return dropMissing(); app.append(renderView(s)); }
   else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
@@ -1157,8 +1175,10 @@ function render() {
 }
 
 /* ---------- メモ検索画面 ---------- */
-function renderSearch() {
-  const st = UI.search;
+/* 今の検索画面の状態（ホームは UI.search、タグなどから開いた検索はその画面が持つ） */
+const searchState = () => { const s = current(); return (s && s.name === "search" && s.st) || UI.search; };
+function renderSearch(s) {
+  const st = (s && s.st) || UI.search;
   const input = h("input", { id: "q", class: "search-input", type: "search", enterkeyhint: "search", placeholder: "キーワードでメモを探す", value: st.q, autocomplete: "off",
     oninput: (e) => { st.q = e.target.value; },
     onkeydown: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); input.blur(); } } });
@@ -1233,13 +1253,14 @@ function renderSearch() {
 
   const scr = h("div", { class: "screen" },
     h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
+      UI.stack.length > 1 ? h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←") : null,
       h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "ヒフミヨ"), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       searchBtn,
       iconBtn("gear", "設定", openSettings)),
       h("div", { class: "search-tools" },
         panel,
-        toolbar)),
+        toolbar), crumbBar()),
     h("main", { class: "wrap swipe-area", style: "padding-top:12px" },
       storeNote,
       results),
@@ -1356,7 +1377,7 @@ function memoCard(m, terms = [], sel, scope) {
   const startSelect = () => { longDone = true; longPressHeld = true; longPressAt = Date.now(); try { navigator.vibrate && navigator.vibrate(25); } catch {} enterSelect(scope, m.id); };
   const cancel = () => { clearTimeout(timer); timer = 0; };
   const tags = (m.tags || []).slice(0, 2).map(t => h("span", { class: "tag-mini" }, "#" + t));
-  const bandH = (gs.length ? gs : ["未選択"]).reduce((n, g) => n + g.length * 15 + 16, 0);
+  const bandH = Math.max(1, gs.length) * 40;
   return h("button", { class: "memo-card" + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null, style: `min-height:${bandH}px`,
     onpointerdown: (e) => { if (sel || !scope || (e.pointerType === "mouse" && e.button !== 0)) return; longDone = false; sx = e.clientX; sy = e.clientY; cancel(); timer = setTimeout(startSelect, LONG_PRESS); },
     onpointermove: (e) => { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); },
@@ -1365,7 +1386,7 @@ function memoCard(m, terms = [], sel, scope) {
     onclick: (e) => { if (longDone || longPressHeld || Date.now() - longPressAt < 200) { longDone = false; e.preventDefault(); return; } sel ? sel.toggle(m.id) : go({ name: "view", id: m.id }); } },
     // 左端の帯: ジャンル名を縦書きで、ジャンルの色で塗る（複数あれば縦に分ける）
     h("span", { class: "genre-band", "aria-label": "ジャンル：" + (gs.join("・") || "未選択") },
-      (gs.length ? gs : [null]).map(g => h("span", { class: g ? "gb g-" + g : "gb none", style: `flex:${(g || "未選択").length + 1} 1 0` }, [...(g || "未選択")].map(ch => h("span", {}, ch))))),
+      (gs.length ? gs : [null]).map(g => h("span", { class: g ? "gb g-" + g : "gb none", title: g || "ジャンル未選択" }, g ? svgIcon(ICONS["g" + g]) : "－"))),
     sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? checkMark() : "") : null,
     // カードは「題名・日付／本文の冒頭／タグ2つ・添付数」だけにして見やすくする（ジャンルは左端の帯）
     h("div", { class: "card-head" }, h("div", { class: "card-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"), h("span", { class: "card-date" }, relDate(m.createdAt))),
@@ -1374,7 +1395,7 @@ function memoCard(m, terms = [], sel, scope) {
       m.attachments.length ? h("span", { class: "att-count" }, `📎 ${m.attachments.length}`) : null) : null);
 }
 function renderLists(redraw) {
-  const st = UI.search;
+  const st = searchState();
   const wrap = h("div");
   let lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
   if (st.sort === "upd-asc") lists.reverse();
@@ -1761,14 +1782,19 @@ function renderView(s) {
     m.attachments.length ? attList(m.attachments) : null);
 
   const main = h("div", { class: "view-main" }, doc);
+  const gs = GENRES.filter(g => (m.genres || []).includes(g));
   return h("div", { class: "screen view-screen" },
-    h("header", { class: "topbar bar-view" }, h("div", { class: "topbar-in wide" },
+    h("header", { class: "topbar bar-view" + (gs.length ? " g-" + gs[0] : "") },
+      // ジャンルは、背景に大きく斜めの薄い文字で示す（ペルソナシリーズの画面のような見せ方）
+      gs.length ? h("div", { class: "genre-mark-wrap", "aria-hidden": "true" }, h("div", { class: "genre-mark" }, gs.join(" "))) : null,
+      h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("div", { class: "view-head" },
+        (m.tags || []).length ? h("div", { class: "view-head-chips" },
+          (m.tags || []).map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))) : null,
         h("h1", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
-        h("div", { class: "view-head-chips" }, genreChips(m),
-          (m.tags || []).map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t)))),
-      h("div", { class: "menu-wrap" }, menuBtn, menu)), crumbBar({ omitCurrent: true })),
+        h("span", { class: "sr-only" }, "ジャンル：" + (gs.join("・") || "未選択"))),
+      h("div", { class: "menu-wrap" }, menuBtn, menu)), crumbBar()),
     h("div", { class: "view-shell" }, main));
 }
 /* 閲覧画面の添付ファイル: 折りたたみの一覧。タップで中身を確認 */
@@ -1810,9 +1836,9 @@ function attList(atts) {
       h("span", { class: "att-size" }, fmtSize(a.size)),
       h("span", { class: "att-go", "aria-hidden": "true" }, "›")))));
 }
+/* タグを押したら、そのタグで探した検索画面を（検索窓を開いた状態で）上に重ねて開く。戻る操作で元の画面へ */
 function tagSearch(tag) {
-  Object.assign(UI.search, { q: "#" + tag, committed: "#" + tag, tab: "memos", genre: "" });
-  if (UI.stack.length > 1) resetTo(); else render();
+  go({ name: "search", st: { q: "#" + tag, committed: "#" + tag, tab: "memos", sort: "upd-desc", genre: "", open: true } });
 }
 function attGrid(atts, editable, onRemove) {
   return h("div", { class: "att-grid" }, atts.map(a => {
@@ -2383,7 +2409,7 @@ function renderEdit(s) {
   const editHeader = h("header", { class: "topbar bar-edit" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: goBack }, "←"),
       h("h1", {}, isNew ? "新しいメモ" : "メモを編集"),
-      h("button", { class: "btn danger ghost", onclick: del }, "削除")), crumbBar({ omitCurrent: true }));
+      h("button", { class: "btn danger ghost", onclick: del }, "削除")), crumbBar());
   // ツールバーがヘッダーの真下に貼り付くよう、ヘッダーの高さを渡す
   if (window.ResizeObserver) {
     const ro = new ResizeObserver(() => document.documentElement.style.setProperty("--hdr-h", editHeader.offsetHeight + "px"));
