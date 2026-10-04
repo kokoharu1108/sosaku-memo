@@ -137,6 +137,7 @@ with sync_playwright() as p:
     check("メモ画面の下部の見出しは「タグ」「フォルダ」だけ", "そのほかの設定" not in pg.inner_text("main") and "自由に付けられます" not in pg.inner_text("main") and "フォルダに入れる" not in pg.inner_text("main"))
     check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
     check("タグ・フォルダは本文より下・階層の欄はない", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&!document.querySelector('.parent-box')})()"))
+    check("箇条書きのボタンはない", pg.locator(".fmt-bar >> text=•").count() == 0)
     check("書式ボタンが1行に収まる", pg.evaluate("(()=>{const f=document.querySelector('.fmt-bar');return f.scrollWidth<=f.clientWidth+1})()"))
     pg.click("#title"); check("題名を触ると直近の題名が出る", pg.locator(".recent-titles").is_visible())
     pg.click(".topbar .back"); pg.wait_for_selector(".search-toggle")
@@ -202,7 +203,12 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     # 情報まとめ: 検索結果からまとめ → 画面表示・ファイル保存
     pg.click(".search-toggle"); pg.fill("#q", "火祭"); pg.keyboard.press("Enter"); time.sleep(0.2)
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc"); time.sleep(0.3)
-    check("まとめは新しい資料として抜き出した文章だけ（元の題名は出ない）", "火祭" in pg.inner_text(".rp-doc") and "京都取材" not in pg.inner_text(".rp-doc .rp-sec"))
+    check("まとめはジャンル → メモの題名の順に畳んで並ぶ", pg.locator(".rp-doc details.rp-sec").count() >= 1 and pg.locator(".rp-doc details.rp-sec[open]").count() == 0 and pg.locator(".rp-index .rp-idx svg").count() >= 1)
+    pg.locator(".rp-sec > summary").first.click(); time.sleep(0.2)
+    check("ジャンルを押すとメモの題名が並ぶ（中身は畳んだまま）", pg.locator(".rp-memo-t").first.is_visible() and not pg.locator(".rp-memo-body").first.is_visible())
+    pg.locator(".rp-memo > summary").first.click(); time.sleep(0.2)
+    check("題名を押すと中身が開く", pg.locator(".rp-memo-body").first.is_visible() and "火祭" in pg.inner_text(".rp-memo-body >> nth=0"))
+    check("まとめの末尾に「画像」の欄はない", "画像" not in [t.strip() for t in pg.locator(".rp-doc h2").all_inner_texts()])
     with pg.expect_download() as dl: pg.click(".rp-tools [aria-label=ファイルに保存]")
     import shutil; out = Path(__file__).resolve().parent / "_report_test.html"; shutil.copy(dl.value.path(), out)
     html = out.read_text(encoding="utf-8"); out.unlink()
@@ -216,7 +222,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".filter-chip button"); pg.click(".search-toggle")
     pg.click(".tabs >> text=フォルダ"); pg.click(".list-row .open"); time.sleep(0.2)
     pg.click(".fab"); pg.click(".fab-menu >> text=保存済から追加"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
-    check("フォルダ画面のまとめるボタンは上部バーの右下", pg.locator("header .bar-bottom .report-btn").count() == 1)
+    check("フォルダ画面のまとめるボタンは鉛筆の右隣", pg.evaluate("(()=>{const b=[...document.querySelectorAll('header .head-actions > *')];return b.length===2&&b[1].classList.contains('report-btn')})()"))
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
     check("フォルダからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=最近")
@@ -245,10 +251,10 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
 
     # まとめ: キーワードなしでも作れて、作成日時の期間（今日など）で絞れる
     pg.click(".report-btn"); pg.wait_for_selector(".rp-tools")
-    check("キーワードなしで全メモのまとめ", pg.inner_text(".rp-title") == "すべてのメモのまとめ")
+    check("条件なしでは「すべてのメモのまとめ」を作らない", pg.locator(".rp-doc").count() == 0 and "まとめる条件を選んでください" in pg.inner_text(".rp-holder"))
+    check("フォルダと期間の選択欄は同じ幅", pg.evaluate("(()=>{const a=document.querySelector('#rp-period'),b=document.querySelector('#rp-list');return !b||Math.abs(a.getBoundingClientRect().width-b.getBoundingClientRect().width)<2})()"))
     check("フォルダ・期間は「未選択」から選ぶ", pg.locator("#rp-period option").first.inner_text() == "未選択")
-    check("キーワードなしでは「関連部分」を出さない（要約／全文だけ）", pg.locator(".rp-seg >> text=関連部分").count() == 0 and pg.locator(".rp-seg >> text=要約").count() == 1)
-    check("要約のまとめには概要（件数・期間）が出る", pg.locator(".rp-overview .rp-stat").count() == 2)
+    check("キーワードなしでは「関連部分／全文」を出さない", pg.locator(".rp-seg").count() == 0)
     pg.select_option("#rp-period", "today"); time.sleep(0.3)
     import datetime as _dt
     check("期間「今日」でまとめられる", pg.inner_text(".rp-title") == _dt.date.today().strftime("%Y/%m/%d") + "のまとめ")
@@ -301,6 +307,13 @@ fire('touchend',x1,false);}"""
     ctx.set_offline(True); pg.reload(); pg.wait_for_selector(".memo-card", timeout=8000)
     check("オフラインで起動・一覧表示", pg.locator(".memo-card").count() >= 4)
     ctx.set_offline(False)
+
+    # 長押しで選んだメモからまとめを作る
+    long_press(pg, pg.locator(".memo-card").first)
+    pg.click(".select-bar >> text=まとめる"); pg.wait_for_selector(".rp-tools"); time.sleep(0.3)
+    check("選んだメモからまとめを作れる", pg.inner_text(".rp-title").startswith("選んだ1件のメモ") and pg.inner_text(".rp-pick") == "1件を選択中")
+    pg.go_back(); pg.wait_for_selector(".search-toggle"); time.sleep(0.3)
+    check("まとめから戻ると選択モードは終わっている", pg.locator(".select-bar").count() == 0)
 
     # まとめて削除
     n_cards = pg.locator(".memo-card").count()
