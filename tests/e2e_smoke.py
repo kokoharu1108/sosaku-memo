@@ -40,6 +40,7 @@ with sync_playwright() as p:
     # 作成・保存・一覧
     new_memo(pg, "京都取材", body="鞍馬で火祭を見た")
     new_memo(pg, "単独メモ", genre="学び")
+    check("上部のアプリ名は参考画像の文字の形のロゴ", pg.locator(".brand svg.logo[aria-label=ヒフミヨ] path").count() >= 4)
     check("メモが一覧に出る", pg.locator(".memo-card").count() == 2)
 
     # 検索パネル・ジャンル
