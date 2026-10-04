@@ -55,9 +55,24 @@ with sync_playwright() as p:
     check("ツリーのタブがない", pg.locator(".tabs >> text=ツリー").count() == 0)
     check("カードは題名・日付・冒頭・ジャンルだけ（リスト名・時刻なし）", pg.locator(".memo-card .list-tag").count() == 0 and ":" not in pg.locator(".memo-card .card-date").first.inner_text())
     pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
-    check("閲覧画面の上部バーに題名とジャンル（「メモを読む」はない）", pg.inner_text("header .view-title") == "京都取材" and pg.locator("header .genre").count() >= 1 and "メモを読む" not in pg.inner_text("header"))
+    check("閲覧画面の上部バーに題名、背景に大きくジャンル（「メモを読む」はない）", pg.inner_text("header .view-title") == "京都取材" and "体験" in pg.inner_text("header .genre-mark") and pg.locator("header.topbar.g-体験").count() == 1 and "メモを読む" not in pg.inner_text("header"))
     check("アプリ名はヒフミヨ", pg.title() == "ヒフミヨ")
     check("閲覧画面に階層の欄がない", pg.locator(".child-sec, .tree-path").count() == 0 and "階層" not in pg.inner_text(".view-doc"))
+
+    # タグを押すと、検索窓を開いた検索画面を重ねて開き、戻ると閲覧画面へ
+    pg.go_back(); time.sleep(0.3)
+    new_memo(pg, "タグ付きメモ", body="タグの確認")
+    pg.locator(".memo-card", has_text="タグ付きメモ").click(); pg.wait_for_selector(".view-title")
+    pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.fill("#taginput", "取材"); pg.keyboard.press("Enter"); pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".view-title"); time.sleep(0.3)
+    check("閲覧画面のタグは題名の上で枠線なし", pg.evaluate("(()=>{const t=document.querySelector('header .tag-chip');return t.getBoundingClientRect().top<document.querySelector('header .view-title').getBoundingClientRect().top&&getComputedStyle(t).borderTopWidth==='0px'})()"))
+    pg.click("header .tag-chip"); time.sleep(0.4)
+    check("タグを押すと検索窓を開いた検索画面になる", pg.locator(".search-panel").is_visible() and pg.input_value("#q") == "#取材" and pg.locator(".memo-card", has_text="タグ付きメモ").count() == 1)
+    check("パス表示はタブの形で「ホーム」から今の画面まで", pg.inner_text(".crumb.home") == "ホーム" and pg.locator(".crumbs .crumb").count() == 3 and "検索" in pg.inner_text(".crumb.current"))
+    pg.go_back(); time.sleep(0.4)
+    check("戻るとタグを押す前の閲覧画面に戻る", pg.inner_text("header .view-title") == "タグ付きメモ")
+    pg.go_back(); time.sleep(0.3)
+    check("ホームの検索はタグの検索の影響を受けない", pg.locator(".filter-chip").count() == 0 and not pg.locator(".search-panel").is_visible())
+    pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
 
     # 戻る操作（Android のスワイプと同じ）
     pg.go_back(); time.sleep(0.3)
@@ -204,7 +219,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("検索パネルを閉じると検索ボタンは押していない見た目に戻る", pg.evaluate("getComputedStyle(document.querySelector('.search-toggle')).backgroundColor") == "rgba(0, 0, 0, 0)")
     check("メモ／リストのタブは選んでいる方が塗りつぶし", pg.evaluate("(()=>{const [a,b]=document.querySelectorAll('.tabs button');const c=e=>getComputedStyle(e).backgroundColor;return c(a)!==c(b)&&c(a)!=='rgba(0, 0, 0, 0)'})()"))
     check("タグは鮮やかな青", pg.evaluate("getComputedStyle(document.querySelector('.tag-mini')||document.body).color") == "rgb(29, 155, 240)" if pg.locator(".tag-mini").count() else True)
-    check("メモのカードの左端にジャンル名を縦に並べた色の帯がある", pg.evaluate("(()=>{const b=document.querySelector('.memo-card .genre-band .gb');const c=getComputedStyle(b);return c.backgroundColor!=='rgba(0, 0, 0, 0)'&&b.textContent.length>0})()"))
+    check("メモのカードの左端にジャンルのアイコンを置いた色の帯がある", pg.evaluate("(()=>{const b=document.querySelector('.memo-card .genre-band .gb');const c=getComputedStyle(b);return c.backgroundColor!=='rgba(0, 0, 0, 0)'&&!!b.querySelector('svg')})()"))
     check("カードの下段にジャンルの重複表示はない", pg.locator(".memo-card .card-foot .genre").count() == 0)
     check("作成から1時間未満は「○分前」", pg.locator(".memo-card .card-date").first.inner_text().endswith("分前"))
 
