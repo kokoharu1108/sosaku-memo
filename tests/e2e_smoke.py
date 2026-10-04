@@ -102,7 +102,7 @@ with sync_playwright() as p:
     pg.click(".tabs >> text=フォルダ"); pg.click(".fab"); pg.fill("#newlist", "京都"); pg.click(".modal >> text=作成"); time.sleep(0.3)
     if pg.locator(".modal").count(): pg.click(".modal >> text=キャンセル"); time.sleep(0.2)
     check("フォルダ画面の上部は名前の左にフォルダのアイコン（「フォルダ」の見出しなし）", pg.locator(".folder-title .folder-ico svg").count() == 1 and pg.locator(".list-head-label").count() == 0)
-    check("2画面からパス表示を出す（平行四辺形のタブ）", pg.locator(".crumbs .crumb").count() == 2 and pg.evaluate("getComputedStyle(document.querySelector('.crumb.current')).clipPath.startsWith('polygon')"))
+    check("2画面からパス表示を出す（丸角・斜体なし）", pg.locator(".crumbs .crumb").count() == 2 and pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.crumb.current'));return c.clipPath==='none'&&parseFloat(c.borderTopLeftRadius)>0&&c.fontStyle==='normal'})()"))
     check("「保存済みのメモを入れる」ボタンはない", pg.locator("text=保存済みのメモを入れる").count() == 0)
     pg.click(".fab")
     check("右下のボタンで「保存済から追加」「新規追加」を選べる", pg.locator(".fab-menu >> text=保存済から追加").is_visible() and pg.locator(".fab-menu >> text=新規追加").is_visible())
@@ -162,6 +162,9 @@ with sync_playwright() as p:
     pg.click(".att-row"); pg.wait_for_selector(".lightbox img")
     pg.click(".lightbox img"); time.sleep(0.2)
     check("画像を押しても原寸表示にならず、拡大表示が閉じる", pg.locator(".lightbox").count() == 0 and "原寸" not in pg.content())
+    pg.go_back(); pg.wait_for_selector(".search-toggle"); time.sleep(0.6)
+    check("画像付きのメモはカードの右側に画像を薄く敷く", pg.evaluate("(()=>{const c=[...document.querySelectorAll('.memo-card')].find(e=>e.textContent.includes('書式'));const t=c&&c.querySelector('.card-thumb img');return !!t&&!!t.getAttribute('src')&&parseFloat(getComputedStyle(t.parentNode).opacity)<1})()"))
+    pg.locator(".memo-card", has_text="書式").click(); pg.wait_for_selector(".view-title")
     body = pg.inner_html(".view-body")
     check("保存後も書式・見出しが残る", "<b>" in body and "<h2>" in body and "tc-rose" in body, body[:200])
     check("ゼロ幅スペースが残らない", "​" not in body)
@@ -213,6 +216,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".filter-chip button"); pg.click(".search-toggle")
     pg.click(".tabs >> text=フォルダ"); pg.click(".list-row .open"); time.sleep(0.2)
     pg.click(".fab"); pg.click(".fab-menu >> text=保存済から追加"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
+    check("フォルダ画面のまとめるボタンは上部バーの右下", pg.locator("header .bar-bottom .report-btn").count() == 1)
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
     check("フォルダからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=最近")
@@ -232,6 +236,9 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("検索画面の右下のボタンは「＋」だけの丸いボタン", pg.evaluate("(()=>{const f=document.querySelector('.fab');return f.classList.contains('round')&&f.textContent.trim()===''&&f.getAttribute('aria-label')==='新規メモ'})()"))
     check("上部バーに水色の線を付けない", pg.evaluate("getComputedStyle(document.querySelector('.topbar'),'::after').content") in ("none", "normal"))
     check("メモタブの名前は「最近」", pg.locator(".tabs button").first.inner_text() == "最近")
+    check("検索窓に「検索」ボタンはない（Enter で検索）", pg.locator(".search-go").count() == 0)
+    check("最近タブに件数を出さず、まとめるボタンは上部バー", pg.locator(".result-meta").count() == 0 and pg.locator("header .report-btn").count() == 1)
+    check("タブは丸角で斜体にしない", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.tabs button'));return c.clipPath==='none'&&c.fontStyle==='normal'})()"))
     check("メモのカードの左端にジャンルのアイコンを置いた色の帯がある", pg.evaluate("(()=>{const b=document.querySelector('.memo-card .genre-band .gb');const c=getComputedStyle(b);return c.backgroundColor!=='rgba(0, 0, 0, 0)'&&!!b.querySelector('svg')})()"))
     check("カードの下段にジャンルの重複表示はない", pg.locator(".memo-card .card-foot .genre").count() == 0)
     check("作成から1時間未満は「○分前」", pg.locator(".memo-card .card-date").first.inner_text().endswith("分前"))
@@ -240,7 +247,8 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.click(".report-btn"); pg.wait_for_selector(".rp-tools")
     check("キーワードなしで全メモのまとめ", pg.inner_text(".rp-title") == "すべてのメモのまとめ")
     check("フォルダ・期間は「未選択」から選ぶ", pg.locator("#rp-period option").first.inner_text() == "未選択")
-    check("キーワードなしでは「関連部分だけ／全文」を出さない", pg.locator(".rp-seg").count() == 0)
+    check("キーワードなしでは「関連部分」を出さない（要約／全文だけ）", pg.locator(".rp-seg >> text=関連部分").count() == 0 and pg.locator(".rp-seg >> text=要約").count() == 1)
+    check("要約のまとめには概要（件数・期間）が出る", pg.locator(".rp-overview .rp-stat").count() == 2)
     pg.select_option("#rp-period", "today"); time.sleep(0.3)
     import datetime as _dt
     check("期間「今日」でまとめられる", pg.inner_text(".rp-title") == _dt.date.today().strftime("%Y/%m/%d") + "のまとめ")
@@ -285,6 +293,7 @@ fire('touchend',x1,false);}"""
     check("バックアップを書き出せる", dl.value.suggested_filename.startswith("hifumiyo-backup-"))
     time.sleep(0.3)
     check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
+    check("設定の見出しは斜体にしない", pg.evaluate("getComputedStyle(document.querySelector('.settings-sec h4')).fontStyle") == "normal")
     pg.click(".modal >> text=閉じる")
 
     # オフライン起動
@@ -318,6 +327,16 @@ fire('touchend',x1,false);}"""
     tp.go_back(); tp.clock.fast_forward(22 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
     check("24時間をすぎたら日付", "/" in tp.inner_text(".memo-card .card-date"), tp.inner_text(".memo-card .card-date"))
     tc.close()
+
+    # フォルダ一覧: 削除アイコンはなく、長押しで選んで削除できる
+    pg.click(".tabs >> text=フォルダ"); time.sleep(0.3)
+    check("フォルダ一覧に削除アイコンはない", pg.locator(".list-row [aria-label=フォルダを削除]").count() == 0)
+    n_lists = pg.locator(".list-row").count()
+    long_press(pg, pg.locator(".list-row .open").first)
+    check("フォルダの長押しで選択が始まる", pg.locator(".select-bar").count() == 1 and pg.locator(".list-row.picked").count() == 1)
+    pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.5)
+    check("選んだフォルダを削除できる", pg.locator(".list-row").count() == n_lists - 1 and pg.locator(".select-bar").count() == 0)
+    pg.click(".tabs >> text=最近"); time.sleep(0.2)
 
     # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
     gas = FakeGas()

@@ -17,26 +17,27 @@
 <style>
 /* Layout: one-column notebook (max 760px) for 検索・メモ画面; 閲覧画面 splits into 本文 + resizable AI panel on the right edge. */
 :root {
-  --bg: #eef2f8;
-  --surface: #ffffff;
-  --surface-2: #e3e9f2;
-  --line: #d0d9e6;
-  --ink: #0f1a30;
-  --ink-2: #3d4a63;
-  --ink-3: #56637c;
-  --accent: #1a5fd6;
-  --accent-soft: #dde8fb;
-  --accent-ink: #154bb0;
+  --bg: #e8edf5;
+  --surface: #f8fafd;
+  --surface-2: #e1e8f3;
+  --line: #ccd6e4;
+  --ink: #111a2e;
+  --ink-2: #39465f;
+  --ink-3: #53607a;
+  --accent: #1f54d6;
+  --accent-soft: #dbe5fa;
+  --accent-ink: #1846b0;
+  --field-ink: #111a2e; --field-ink-2: #39465f; --field-ink-3: #53607a; --field-accent-ink: #1846b0;   /* バーの上の入力欄・小窓の文字 */
   --tag: #1d9bf0;   /* タグの色（X のリンクと同じ鮮やかな青） */
-  --g-exp: #ffdcbf;  --g-exp-ink: #a8460a;
-  --g-learn: #c8efe9; --g-learn-ink: #0d6b62;
-  --g-idea: #e6d6fb; --g-idea-ink: #6a2fc0;
+  --g-exp: #c8540c;  --g-exp-ink: #ffffff;   /* ジャンルは鮮やかな色＋白い文字 */
+  --g-learn: #0b8478; --g-learn-ink: #ffffff;
+  --g-idea: #7a3cd0; --g-idea-ink: #ffffff;
   --ok: #d6efe2; --ok-ink: #2d6f51;
   --ng: #f8dde0; --ng-ink: #a23b4b;
   --scrim: rgba(8, 16, 36, .5);
   --shadow: 0 1px 2px rgba(15,26,48,.08), 0 6px 20px rgba(15,26,48,.1);
-  --bar-search: #d5e2fb; --bar-list: #dde1e9; --bar-edit: #f8d5e3; --bar-report: #f5eaa6;
-  --bar-view: #e1e3ea; --bar-view-exp: #ffcfa3; --bar-view-learn: #b6e9e1; --bar-view-idea: #d9c6fa;   /* 閲覧画面はメモのジャンルの色 */
+  --bar-search: #1f54d6; --bar-list: #3a4a6e; --bar-edit: #c42e6e; --bar-report: #a86e00;
+  --bar-view: #4a5574; --bar-view-exp: #c8540c; --bar-view-learn: #0b8478; --bar-view-idea: #7a3cd0;   /* 閲覧画面はメモのジャンルの色 */
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #e0182f;   /* 削除などの警告色（はっきりした赤） */
@@ -50,13 +51,14 @@
     --bg: #0a1222; --surface: #111c30; --surface-2: #18253d; --line: #26364f;
     --ink: #e9f0fb; --ink-2: #b1c0d8; --ink-3: #95a6c2;
     --accent: #3cc4ff; --accent-soft: #12324e; --accent-ink: #9fdcff; --tag: #1d9bf0;
-    --g-exp: #4d2a12; --g-exp-ink: #ffb27a;
-    --g-learn: #0f3b39; --g-learn-ink: #7ee6d8;
-    --g-idea: #33205a; --g-idea-ink: #cfb0ff;
+    --g-exp: #c8540c; --g-exp-ink: #ffffff;
+    --g-learn: #0b8478; --g-learn-ink: #ffffff;
+    --g-idea: #7a3cd0; --g-idea-ink: #ffffff;
+    --field-ink: #e9f0fb; --field-ink-2: #b1c0d8; --field-ink-3: #95a6c2; --field-accent-ink: #9fdcff;
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
     --scrim: rgba(0,4,14,.66);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #8a4510; --bar-view-learn: #136458; --bar-view-idea: #5a2fa0; --danger: #ff4d63;
+    --bar-search: #1846b0; --bar-list: #34466d; --bar-edit: #9c2457; --bar-report: #8a5a00; --bar-view: #3f4a68; --bar-view-exp: #a8460a; --bar-view-learn: #0b6e66; --bar-view-idea: #6a2fc0; --danger: #ff4d63;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
@@ -66,24 +68,25 @@
   --bg: #0a1222; --surface: #111c30; --surface-2: #18253d; --line: #26364f;
   --ink: #e9f0fb; --ink-2: #b1c0d8; --ink-3: #95a6c2;
   --accent: #3cc4ff; --accent-soft: #12324e; --accent-ink: #9fdcff; --tag: #1d9bf0;
-  --g-exp: #4d2a12; --g-exp-ink: #ffb27a;
-  --g-learn: #0f3b39; --g-learn-ink: #7ee6d8;
-  --g-idea: #33205a; --g-idea-ink: #cfb0ff;
+  --g-exp: #c8540c; --g-exp-ink: #ffffff;
+  --g-learn: #0b8478; --g-learn-ink: #ffffff;
+  --g-idea: #7a3cd0; --g-idea-ink: #ffffff;
+  --field-ink: #e9f0fb; --field-ink-2: #b1c0d8; --field-ink-3: #95a6c2; --field-accent-ink: #9fdcff;
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
   --scrim: rgba(0,4,14,.66);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #8a4510; --bar-view-learn: #136458; --bar-view-idea: #5a2fa0; --danger: #ff4d63;
+  --bar-search: #1846b0; --bar-list: #34466d; --bar-edit: #9c2457; --bar-report: #8a5a00; --bar-view: #3f4a68; --bar-view-exp: #a8460a; --bar-view-learn: #0b6e66; --bar-view-idea: #6a2fc0; --danger: #ff4d63;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
 }
 
-.topbar { --tag: #1d9bf0; }
-/* ダークモード: 屋外でも画面を見分けられるよう、バーは色を濃く（明るく）し、バーの上の文字・アイコンは明るくする */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; --tag: #6cc4ff; }
-}
-:root[data-theme="dark"] :is(.topbar, .edit-actions, .select-bar) { --ink-2: #e2e4ec; --ink-3: #c9ccd8; --accent-ink: #e3e6ff; --tag: #6cc4ff; }
+/* バーは鮮やかな色なので、上の文字・アイコンは白に。入力欄や小窓（白地）の中は元の文字色に戻す */
+:is(.topbar, .edit-actions, .select-bar) { color: #fff; --ink-2: #eef2fb; --ink-3: #d3dcef; --accent-ink: #fff; --tag: #bfe6ff; }
+.topbar :is(.searchbox, select, input, .menu, .pop) { color: var(--field-ink); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-3); --accent-ink: var(--field-accent-ink); }
+.topbar.bar-search { --bar-cur: var(--bar-search); } .topbar.bar-list { --bar-cur: var(--bar-list); } .topbar.bar-edit { --bar-cur: var(--bar-edit); }
+.topbar.bar-report { --bar-cur: var(--bar-report); } .topbar.bar-view { --bar-cur: var(--bar-view); } .topbar.g-体験 { --bar-cur: var(--bar-view-exp); }
+.topbar.g-学び { --bar-cur: var(--bar-view-learn); } .topbar.g-アイデア { --bar-cur: var(--bar-view-idea); }
 
 * { box-sizing: border-box; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -114,10 +117,10 @@ a { color: var(--accent-ink); }
   display: flex; align-items: center; gap: 8px; min-height: 52px;
 }
 .topbar-in.wide { max-width: none; }
-.topbar h1 { font-size: 17px; font-weight: 900; font-style: italic; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar h1 { font-size: 17px; font-weight: 700; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
 .brand { align-items: center; }
-.brand b { display: inline-flex; line-height: 0; color: var(--ink); }
+.brand b { display: inline-flex; line-height: 0; color: currentColor; }
 .brand .logo { height: 23px; width: auto; display: block; }
 .brand small { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .icon-btn {
@@ -128,14 +131,14 @@ a { color: var(--accent-ink); }
 .icon-btn.ico svg { width: 27px; height: 27px; }
 .icon-btn:disabled { opacity: .45; }
 .head-actions { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
-.icon-btn.back { font-size: 28px; color: var(--ink); }
+.icon-btn.back { font-size: 28px; color: inherit; }
 .btn {
   border: 1px solid var(--line); background: var(--surface); color: var(--ink);
   border-radius: 10px; padding: 7px 14px; font-size: 14px; font-weight: 500;
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
 }
 a.btn { text-decoration: none; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 700; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding-inline: 18px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; padding-inline: 18px; border-radius: 999px; }
 .btn.danger { color: var(--ng-ink); }
 .btn.ghost { border-color: transparent; background: transparent; }
 .btn:disabled { opacity: .5; cursor: default; }
@@ -164,11 +167,14 @@ a.btn { text-decoration: none; }
 
 .toolbar-row { display: flex; align-items: center; gap: 8px; margin-block: 14px 10px; flex-wrap: wrap; }
 /* タブ: 斜めの平行四辺形。選んでいる方を塗りつぶす */
-.tabs { display: inline-flex; gap: 0; background: none; padding: 0; }
-.tabs button + button { margin-left: -8px; }
-.tabs button { border: 0; background: color-mix(in srgb, var(--surface) 55%, transparent); padding: 6px 20px; font-size: 15px; font-weight: 700; color: var(--ink-2);
-  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
-.tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); font-weight: 900; font-style: italic; }
+/* タブ: 丸角の切り替え（隙間なく並べる）。選んでいる方は白地にバーの色の文字 */
+.tabs { display: inline-flex; gap: 0; background: rgba(255,255,255,.16); padding: 3px; border-radius: 999px; }
+.tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 20px; font-size: 15px; font-weight: 700; color: var(--ink-2); }
+.tabs button[aria-selected="true"] { background: #fff; color: var(--bar-cur, var(--accent)); font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+/* まとめ画面の「要約／全文」など、バーの外のタブ */
+main .tabs, .modal .tabs { background: var(--surface-2); }
+main .tabs button, .modal .tabs button { color: var(--ink-2); }
+main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true"] { background: var(--accent); color: #fff; }
 .spacer { flex: 1; }
 .result-meta { font-size: 14.5px; color: var(--ink-2); }
 .filter-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 14.5px; }
@@ -226,11 +232,10 @@ a.btn { text-decoration: none; }
 .crumbs { display: flex; align-items: flex-end; padding: 4px 12px 6px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; max-width: 760px; margin: 0 auto; }
 .crumbs::-webkit-scrollbar { display: none; }
 /* パスのタブ: 平行四辺形を隙間なく並べる。前の画面は詰めて、今の画面は普通の大きさで塗りつぶす */
-.crumb { position: relative; flex: 0 1 auto; min-width: 3.4em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: -7px;
-  border: 0; background: var(--surface-2); color: var(--ink-2); padding: 4px 16px 5px 14px; font-size: 12px; font-weight: 700; text-align: left;
-  clip-path: polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
+.crumb { position: relative; flex: 0 1 auto; min-width: 3.4em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 4px;
+  border: 0; border-radius: 999px; background: rgba(255,255,255,.16); color: var(--ink-2); padding: 4px 12px; font-size: 12px; font-weight: 700; text-align: left; }
 .crumb.home { flex: 0 0 auto; max-width: none; }
-.crumb.current { flex: 0 0 auto; max-width: 62%; z-index: 50; margin-right: 0; background: var(--accent); color: var(--surface); font-size: 13.5px; font-weight: 900; font-style: italic; padding: 5px 18px 6px 16px; }
+.crumb.current { flex: 0 1 auto; max-width: 62%; margin-right: 0; background: #fff; color: var(--bar-cur, var(--accent)); font-size: 13.5px; font-weight: 800; padding: 5px 14px; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
 /* bar colors per screen（屋外でも見分けやすいよう、画面ごとに色相を分ける） */
 .topbar.bar-search { background: var(--bar-search); }
@@ -299,6 +304,20 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 }
 /* selection mode */
 .memo-card.selecting { padding-left: 74px; }
+/* カードの右側に敷く画像（境目をぼかし、少し透かす。文字は手前） */
+.card-thumb { position: absolute; top: 0; right: 0; bottom: 0; width: 46%; pointer-events: none; z-index: 0;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 70%); mask-image: linear-gradient(to right, transparent, #000 70%); opacity: .42; }
+.card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card-thumb { opacity: .3; } }
+:root[data-theme="dark"] .card-thumb { opacity: .3; }
+/* バーの上の「削除」は白い文字に（鮮やかなバーの上で赤い文字は読みにくい） */
+.topbar .btn.danger { color: #fff; background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.45); border-radius: 999px; }
+.memo-card > :not(.card-thumb):not(.genre-band):not(.pick-box) { position: relative; z-index: 1; }
+.list-row.selecting { position: relative; padding-left: 40px; }
+.list-row .pick-box { left: 12px; }
+.list-row.picked { border-color: var(--accent); background: var(--accent-soft); }
+.list-row.picked .pick-box { background: var(--accent); border-color: var(--accent); }
+.list-row > button.open { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .pick-box { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink-3); display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--surface); }
 .memo-card.picked { border-color: var(--accent); background: var(--accent-soft); }
 .memo-card.picked .pick-box { background: var(--accent); border-color: var(--accent); }
@@ -307,12 +326,12 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--sel-bar, var(--surface)); border-top: 1px solid var(--line); box-shadow: var(--shadow); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
 .select-bar-in { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .sel-count { font-size: 14px; }
-.btn.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 700; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding-inline: 18px; }
+.btn.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 700; padding-inline: 18px; border-radius: 999px; }
 .btn.sel-start { padding: 2px 10px; font-size: 13px; color: var(--accent-ink); }
 /* search panel */
 .search-toggle { position: relative; }
 .search-toggle svg { width: 27px; height: 27px; }
-.search-toggle[aria-expanded="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+.search-toggle[aria-expanded="true"] { background: #fff; color: var(--bar-cur, var(--accent)); }   /* タブの選択と同じ色 */
 .search-toggle .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
 .search-toggle.active .dot { display: block; }
 .search-panel { padding-top: 6px; }
@@ -338,6 +357,8 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .pv-media { width: 100%; max-height: 55vh; border-radius: 10px; background: #000; }
 .modal h3 { overflow-wrap: anywhere; }
 .list-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; }
+.bar-bottom { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; max-width: 760px; margin: 0 auto; padding-right: 8px; }
+.bar-bottom .crumbs { flex: 1; min-width: 0; margin: 0; }
 .folder-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .list-head-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--accent-ink); }
 .list-head-name { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
@@ -346,6 +367,8 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .list-name { font-weight: 700; overflow-wrap: anywhere; display: flex; align-items: center; gap: 8px; }
 .folder-ico { flex: 0 0 auto; display: inline-flex; color: var(--accent); }
 .folder-ico svg { width: 26px; height: 26px; fill: color-mix(in srgb, var(--accent) 22%, transparent); }
+.topbar .folder-ico { color: #fff; }
+.topbar .folder-ico svg { fill: rgba(255,255,255,.22); }
 .list-sub { padding-left: 34px; }
 .list-sub { font-size: 13.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .new-list { display: flex; gap: 8px; margin-bottom: 12px; }
@@ -357,17 +380,15 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 
 .fab {
   position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 25;
-  height: 54px; padding: 0 26px 0 22px; border-radius: 0; border: 0;
-  background: var(--accent); color: var(--surface); font-weight: 900; font-size: 15px; font-style: italic; letter-spacing: .04em;
-  display: inline-flex; align-items: center; gap: 6px; filter: drop-shadow(0 4px 10px rgba(8,16,36,.35));
-  clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
+  height: 54px; padding: 0 22px 0 18px; border-radius: 999px; border: 0;
+  background: var(--accent); color: #fff; font-weight: 800; font-size: 15px;
+  display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(8,16,36,.3);
 }
 .fab svg { width: 26px; height: 26px; }
-.fab.round { width: 60px; height: 60px; padding: 0; justify-content: center; border-radius: 50%; clip-path: none; }
+.fab.round { width: 60px; height: 60px; padding: 0; justify-content: center; border-radius: 50%; }
 .fab.round svg { width: 30px; height: 30px; stroke-width: 2.6; }
 .fab-menu { position: fixed; right: 18px; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 6px; justify-items: end; }
-.fab-menu button { border: 0; background: var(--surface); color: var(--ink); font-weight: 900; font-style: italic; font-size: 15px; padding: 11px 26px 11px 22px;
-  border-left: 4px solid var(--accent); box-shadow: var(--shadow); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.fab-menu button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 15px; padding: 11px 22px; border-radius: 999px; box-shadow: var(--shadow); }
 .fab-menu button:disabled { opacity: .45; }
 
 /* ---------- view screen ---------- */
@@ -376,6 +397,8 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .view-doc { max-width: 720px; margin: 0 auto; padding-inline: 20px 36px; padding-block: 20px 120px; }
 /* 閲覧画面の上部バー: 題名（2行まで）＋ジャンル・タグ（1行、横にスクロール） */
 .view-head { flex: 1; min-width: 0; padding: 2px 0; }
+.view-head.notags { padding: 6px 0; }
+.view-screen .topbar-in:has(.notags) { padding-top: 14px; padding-bottom: 8px; }
 .topbar .view-title { font-family: var(--font-title); font-size: 18px; font-weight: 700; font-style: normal; line-height: 1.4; margin: 0; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
 .view-head-chips { display: flex; gap: 2px 10px; align-items: center; margin-bottom: 2px; overflow-x: auto; scrollbar-width: none; }
 .view-head-chips::-webkit-scrollbar { display: none; }
@@ -385,10 +408,10 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .genre-mark-wrap { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
 .view-screen .crumbs { position: relative; z-index: 1; }
 .view-screen .topbar-in { position: relative; z-index: 2; }
-.genre-mark { position: absolute; right: -6px; top: 50%; transform: translateY(-58%) rotate(-12deg) skewX(-12deg); font-family: var(--font-title); font-size: 66px; font-weight: 900; letter-spacing: -.02em; line-height: 1; white-space: nowrap; pointer-events: none; z-index: 0; opacity: .16; color: var(--ink); }
-.g-体験 .genre-mark { color: var(--g-exp-ink); opacity: .24; }
-.g-学び .genre-mark { color: var(--g-learn-ink); opacity: .24; }
-.g-アイデア .genre-mark { color: var(--g-idea-ink); opacity: .24; }
+.genre-mark { position: absolute; right: -6px; top: 50%; transform: translateY(-58%) rotate(-12deg) skewX(-12deg); font-family: var(--font-title); font-size: 66px; font-weight: 900; letter-spacing: -.02em; line-height: 1; white-space: nowrap; pointer-events: none; z-index: 0; opacity: .16; color: #fff; }
+.g-体験 .genre-mark { color: #fff; opacity: .2; }
+.g-学び .genre-mark { color: #fff; opacity: .2; }
+.g-アイデア .genre-mark { color: #fff; opacity: .2; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .view-screen .topbar-in { align-items: center; min-height: 64px; }
 .view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 2px; }
@@ -522,7 +545,7 @@ body.editing-body .edit-actions { display: none; }
 .modal-scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 90; display: grid; place-items: center; padding: 16px; }
 .modal { background: var(--surface); border-radius: var(--radius); border-top: 4px solid var(--accent); box-shadow: var(--shadow); width: min(380px, 100%); padding: 20px; }
 .modal.wide { width: min(560px, 100%); max-height: min(80vh, 640px); display: flex; flex-direction: column; }
-.modal h3 { margin: 0 0 6px; font-size: 17px; font-weight: 900; font-style: italic; }
+.modal h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; }
 .modal p { margin: 0 0 16px; color: var(--ink-2); font-size: 14px; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .picker-list { overflow: auto; display: grid; gap: 6px; margin-block: 10px; min-height: 0; flex: 1; }
@@ -564,7 +587,18 @@ body.editing-body .edit-actions { display: none; }
 .rp-title { font-family: var(--font-title); font-size: 1.6em; line-height: 1.4; margin: 0 0 4px; overflow-wrap: anywhere; }
 .rp-meta { font-size: 12.5px; color: var(--ink-3); padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .rp-sec { margin-top: 20px; }
-.rp-sec-h { font-size: 1.15em; margin: 0 0 8px; padding-bottom: 4px; border-bottom: 2px solid var(--accent-soft); }
+.rp-sec-h { font-size: 1.1em; margin: 0 0 10px; padding-bottom: 6px; border-bottom: 2px solid var(--accent-soft); display: flex; align-items: center; gap: 8px; }
+.rp-sec-h .genre { font-size: 14px; padding: 2px 12px; }
+.rp-sec-n { font-size: 13px; font-weight: 500; color: var(--ink-3); }
+.rp-stats { display: grid; grid-template-columns: auto 1fr; gap: 8px; }
+.rp-stat { background: var(--surface-2); border-radius: 10px; padding: 8px 12px; display: grid; gap: 2px; min-width: 0; }
+.rp-stat-n { font-size: 22px; font-weight: 800; color: var(--accent-ink); line-height: 1.2; }
+.rp-stat-d { font-size: 15px; overflow-wrap: anywhere; }
+.rp-stat-l { font-size: 12px; color: var(--ink-3); }
+.rp-chips { display: flex; flex-wrap: wrap; gap: 6px 10px; margin-top: 10px; align-items: center; }
+.rp-summary .rp-list { list-style: none; padding: 0; display: grid; gap: 8px; }
+.rp-summary .rp-list > li { margin: 0; padding: 8px 12px; border-left: 3px solid var(--accent); background: var(--surface-2); border-radius: 0 8px 8px 0; font-size: 15px; line-height: 1.7; }
+.rp-more { font-size: 13px; color: var(--ink-3); margin: 8px 0 0; }
 .rp-list { margin: 0; padding-left: 1.3em; font-size: 15.5px; line-height: 1.8; letter-spacing: .02em; overflow-wrap: anywhere; }
 .rp-list > li { margin-bottom: 10px; }
 .rp-list > li::marker { color: var(--ink-3); }
@@ -585,7 +619,7 @@ body.editing-body .edit-actions { display: none; }
   .rp-sec { break-inside: auto; } .rp-list > li { break-inside: avoid; }
 }
 .settings-sec { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; display: grid; gap: 8px; }
-.settings-sec h4 { margin: 0; font-size: 14px; font-weight: 900; font-style: italic; color: var(--ink); border-left: 4px solid var(--accent); padding-left: 8px; }
+.settings-sec h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--ink); border-left: 4px solid var(--accent); padding-left: 8px; }
 .settings-sec .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .sync-btn svg { width: 22px; height: 22px; }
 .sync-btn[aria-pressed="true"] { background: var(--ok); color: var(--ok-ink); border-color: var(--ok-ink); font-weight: 700; }
@@ -1211,6 +1245,7 @@ function renderSearch(s) {
   const toolbar = h("div", { class: "toolbar-row tab-row" });
   const filterRow = h("div", { class: "toolbar-row filter-row" });
   const panel = h("div", { class: "search-panel", hidden: !st.open });
+  const reportSlot = h("span", { class: "report-slot" });
   const searchBtn = h("button", { class: "icon-btn search-toggle", type: "button", "aria-label": "検索・絞り込み", "aria-expanded": String(!!st.open), title: "検索・絞り込み",
     onclick: () => setPanel(!st.open) },
     svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), h("span", { class: "dot", "aria-hidden": "true" }));
@@ -1229,7 +1264,8 @@ function renderSearch(s) {
       sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
     searchBtn.classList.toggle("active", !!(st.committed || st.genre));
     const selecting = UI.select.on && UI.select.scope === "search";
-    fab.hidden = selecting;
+    fab.hidden = selecting || (UI.select.on && UI.select.scope === "lists");
+    reportSlot.replaceChildren();
 
     const fabText = st.tab === "lists" ? "新規フォルダ" : "新規メモ";
     fab.setAttribute("aria-label", fabText); fab.title = fabText;
@@ -1244,11 +1280,9 @@ function renderSearch(s) {
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
     if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
-    metaRow.append(h("span", { class: "result-meta" }, `${items.length}件`));
-    // 検索・絞り込みの結果を1つの新しいメモにまとめる（空の要素を append すると「null」と表示されるので条件で分ける）
-    if (items.length && !selecting) metaRow.append(h("span", { class: "spacer" }),
-      iconBtn("report", "まとめる", () => go({ name: "report", q: st.committed, genre: st.genre }), "report-btn"));
-    results.append(metaRow);
+    // 検索・絞り込みの結果を1つの新しいメモにまとめるボタンは、上部バーの検索ボタンの左に置く（件数は出さない）
+    reportSlot.replaceChildren(...(items.length && !selecting ? [iconBtn("report", "まとめる", () => go({ name: "report", q: st.committed, genre: st.genre }), "report-btn")] : []));
+    if (metaRow.childNodes.length) results.append(metaRow);
     // 「選択」は上部の固定バー（タブの行）の右端に置き、スクロールしても押せるようにする
 
     if (!items.length) {
@@ -1278,6 +1312,7 @@ function renderSearch(s) {
       UI.stack.length > 1 ? h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←") : null,
       h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
+      reportSlot,
       searchBtn,
       iconBtn("gear", "設定", openSettings)),
       h("div", { class: "search-tools" },
@@ -1290,8 +1325,7 @@ function renderSearch(s) {
   panel.append(
     h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
       h("div", { class: "search-row" },
-        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), input),
-        h("button", { class: "btn primary search-go", type: "submit" }, "検索"))),
+        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), input))),
     filterRow);
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
@@ -1394,20 +1428,46 @@ let longPressAt = 0, longPressHeld = false;
 const releaseLongPress = () => { if (longPressHeld) { longPressHeld = false; longPressAt = Date.now(); } };
 document.addEventListener("pointerup", releaseLongPress, true);
 document.addEventListener("pointercancel", releaseLongPress, true);
+/* 長押し（PCは右クリック）で選択を始める、押したら開く（選択中は選ぶ・外す）。メモのカードとフォルダの行で共通 */
+function pressHandlers(scope, id, sel, open) {
+  let timer = 0, sx = 0, sy = 0, longDone = false;
+  const start = () => { longDone = true; longPressHeld = true; longPressAt = Date.now(); try { navigator.vibrate && navigator.vibrate(25); } catch {} enterSelect(scope, id); };
+  const cancel = () => { clearTimeout(timer); timer = 0; };
+  return {
+    onpointerdown: (e) => { if (sel || !scope || (e.pointerType === "mouse" && e.button !== 0)) return; longDone = false; sx = e.clientX; sy = e.clientY; cancel(); timer = setTimeout(start, LONG_PRESS); },
+    onpointermove: (e) => { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); },
+    onpointerup: cancel, onpointercancel: cancel, onpointerleave: cancel,
+    oncontextmenu: (e) => { e.preventDefault(); if (!sel && scope && !longDone) { cancel(); start(); } },
+    onclick: (e) => { if (longDone || longPressHeld || Date.now() - longPressAt < 200) { longDone = false; e.preventDefault(); return; } sel ? sel.toggle(id) : open(); },
+  };
+}
+/* 題名に合いそうな画像を1枚選ぶ（題名の言葉を名前に含む画像 → 本文中の最初の画像 → 最初の添付画像） */
+function cardImage(m) {
+  const imgs = (m.attachments || []).filter(a => fileKind(a) === "image" && a.fileId);
+  if (!imgs.length) return null;
+  const words = (m.title || "").split(/[\s・、。,.!?！？「」『』（）()]+/).filter(w => w.length >= 2);
+  const byName = imgs.find(a => words.some(w => a.name.includes(w)));
+  if (byName) return byName;
+  const inBody = imgs.find(a => (m.bodyHtml || "").includes(`data-att="${a.id}"`));
+  return inBody || imgs[0];
+}
 function memoCard(m, terms = [], sel, scope) {
   const picked = sel && sel.ids.has(m.id);
   const gs = GENRES.filter(g => (m.genres || []).includes(g));
-  let timer = 0, sx = 0, sy = 0, longDone = false;
-  const startSelect = () => { longDone = true; longPressHeld = true; longPressAt = Date.now(); try { navigator.vibrate && navigator.vibrate(25); } catch {} enterSelect(scope, m.id); };
-  const cancel = () => { clearTimeout(timer); timer = 0; };
   const tags = (m.tags || []).slice(0, 2).map(t => h("span", { class: "tag-mini" }, "#" + t));
   const bandH = Math.max(1, gs.length) * 40;
-  return h("button", { class: "memo-card" + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null, style: `min-height:${bandH}px`,
-    onpointerdown: (e) => { if (sel || !scope || (e.pointerType === "mouse" && e.button !== 0)) return; longDone = false; sx = e.clientX; sy = e.clientY; cancel(); timer = setTimeout(startSelect, LONG_PRESS); },
-    onpointermove: (e) => { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); },
-    onpointerup: cancel, onpointercancel: cancel, onpointerleave: cancel,
-    oncontextmenu: (e) => { e.preventDefault(); if (!sel && scope && !longDone) { cancel(); startSelect(); } },
-    onclick: (e) => { if (longDone || longPressHeld || Date.now() - longPressAt < 200) { longDone = false; e.preventDefault(); return; } sel ? sel.toggle(m.id) : go({ name: "view", id: m.id }); } },
+  // 画像付きのメモは、カードの右側に1枚を薄く、境目をぼかして敷く
+  const ci = cardImage(m);
+  let thumb = null;
+  if (ci) {
+    const img = h("img", { alt: "", loading: "lazy", decoding: "async" });
+    const set = () => { const u = attUrl(ci); if (u) img.src = u; else thumb.remove(); };
+    thumb = h("span", { class: "card-thumb", "aria-hidden": "true" }, img);
+    if (attUrl(ci)) img.src = attUrl(ci); else ensureFileUrls([ci]).then(set, () => thumb.remove());
+  }
+  return h("button", { class: "memo-card" + (sel ? " selecting" : "") + (picked ? " picked" : "") + (ci ? " has-thumb" : ""), "aria-pressed": sel ? String(!!picked) : null, style: `min-height:${bandH}px`,
+    ...pressHandlers(scope, m.id, sel, () => go({ name: "view", id: m.id })) },
+    thumb,
     // 左端の帯: ジャンル名を縦書きで、ジャンルの色で塗る（複数あれば縦に分ける）
     h("span", { class: "genre-band", "aria-label": "ジャンル：" + (gs.join("・") || "未選択") },
       (gs.length ? gs : [null]).map(g => h("span", { class: g ? "gb g-" + g : "gb none", title: g || "ジャンル未選択" }, g ? svgIcon(ICONS["g" + g]) : "－"))),
@@ -1420,6 +1480,8 @@ function memoCard(m, terms = [], sel, scope) {
 }
 function renderLists(redraw) {
   const st = searchState();
+  const selecting = UI.select.on && UI.select.scope === "lists";
+  const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); redraw(); } } : null;
   const wrap = h("div");
   let lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
   if (st.sort === "upd-asc") lists.reverse();
@@ -1427,19 +1489,23 @@ function renderLists(redraw) {
   const rows = h("div", { class: "list-rows" });
   for (const l of lists) {
     const count = Manager.sorted.filter(m => (m.listIds || []).includes(l.id)).length;
-    rows.append(h("div", { class: "list-row" },
-      h("button", { class: "open", onclick: () => go({ name: "list", id: l.id }) },
+    const picked = sel && sel.ids.has(l.id);
+    rows.append(h("div", { class: "list-row" + (sel ? " selecting" : "") + (picked ? " picked" : "") },
+      sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? checkMark() : "") : null,
+      h("button", { class: "open", "aria-pressed": sel ? String(!!picked) : null, ...pressHandlers("lists", l.id, sel, () => go({ name: "list", id: l.id })) },
         h("div", { class: "list-name" }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("span", {}, l.name)),
         h("div", { class: "list-sub" }, `${count}件 ・ `, h("span", { class: "upd-ico", title: "更新", "aria-label": "更新" }, svgIcon(ICONS.updated)), relDate(l.updatedAt))),
-      iconBtn("edit", "名前を変更", () => renameList(l, redraw)),
-      h("button", { class: "icon-btn ico", title: "フォルダを削除", "aria-label": "フォルダを削除", onclick: async () => {
-        const ok = await modal({ title: "本当に削除しますか？", message: `フォルダ「${l.name}」を削除します。中のメモは削除されません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "danger-solid" }] });
-        if (!ok) return;
-        try { await Manager.deleteList(l.id); toast("フォルダを削除しました"); redraw(); }
-        catch { toast("フォルダを削除できませんでした。", true); }
-      } }, svgIcon(ICONS.trash))));
+      sel ? null : iconBtn("edit", "名前を変更", () => renameList(l, redraw))));
   }
   wrap.append(rows);
+  if (selecting) wrap.append(selectBar(lists.map(l => l.id), [{ label: "削除", cls: "danger-solid", run: async () => {
+    const ids = [...UI.select.ids].filter(id => Manager.lists.has(id));
+    if (!ids.length) return;
+    const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のフォルダを削除します。中のメモは削除されません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "danger-solid" }] });
+    if (!ok) return;
+    try { for (const id of ids) await Manager.deleteList(id); toast(`${ids.length}件のフォルダを削除しました`); exitSelect(); }
+    catch { toast("フォルダを削除できませんでした。", true); }
+  } }], redraw));
   return wrap;
 }
 const SORTS = [["upd-desc", "更新順（新）"], ["upd-asc", "更新順（古）"], ["cre-desc", "作成順（新）"], ["cre-asc", "作成順（古）"]];
@@ -1475,9 +1541,8 @@ function renderListScreen(s) {
     let items = sortMemos(filterByGenre(members, st.genre), st.sort);
     const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); draw(); } } : null;
     // 「まとめる」「選択」「名前の変更」は上部バーのアイコンに。本文側は件数と絞り込みの1行だけにする
-    headActions.replaceChildren(...[
-      items.length && !selecting ? iconBtn("report", "まとめる", () => go({ name: "report", listId: l.id, genre: st.genre }), "report-btn") : null,
-      iconBtn("edit", "フォルダ名を変更", () => renameList(l, render))].filter(Boolean));
+    headActions.replaceChildren(iconBtn("edit", "フォルダ名を変更", () => renameList(l, render)));
+    reportSlot.replaceChildren(...(items.length && !selecting ? [iconBtn("report", "まとめる", () => go({ name: "report", listId: l.id, genre: st.genre }), "report-btn")] : []));
     body.replaceChildren(...[
       h("div", { class: "toolbar-row", style: "margin-top:0" },
         h("span", { class: "result-meta" }, st.genre ? `${items.length}件／${members.length}件` : `${members.length}件`),
@@ -1506,12 +1571,13 @@ function renderListScreen(s) {
   document.addEventListener("click", closeAdd); cleanupFns.push(() => document.removeEventListener("click", closeAdd));
   const fabEl = h("button", { class: "fab", "aria-haspopup": "menu", onclick: () => { addMenu.hidden = !addMenu.hidden; } }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "メモを追加"));
   const headActions = h("div", { class: "head-actions" });
+  const reportSlot = h("span", { class: "report-slot" });
   draw();
   return h("div", { class: "screen" },
     h("header", { class: "topbar bar-list" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("div", { class: "folder-title" }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("h1", { style: "line-height:1.3" }, l.name)),
-      headActions), crumbBar()),
+      headActions), h("div", { class: "bar-bottom" }, crumbBar() || h("span"), reportSlot)),
     h("main", { class: "wrap" }, body),
     addMenu, fabEl);
 }
@@ -1643,14 +1709,46 @@ function pickBlocks(m, terms, excerpt) {
   }
   return raw.filter((b, i) => keep[i]);
 }
-/* まとめの中身: ジャンルごとの文章（本文中の画像はその文章と一緒）、本文に入っていない画像、ファイル */
+/* 要約: 1件のメモを1〜2文の要点に縮める（キーワードを含む文を優先、なければ冒頭の文） */
+const SUM_LEN = 90, SUM_PER_GENRE = 8, SUM_IMAGES = 6;
+function summarize(m, terms) {
+  const text = (m.bodyText || "").replace(/​/g, "").trim();
+  const sents = text.split(/(?<=[。！？!?])|\n+/).map(x => x.trim()).filter(Boolean);
+  if (!sents.length) return "";
+  const hit = terms.length ? sents.filter(x => terms.some(t => x.toLowerCase().includes(t))) : [];
+  const pick = (hit.length ? hit : sents).slice(0, 2);
+  let out = pick[0];
+  if (pick[1] && out.length + pick[1].length <= SUM_LEN) out += pick[1];
+  return out.length > SUM_LEN ? out.slice(0, SUM_LEN - 1) + "…" : out;
+}
+/* まとめの中身: ジャンルごとの文章（本文中の画像はその文章と一緒）、本文に入っていない画像、ファイル。
+   要約（既定）では、各メモを1〜2文に縮め、ジャンルごとの件数・画像の枚数にも上限を設ける */
 function digest(s, src) {
   const o = s.opts;
+  const summary = o.body === "summary";
   const items = [...src.items].sort((a, b) => a.createdAt - b.createdAt);
-  const groups = new Map();
+  const groups = new Map(), more = new Map();
   const images = [], files = [], seen = new Set(), inlineAtts = [];
+  const tagCount = new Map(), genreCount = new Map();
+  for (const m of items) {
+    (m.tags || []).forEach(t => tagCount.set(t, (tagCount.get(t) || 0) + 1));
+    GENRES.filter(g => (m.genres || []).includes(g)).forEach(g => genreCount.set(g, (genreCount.get(g) || 0) + 1));
+  }
   for (const m of items) {
     const key = GENRES.find(g => (m.genres || []).includes(g)) || "その他";
+    if (summary) {
+      const t = summarize(m, src.terms);
+      if (t) {
+        const list = groups.get(key) || []; groups.set(key, list);
+        if (list.length < SUM_PER_GENRE) { const d = document.createElement("div"); d.textContent = t; list.push([d]); }
+        else more.set(key, (more.get(key) || 0) + 1);
+      }
+      for (const a of m.attachments || []) {
+        const k = a.fileId || a.id; if (seen.has(k)) continue; seen.add(k);
+        (fileKind(a) === "image" ? images : files).push(a);
+      }
+      continue;
+    }
     const blocks = pickBlocks(m, src.terms, o.body === "excerpt");
     const inlineIds = new Set();
     for (const b of blocks) b.querySelectorAll("img").forEach(img => { if (!o.images) img.remove(); else if (img.dataset.att) inlineIds.add(img.dataset.att); });
@@ -1665,17 +1763,34 @@ function digest(s, src) {
       (fileKind(a) === "image" ? images : files).push(a);
     }
   }
-  return { title: src.title, count: items.length, groups: [...GENRES, "その他"].filter(g => groups.has(g)).map(g => [g, groups.get(g)]), images: o.images ? images : [], files, inlineAtts };
+  const dates = items.map(m => m.createdAt);
+  const overview = items.length ? { from: Math.min(...dates), to: Math.max(...dates), genres: GENRES.filter(g => genreCount.has(g)).map(g => [g, genreCount.get(g)]),
+    tags: [...tagCount].sort((a, b) => b[1] - a[1]).slice(0, 6) } : null;
+  const allImages = o.images ? images : [];
+  return { title: src.title, count: items.length, summary, overview, more,
+    groups: [...GENRES, "その他"].filter(g => groups.has(g) && groups.get(g).length).map(g => [g, groups.get(g)]),
+    images: summary ? allImages.slice(0, SUM_IMAGES) : allImages, moreImages: summary ? Math.max(0, allImages.length - SUM_IMAGES) : 0, files, inlineAtts };
 }
 /* 画面・ファイル用の見た目 */
 function digestDoc(dg) {
-  return h("article", { class: "rp-doc" },
+  const ov = dg.overview;
+  const day = (t) => fmtDate(t).slice(0, 10);
+  return h("article", { class: "rp-doc" + (dg.summary ? " rp-summary" : "") },
     h("h1", { class: "rp-title" }, dg.title),
-    h("div", { class: "rp-meta" }, `${fmtDate(Date.now()).slice(0, 10)} 作成 ・ ${dg.count}件のメモから`),
-    dg.groups.map(([g, list]) => h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, g),
-      h("ul", { class: "rp-list" }, list.map(blocks => h("li", {}, blocks.map(b => b.cloneNode(true))))))),
+    h("div", { class: "rp-meta" }, `${day(Date.now())} 作成 ・ ${dg.count}件のメモから`),
+    // 概要: 件数・期間・ジャンルの内訳・よく出てくるタグ
+    ov ? h("section", { class: "rp-sec rp-overview" }, h("h2", { class: "rp-sec-h" }, "概要"),
+      h("div", { class: "rp-stats" },
+        h("div", { class: "rp-stat" }, h("span", { class: "rp-stat-n" }, String(dg.count)), h("span", { class: "rp-stat-l" }, "件のメモ")),
+        h("div", { class: "rp-stat" }, h("span", { class: "rp-stat-n rp-stat-d" }, day(ov.from) === day(ov.to) ? day(ov.from) : day(ov.from) + " 〜 " + day(ov.to)), h("span", { class: "rp-stat-l" }, "期間"))),
+      ov.genres.length ? h("div", { class: "rp-chips" }, ov.genres.map(([g, n]) => h("span", { class: "genre g-" + g }, `${g} ${n}`))) : null,
+      ov.tags.length ? h("div", { class: "rp-chips" }, ov.tags.map(([t, n]) => h("span", { class: "tag-mini" }, `#${t}` + (n > 1 ? ` ×${n}` : "")))) : null) : null,
+    dg.groups.map(([g, list]) => h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, h("span", { class: "genre g-" + g }, g), h("span", { class: "rp-sec-n" }, `${list.length + (dg.more.get(g) || 0)}件`)),
+      h("ul", { class: "rp-list" }, list.map(blocks => h("li", {}, blocks.map(b => b.cloneNode(true))))),
+      dg.more.get(g) ? h("p", { class: "rp-more" }, `ほか${dg.more.get(g)}件（「全文」ですべて見られます）`) : null)),
     dg.images.length ? h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, "画像"),
-      h("div", { class: "rp-gallery" }, dg.images.map(a => h("img", { src: attUrl(a), alt: a.name })))) : null,
+      h("div", { class: "rp-gallery" }, dg.images.map(a => h("img", { src: attUrl(a), alt: a.name }))),
+      dg.moreImages ? h("p", { class: "rp-more" }, `ほか${dg.moreImages}枚`) : null) : null,
     dg.files.length ? h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, "添付ファイル"),
       h("ul", { class: "rp-files" }, dg.files.map(a => h("li", {}, h("a", { class: "rp-file", href: attUrl(a), download: a.name, "data-size": String(a.size || 0) }, KIND_ICON[fileKind(a)] + " " + a.name))))) : null);
 }
@@ -1685,6 +1800,13 @@ function digestDraft(dg, src) {
   const copy = (a) => { const n = { id: uid("a"), name: a.name, type: a.type, size: a.size, fileId: a.fileId }; idMap.set(a.id, n.id); return n; };
   const atts = [...dg.inlineAtts.map(copy), ...dg.images.map(copy), ...dg.files.map(copy)];
   const box = document.createElement("div");
+  if (dg.overview) {
+    const ov = dg.overview, day = (t) => fmtDate(t).slice(0, 10);
+    box.append(h("h2", {}, "概要"), h("ul", {},
+      h("li", {}, `${dg.count}件のメモ（${day(ov.from) === day(ov.to) ? day(ov.from) : day(ov.from) + "〜" + day(ov.to)}）`),
+      ov.genres.length ? h("li", {}, ov.genres.map(([g, n]) => `${g} ${n}件`).join("・")) : null,
+      ov.tags.length ? h("li", {}, ov.tags.map(([t]) => "#" + t).join(" ")) : null));
+  }
   for (const [g, list] of dg.groups) {
     box.append(h("h2", {}, g));
     box.append(h("ul", {}, list.map(blocks => h("li", {}, blocks.map(b => b.cloneNode(true))))));
@@ -1712,7 +1834,7 @@ async function reportFileHtml(doc, title) {
   for (const sh of document.styleSheets) { let rules; try { rules = sh.cssRules; } catch { continue; }
     for (const r of rules) {
       if (r.selectorText === ":root" && r.cssText.includes("--bg:")) css += r.cssText + "\n";
-      else if (r.selectorText && /\.(rp-|tc-|hl-)/.test(r.selectorText)) css += r.cssText + "\n";
+      else if (r.selectorText && /\.(rp-|tc-|hl-|genre|tag-mini)/.test(r.selectorText)) css += r.cssText + "\n";
     } }
   const esc = (t) => t.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${esc(title)}</title>
@@ -1723,7 +1845,7 @@ async function reportFileHtml(doc, title) {
 </style></head><body>${clone.outerHTML}</body></html>`;
 }
 function renderReport(s) {
-  s.opts = s.opts || { body: s.listId ? "full" : "excerpt", images: true, period: "all", from: "", to: "", listId: s.listId || "" };
+  s.opts = s.opts || { body: "summary", images: true, period: "all", from: "", to: "", listId: s.listId || "" };
   const o = s.opts;
   const src = reportSource(s);
   const holder = h("div", { class: "rp-holder" }, h("p", { class: "ai-hint" }, "まとめを作っています…"));
@@ -1750,7 +1872,7 @@ function renderReport(s) {
     catch (e) { if (!e || e.name !== "AbortError") toast("共有できませんでした。「ファイルに保存」をお使いください", true); }
   });
   const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.html", { type: "text/html" })] })); } catch { return false; } })();
-  const seg = h("div", { class: "tabs rp-seg", role: "group", "aria-label": "本文" }, [["excerpt", "関連部分だけ"], ["full", "全文"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o.body === v), "aria-selected": String(o.body === v),
+  const seg = h("div", { class: "tabs rp-seg", role: "group", "aria-label": "本文" }, [["summary", "要約"], ...(src.terms.length ? [["excerpt", "関連部分"]] : []), ["full", "全文"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o.body === v), "aria-selected": String(o.body === v),
     onclick: (e) => { o.body = v; seg.querySelectorAll("button").forEach(b => { const on = b === e.currentTarget; b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-selected", String(on)); }); draw(); } }, l)));
   // 期間（作成日時）: 変えたら画面ごと作り直す（題名・対象のメモが変わるため）
   const periodSel = h("select", { id: "rp-period", class: "genre-select" + (o.period !== "all" ? " on" : ""), "aria-label": "期間", onchange: () => { o.period = periodSel.value; render(); } },
@@ -1764,8 +1886,8 @@ function renderReport(s) {
     Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "フォルダ"), listSel) : null,
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
-    // 「関連部分だけ／全文」はキーワードで探したときだけ意味があるので、キーワードなし（フォルダや期間だけ）のときは出さない
-    h("div", { class: "rp-tool-row" }, src.terms.length ? [h("span", { class: "fr-label" }, "本文"), seg] : null,
+    // 「関連部分」はキーワードで探したときだけ出す
+    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg,
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
     h("div", { class: "rp-tool-row rp-actions" },
@@ -1818,7 +1940,7 @@ function renderView(s) {
       gs.length ? h("div", { class: "genre-mark-wrap", "aria-hidden": "true" }, h("div", { class: "genre-mark" }, gs.join(" "))) : null,
       h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
-      h("div", { class: "view-head" },
+      h("div", { class: "view-head" + ((m.tags || []).length ? "" : " notags") },
         (m.tags || []).length ? h("div", { class: "view-head-chips" },
           (m.tags || []).map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))) : null,
         h("h1", { class: "view-title" + (m.title ? "" : " untitled") }, m.title || "無題のメモ"),
