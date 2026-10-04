@@ -21,6 +21,11 @@ def check(name, cond, detail=""):
     print(("OK  " if cond else "NG  ") + name + (f"  ({detail})" if detail and not cond else ""))
     if not cond: failures.append(name)
 
+def long_press(pg, loc):
+    """長押し（指を置いたまま0.7秒）。離したあとの「押した」扱いも含めて確かめる"""
+    box = loc.bounding_box(); x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
+    pg.mouse.move(x, y); pg.mouse.down(); pg.wait_for_timeout(700); pg.mouse.up(); pg.wait_for_timeout(300)
+
 def new_memo(pg, title, genre="体験", body=None):
     pg.click(".fab"); pg.fill("#title", title); pg.click(f".genre-pick >> text={genre}")
     if body: pg.click(".editor"); pg.keyboard.insert_text(body)
@@ -83,7 +88,9 @@ with sync_playwright() as p:
     check("リストで作ったメモは保存後リスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 1)
 
     # 選択モードのままパンくずで戻っても、その後の「戻る」が効く
-    pg.click(".select-btn"); pg.click(".crumb.home"); time.sleep(0.4)
+    long_press(pg, pg.locator(".memo-card").first)
+    check("リスト画面でもメモの長押しで選択が始まる", pg.locator(".select-bar").count() == 1 and pg.locator(".memo-card.picked").count() == 1)
+    pg.click(".crumb.home"); time.sleep(0.4)
     pg.click(".tabs >> text=メモ"); pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
     pg.go_back(); time.sleep(0.3)
     check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
@@ -197,7 +204,9 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("検索パネルを閉じると検索ボタンは押していない見た目に戻る", pg.evaluate("getComputedStyle(document.querySelector('.search-toggle')).backgroundColor") == "rgba(0, 0, 0, 0)")
     check("メモ／リストのタブは選んでいる方が塗りつぶし", pg.evaluate("(()=>{const [a,b]=document.querySelectorAll('.tabs button');const c=e=>getComputedStyle(e).backgroundColor;return c(a)!==c(b)&&c(a)!=='rgba(0, 0, 0, 0)'})()"))
     check("タグは鮮やかな青", pg.evaluate("getComputedStyle(document.querySelector('.tag-mini')||document.body).color") == "rgb(29, 155, 240)" if pg.locator(".tag-mini").count() else True)
-    check("メモのカードに1件ずつの色の帯がある", pg.evaluate("parseFloat(getComputedStyle(document.querySelector('.memo-card')).borderLeftWidth) >= 5"))
+    check("メモのカードの左端にジャンル名を縦に並べた色の帯がある", pg.evaluate("(()=>{const b=document.querySelector('.memo-card .genre-band .gb');const c=getComputedStyle(b);return c.backgroundColor!=='rgba(0, 0, 0, 0)'&&b.textContent.length>0})()"))
+    check("カードの下段にジャンルの重複表示はない", pg.locator(".memo-card .card-foot .genre").count() == 0)
+    check("作成から1時間未満は「○分前」", pg.locator(".memo-card .card-date").first.inner_text().endswith("分前"))
 
     # まとめ: キーワードなしでも作れて、作成日時の期間（今日など）で絞れる
     pg.click(".report-btn"); pg.wait_for_selector(".rp-tools")
@@ -240,7 +249,7 @@ fire('touchend',x1,false);}"""
 
     # 検索画面: 「null」が出ない・「選択」は上部の固定バー
     check("検索画面に「null」が出ない", "null" not in pg.inner_text("body"))
-    check("「選択」は上部の固定バーのアイコン", pg.locator("header .select-btn").count() == 1)
+    check("選択ボタンはない（長押しで選ぶ）", pg.locator(".select-btn").count() == 0)
 
     # バックアップの書き出し → 「前回の書き出し」がその場で更新される
     pg.goto(URL); pg.wait_for_selector(".fab"); pg.click("button[aria-label=設定]")
@@ -257,10 +266,29 @@ fire('touchend',x1,false);}"""
     ctx.set_offline(False)
 
     # まとめて削除
-    pg.click(".select-btn"); pg.locator(".memo-card").first.click()
+    n_cards = pg.locator(".memo-card").count()
+    long_press(pg, pg.locator(".memo-card").first)
+    check("メモの長押しで選択が始まり、そのメモが選ばれる（離しても外れない）", pg.locator(".select-bar").count() == 1 and pg.locator(".memo-card.picked").count() == 1)
+    pg.locator(".memo-card").nth(1).click()
+    check("選択中は押すたびに選ぶ・外す", pg.locator(".memo-card.picked").count() == 2)
+    pg.locator(".memo-card").nth(1).click()
     check("選択のチェックは太い線の印", pg.evaluate("(()=>{const s=document.querySelector('.memo-card.picked .pick-box svg');return !!s&&parseFloat(s.getAttribute('stroke-width'))>=3})()"))
     pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
+    # 作成・更新の日時: 1時間未満は「○分前」、24時間未満は「○時間前」、それより前は日付
+    tc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    tp = tc.new_page(); tp.clock.install(time=1790000000000); tp.goto(URL); tp.wait_for_selector(".fab")
+    new_memo(tp, "時計のメモ")
+    tp.clock.fast_forward(25 * 60 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
+    check("作成25分後は「25分前」", tp.inner_text(".memo-card .card-date") == "25分前", tp.inner_text(".memo-card .card-date"))
+    tp.clock.fast_forward(2 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
+    check("作成2時間半後は「2時間前」", tp.inner_text(".memo-card .card-date") == "2時間前", tp.inner_text(".memo-card .card-date"))
+    tp.locator(".memo-card").click(); tp.wait_for_selector(".view-title")
+    check("閲覧画面の作成日時も同じ表示", "2時間前 作成" in tp.inner_text(".view-meta"), tp.inner_text(".view-meta"))
+    tp.go_back(); tp.clock.fast_forward(22 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
+    check("24時間をすぎたら日付", "/" in tp.inner_text(".memo-card .card-date"), tp.inner_text(".memo-card .card-date"))
+    tc.close()
+
     # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
     gas = FakeGas()
     def device():
