@@ -116,7 +116,9 @@ a { color: var(--accent-ink); }
 .topbar-in.wide { max-width: none; }
 .topbar h1 { font-size: 17px; font-weight: 900; font-style: italic; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
-.brand b { font-family: var(--font-title); font-size: 22px; font-weight: 900; letter-spacing: .08em; display: inline-block; transform: skewX(-12deg); }
+.brand { align-items: center; }
+.brand b { display: inline-flex; line-height: 0; color: var(--ink); }
+.brand .logo { height: 23px; width: auto; display: block; }
 .brand small { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .icon-btn {
   border: 0; background: transparent; border-radius: 10px; min-width: 46px; height: 46px;
@@ -632,6 +634,8 @@ const fmtDate = (ms) => {
 const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`; };
 const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+/* アプリ名のロゴ「ヒフミヨ」（利用者の参考画像の文字の形を写したもの。フォントを読み込まずに表示できる） */
+const LOGO_SVG = '<svg class="logo" viewBox="0 118 1280 316" role="img" aria-label="ヒフミヨ"><title>ヒフミヨ</title><g fill="currentColor"><path d="M0 130H31V400H261V430H0Z M31 245L253 207V237L31 275Z"/><g transform="translate(-257 0)"><path d="M578 138H862V272L758 422H609V393H741L832 265V167H578Z"/></g><g transform="translate(525 -445)"><path d="M151 568L408 613V643L151 598Z M166 671L318 697L394 750V784L310 726L166 701Z M140 790L420 840V870L140 820Z"/></g><g transform="translate(422 -445)"><path d="M583 583H857V775L803 853H583V824H788L827 768V728H599V699H827V613H583Z"/></g></g></svg>';
 /* 小さなアイコン（文字の代わりに使い、画面の情報量を減らす） */
 const ICONS = {
   note: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/>',
@@ -1272,7 +1276,7 @@ function renderSearch(s) {
   const scr = h("div", { class: "screen" },
     h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
       UI.stack.length > 1 ? h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←") : null,
-      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", {}, "ヒフミヨ"), h("small", {}, "体験・学び・アイデアの記録")),
+      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", {}, "体験・学び・アイデアの記録")),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       searchBtn,
       iconBtn("gear", "設定", openSettings)),

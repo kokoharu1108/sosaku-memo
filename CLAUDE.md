@@ -19,7 +19,7 @@
 
 ビルド不要の静的PWA。GitHub Pages で公開（利用者が GitHub のWeb画面からファイルをアップロードして更新している）。
 
-- `index.html` … アプリ本体（HTML・CSS・JS をすべて1ファイルに内包。外部ライブラリ・外部フォントなし。文字は X（旧Twitter）と同じく端末標準のゴシック体）
+- `index.html` … アプリ本体（HTML・CSS・JS をすべて1ファイルに内包。外部ライブラリ・外部フォントなし。文字は X（旧Twitter）と同じく端末標準のゴシック体）。検索画面上部のアプリ名「ヒフミヨ」だけは、利用者の参考画像（フォント「マキナス」）の文字の形を写した SVG のロゴ `LOGO_SVG`（フォントは読み込まない）
 - `sw.js` … オフライン起動用 Service Worker
 - `manifest.webmanifest`、`icons/` … ホーム画面追加用
 - `gas/Code.gs` … Googleドライブ同期の接続先（利用者が自分の Google Apps Script に貼り付けて「ウェブアプリ」として公開する）。手順は `docs/Googleドライブ同期の設定.md`。直したら利用者に「新しいバージョンで公開し直す」よう伝える
