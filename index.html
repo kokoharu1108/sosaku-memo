@@ -448,12 +448,13 @@ html.clear-bar .topbar:not(.bar-view) .folder-ico svg { fill: color-mix(in srgb,
 .view-screen .crumbs { position: relative; z-index: 1; }
 .view-screen .topbar-in { position: relative; z-index: 2; }
 .genre-mark { position: absolute; right: -6px; top: 50%; transform: translateY(-58%) rotate(-12deg) skewX(-12deg); font-family: var(--font-title); font-size: 66px; font-weight: 900; letter-spacing: -.02em; line-height: 1; white-space: nowrap; pointer-events: none; z-index: 0; opacity: .16; color: #fff; }
-.g-体験 .genre-mark { color: #fff; opacity: .2; }
-.g-学び .genre-mark { color: #0a1a4f; opacity: .14; }
+.g-体験 .genre-mark { color: #fff; opacity: .3; }
+.g-学び .genre-mark { color: #0a1a4f; opacity: .2; }
 .g-アイデア .genre-mark { color: #0a1a4f; opacity: .14; letter-spacing: -.16em; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.view-screen .topbar-in { align-items: center; min-height: 64px; }
-.view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 2px; }
+.view-screen .topbar-in { align-items: flex-start; min-height: 64px; }
+/* 戻る・メニューのボタンは、題名の1行目と同じ高さにそろえる（題名は上に余白があり、2行になることもあるため） */
+.view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 21px; }
 .view-title.untitled { color: var(--ink-3); }
 .view-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .view-body { margin-top: 16px; font-size: var(--read-size, 16px); line-height: 1.6; letter-spacing: .01em; overflow-wrap: anywhere; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
@@ -590,6 +591,8 @@ body.editing-body .edit-actions { display: none; }
 .modal { background: var(--surface); border-radius: var(--radius); border-top: 4px solid var(--accent); box-shadow: var(--shadow); width: min(380px, 100%); padding: 20px; }
 .modal.wide { width: min(560px, 100%); max-height: min(80vh, 640px); display: flex; flex-direction: column; }
 .modal h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; }
+.modal-head { display: flex; align-items: center; gap: 8px; margin: -8px -10px 4px 0; }
+.modal-head h3 { flex: 1; margin: 0; }
 .modal p { margin: 0 0 16px; color: var(--ink-2); font-size: 14px; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .picker-list { overflow: auto; display: grid; gap: 6px; margin-block: 10px; min-height: 0; flex: 1; }
@@ -751,6 +754,7 @@ const ICONS = {
   select: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18"/>',
   save: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
   print: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
@@ -1236,12 +1240,14 @@ function toast(msg, ng) {
   $("#toasts").replaceChildren(t);
   setTimeout(() => t.remove(), 3100);
 }
-function modal({ title, message, buttons, wide, body }) {
+function modal({ title, message, buttons, wide, body, closeX }) {
   return new Promise(resolve => {
     const close = (v) => { scrim.remove(); document.removeEventListener("keydown", onKey); resolve(v); };
     const onKey = (e) => { if (e.key === "Escape") close(null); };
     const box = h("div", { class: "modal" + (wide ? " wide" : ""), role: "dialog", "aria-modal": "true" },
-      title ? h("h3", {}, title) : null,
+      // closeX: 右上の✕で閉じる（下の「閉じる」ボタンの代わり）
+      title && closeX ? h("div", { class: "modal-head" }, h("h3", {}, title), iconBtn("close", "閉じる", () => close(null), "modal-x"))
+        : title ? h("h3", {}, title) : null,
       message ? h("p", {}, message) : null,
       body ? body(close) : null,
       buttons ? h("div", { class: "modal-actions" }, buttons.map(b => h("button", { class: "btn " + (b.cls || ""), onclick: () => close(b.value) }, b.label))) : null);
@@ -2866,7 +2872,7 @@ function afterChange() { Sync.schedule(); }
    設定 (バックアップ)
    ========================================================= */
 function openSettings() {
-  modal({ wide: true, title: "設定", body: (close) => {
+  modal({ wide: true, title: "設定", closeX: true, body: (close) => {
     // 書き出したら、その場で「前回の書き出し」を更新する（連打で二重に書き出さないよう、終わるまでボタンを止める）
     const lastText = () => "前回の書き出し：" + (Manager.meta.lastBackup ? fmtDate(Manager.meta.lastBackup) : "まだありません");
     const lastEl = h("p", { class: "ai-hint", style: "margin:0" }, lastText());
@@ -2879,7 +2885,7 @@ function openSettings() {
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
         h("h4", {}, "表示"),
         h("div", { class: "row" }, h("span", { style: "flex:1" }, "ダークモード"), themeSwitch()),
-        h("div", { class: "row" }, h("span", { style: "flex:1" }, "上部バーを透過（閲覧画面以外）"), onOffSwitch("上部バーを透過", clearBarOn, (v) => { lsSet("sm.clearBar", v); applyClearBar(); }))),
+        h("div", { class: "row" }, h("span", { style: "flex:1" }, "上部バーを透過"), onOffSwitch("上部バーを透過", clearBarOn, (v) => { lsSet("sm.clearBar", v); applyClearBar(); }))),
       bgSection(),
       syncSection(),
       h("div", { class: "settings-sec" },
@@ -2888,8 +2894,7 @@ function openSettings() {
         lastEl,
         h("div", { class: "row" },
           expBtn,
-          h("button", { class: "btn", type: "button", onclick: () => impIn.click() }, "バックアップを読み込む"), impIn)),
-      h("div", { class: "modal-actions", style: "margin-top:16px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "閉じる")));
+          h("button", { class: "btn", type: "button", onclick: () => impIn.click() }, "バックアップを読み込む"), impIn)));
   } });
 }
 /* 背景の画像（設定で端末の画像から選ぶ。端末内に保存し、大きい写真は縮めてから使う） */

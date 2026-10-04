@@ -67,6 +67,7 @@ with sync_playwright() as p:
     pg.locator(".memo-card", has_text="タグ付きメモ").click(); pg.wait_for_selector(".view-title")
     pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.fill("#taginput", "取材"); pg.keyboard.press("Enter"); pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".view-title"); time.sleep(0.3)
     check("閲覧画面のタグは本文の下（バーには出さない）で、検索画面と同じ水色・枠線なし", pg.evaluate("(()=>{const t=document.querySelector('.view-tags .tag-chip');return !!t&&!document.querySelector('header .tag-chip')&&t.getBoundingClientRect().top>document.querySelector('.view-meta').getBoundingClientRect().top&&getComputedStyle(t).borderTopWidth==='0px'&&getComputedStyle(t).color==='rgb(18, 180, 245)'})()"))
+    check("戻るボタンと題名の1行目の高さがそろう", pg.evaluate("(()=>{const r=e=>e.getBoundingClientRect();const t=r(document.querySelector('header .view-title')),b=r(document.querySelector('header .back'));return Math.abs((b.top+b.height/2)-(t.top+14))<3})()"))
     check("題名はタグの有無で位置が変わらず、文字は20px", pg.evaluate("(()=>{const t=document.querySelector('header .view-title');return Math.abs(t.getBoundingClientRect().top-document.querySelector('header.topbar').getBoundingClientRect().top-39)<4&&getComputedStyle(t).fontSize==='20px'})()"))
     check("パスは右（今の画面）のタブが上に重なる", pg.evaluate("(()=>{const c=[...document.querySelectorAll('.crumbs .crumb')];return c.every((e,i)=>i===0||+getComputedStyle(e).zIndex>+getComputedStyle(c[i-1]).zIndex)})()"))
     pg.click(".view-tags .tag-chip"); time.sleep(0.4)
@@ -313,8 +314,9 @@ fire('touchend',x1,false);}"""
     check("上部バーを透過でき、境目に線が出る（アイコンには枠）", pg.evaluate("document.documentElement.classList.contains('clear-bar') && getComputedStyle(document.querySelector('.topbar.bar-search')).borderBottomWidth === '2px' && getComputedStyle(document.querySelector('.topbar .icon-btn.ico')).boxShadow !== 'none'"))
     pg.click(".modal [aria-label=上部バーを透過]"); time.sleep(0.2)
     check("透過をオフに戻せる", not pg.evaluate("document.documentElement.classList.contains('clear-bar')"))
+    check("設定は右上の✕で閉じる（下の「閉じる」ボタンはない）", pg.locator(".modal .modal-head .modal-x[aria-label=閉じる]").count() == 1 and pg.locator(".modal .btn", has_text="閉じる").count() == 0 and "閲覧画面以外" not in pg.inner_text(".modal"))
     check("設定の見出しは斜体にしない", pg.evaluate("getComputedStyle(document.querySelector('.settings-sec h4')).fontStyle") == "normal")
-    pg.click(".modal >> text=閉じる")
+    pg.click(".modal .modal-x")
 
     # オフライン起動
     pg.goto(URL); pg.wait_for_selector(".fab"); time.sleep(1)
@@ -378,7 +380,7 @@ fire('touchend',x1,false);}"""
         q.click("[aria-label=設定]")
         if q.locator(".sync-setup").get_attribute("open") is None: q.click(".sync-setup summary")
         q.fill("#sync-url", url); q.fill("#sync-key", key); q.click(".sync-btn"); q.wait_for_timeout(1500)
-        st = q.inner_text(".sync-status"); q.click(".modal >> text=閉じる"); return st
+        st = q.inner_text(".sync-status"); q.click(".modal .modal-x"); return st
     pa = device()
     pa.click(".fab"); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); pa.set_input_files("#file", ICON); pa.wait_for_selector(".att-tile")
     pa.click(".edit-actions .btn.primary"); pa.wait_for_timeout(5000)
@@ -388,7 +390,7 @@ fire('touchend',x1,false);}"""
     check("「同期」を押すとドライブへ送る（URLの形も自動で直す）", st.startswith("オン") and gas.data and len(gas.data["memos"]) == 1 and len(gas.files) == 1, st)
     pb = device()
     check("合言葉が違うと分かる", "合言葉が違います" in sync_on(pb, "machigai"))
-    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")
+    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal .modal-x")
     sync_on(pb); pb.wait_for_timeout(500)
     check("別の端末で同期するとメモと添付が戻る", pb.locator(".memo-card", has_text="同期のメモ").count() == 1 and "📎 1" in pb.inner_text(".memo-card"))
     pb.locator(".memo-card").first.click(); pb.click(".menu-btn"); pb.click(".menu >> text=削除"); pb.click(".modal >> text=Yes"); pb.wait_for_timeout(5500)
@@ -398,7 +400,7 @@ fire('touchend',x1,false);}"""
     qc = pc.new_page(); qc.goto(URL); qc.wait_for_selector(".fab")
     check("古い接続先のときは直し方を表示", "プログラムが古いまま" in sync_on(qc))
     pc.unroute(FakeGas.URL); pc.route(FakeGas.URL, lambda r: r.fulfill(status=404, content_type="text/html", body="<html><head><title>ページが見つかりません</title></head></html>"))
-    qc.click("[aria-label=設定]"); qc.click(".sync-btn"); qc.wait_for_timeout(300); qc.click(".modal >> text=閉じる")
+    qc.click("[aria-label=設定]"); qc.click(".sync-btn"); qc.wait_for_timeout(300); qc.click(".modal .modal-x")
     st404 = sync_on(qc)
     check("404 のときは段階とGoogleの表示を添える", "接続確認" in st404 and "ページが見つかりません" in st404, st404)
     pc.close()
@@ -414,7 +416,7 @@ fire('touchend',x1,false);}"""
     pb.click("[aria-label=設定]"); st = pb.inner_text(".sync-status")
     check("通信が切れてもメモは先にドライブへ・失敗した添付は件数で知らせる", any(m["title"] == "大きな添付" for m in gas.data["memos"]) and "添付ファイル1件" in st, st)
     pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".sync-btn"); pb.wait_for_timeout(4000)   # オフ→オンで今すぐ同期
-    pb.click(".modal >> text=閉じる")
+    pb.click(".modal .modal-x")
     sent = [d for t, d in gas.files.values() if len(d) > 1_000_000]
     check("大きな添付は小分けで送られ、元通りにつながる", len(sent) == 1 and _b64.b64decode(sent[0]) == big and gas.calls.count("putChunk") >= 3)
     pa.reload(); pa.wait_for_selector(".fab"); pa.wait_for_timeout(5000)
@@ -429,14 +431,14 @@ fire('touchend',x1,false);}"""
     gas.data = other
     pa.evaluate(RESUME); pa.wait_for_timeout(2500)
     check("画面に戻すと他の端末のメモを取り込む（同期オン）", pa.locator(".memo-card", has_text="別の端末で書いたメモ").count() == 1)
-    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal >> text=閉じる")   # pb はオフに
+    pb.click("[aria-label=設定]"); pb.click(".sync-btn"); pb.wait_for_timeout(300); pb.click(".modal .modal-x")   # pb はオフに
     n = len(gas.calls); pb.wait_for_timeout(21000); pb.evaluate(RESUME); pb.wait_for_timeout(2000)
     check("同期オフなら画面に戻しても通信しない", len(gas.calls) == n)
 
     # Google の返事の受け取り口（googleusercontent.com）の一時的な 404 は、自動でやり直して同期を続ける
     def sync_now(q):
         q.click("[aria-label=設定]"); q.click(".sync-btn"); q.wait_for_timeout(300); q.click(".sync-btn"); q.wait_for_timeout(6000)
-        st = q.inner_text(".sync-status"); q.click(".modal >> text=閉じる"); return st
+        st = q.inner_text(".sync-status"); q.click(".modal .modal-x"); return st
     gas.echo404 = {"listFiles": 2}
     st = sync_now(pa)
     check("返事の受け取り口の一時的な404は、その場でやり直して成功", st.startswith("オン") and gas.echo404["listFiles"] == 0, st)
@@ -446,7 +448,7 @@ fire('touchend',x1,false);}"""
     gas.echo404 = {"listFiles": 3}
     st = sync_now(pa)
     check("やり直しても404なら一時的な不調と知らせる", "一時的な不調" in st and "添付の確認" in st, st)
-    pa.wait_for_timeout(9000); pa.click("[aria-label=設定]"); st = pa.inner_text(".sync-status"); pa.click(".modal >> text=閉じる")
+    pa.wait_for_timeout(9000); pa.click("[aria-label=設定]"); st = pa.inner_text(".sync-status"); pa.click(".modal .modal-x")
     check("少したつと自動でやり直して同期できる", st.startswith("オン"), st)
 
     # 古い接続先プログラム（版1）のときは更新を案内
