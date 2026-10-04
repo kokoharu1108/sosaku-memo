@@ -21,7 +21,7 @@
 
 - `index.html` … アプリ本体（HTML・CSS・JS をすべて1ファイルに内包。外部ライブラリ・外部フォントなし。文字は X（旧Twitter）と同じく端末標準のゴシック体）。検索画面上部のアプリ名「ヒフミヨ」だけは、利用者の参考画像（フォント「マキナス」）の文字の形を写した SVG のロゴ `LOGO_SVG`（フォントは読み込まない）
 - `sw.js` … オフライン起動用 Service Worker
-- `manifest.webmanifest`、`icons/` … ホーム画面追加用
+- `manifest.webmanifest`、`icons/` … ホーム画面追加用（v41〜 アイコンは利用者のイラスト。`icon-maskable-512.png` は丸く切り抜かれても欠けないよう縮めて周りを鏡像でつなげたもの）
 - `gas/Code.gs` … Googleドライブ同期の接続先（利用者が自分の Google Apps Script に貼り付けて「ウェブアプリ」として公開する）。手順は `docs/Googleドライブ同期の設定.md`。直したら利用者に「新しいバージョンで公開し直す」よう伝える
 - `tests/fake_gas.py` … テスト用の偽の接続先（`gas/Code.gs` と同じ受け答え）
 
