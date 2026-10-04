@@ -31,6 +31,7 @@
   --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;   /* 選んでいるもの（タブ・パス・ボタン）の色 */
   --water: linear-gradient(180deg, #c3dcff 0%, #e4eeff 38%, #eef4ff 100%);   /* 水の中から見上げたような背景 */
   --caustic-op: .45;
+  --top-color: #c3dcff;   /* 背景のいちばん上の色（上部バーを透過したときのスマホ上端の帯の色） */
   --bg-veil: linear-gradient(rgba(228,238,255,.45), rgba(228,238,255,.62));
   --field-ink: #0a1a4f; --field-ink-2: #2c3f78; --field-ink-3: #4a5c8e; --field-accent-ink: #1236b8;   /* バーの上の入力欄・小窓の文字 */
   --tag: #12b4f5;   /* タグの色（鮮やかな水色） */
@@ -59,6 +60,7 @@
     --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;
     --water: radial-gradient(120% 60% at 50% -8%, rgba(80,200,255,.38), rgba(80,200,255,0) 62%), linear-gradient(180deg, #0b2fa8 0%, #071c6e 34%, #050f3d 100%);
     --caustic-op: .28; --ray-fade: #050f3d;
+    --top-color: #0b2fa8;
     --water: radial-gradient(120% 45% at 50% -6%, rgba(80,200,255,.34), rgba(80,200,255,0) 60%), linear-gradient(180deg, #0b2fa8 0%, #08206f 22%, #061650 42%, #050f3d 100%);
     --bg-veil: linear-gradient(rgba(5,15,61,.45), rgba(5,15,61,.65));
     --g-exp: #e3262f; --g-exp-ink: #ffffff;
@@ -81,6 +83,7 @@
   --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;
   --water: radial-gradient(120% 60% at 50% -8%, rgba(80,200,255,.38), rgba(80,200,255,0) 62%), linear-gradient(180deg, #0b2fa8 0%, #071c6e 34%, #050f3d 100%);
   --caustic-op: .28; --ray-fade: #050f3d;
+  --top-color: #0b2fa8;
   --water: radial-gradient(120% 45% at 50% -6%, rgba(80,200,255,.34), rgba(80,200,255,0) 60%), linear-gradient(180deg, #0b2fa8 0%, #08206f 22%, #061650 42%, #050f3d 100%);
   --bg-veil: linear-gradient(rgba(5,15,61,.45), rgba(5,15,61,.65));
   --g-exp: #e3262f; --g-exp-ink: #ffffff;
@@ -102,7 +105,7 @@
 .topbar.bar-search { --bar-cur: var(--bar-search); } .topbar.bar-list { --bar-cur: var(--bar-list); } .topbar.bar-edit { --bar-cur: var(--bar-edit); }
 .topbar.bar-report { --bar-cur: var(--bar-report); } .topbar.bar-view { --bar-cur: var(--bar-view); } .topbar.g-体験 { --bar-cur: var(--bar-view-exp); }
 .topbar.g-学び { --bar-cur: var(--bar-view-learn); }
-.topbar:is(.g-学び, .g-アイデア) .crumb:not(.current) { background: rgba(255,255,255,.42); }
+.topbar:is(.g-学び, .g-アイデア) .crumb:not(.current) { background: color-mix(in srgb, var(--bar-cur) 62%, #fff); }
 .topbar:is(.g-学び, .g-アイデア) { color: #0a1a4f; --ink-2: #14275e; --ink-3: #24387a; --accent-ink: #0a1a4f; --tag: #0b3a9f; } .topbar.g-アイデア { --bar-cur: var(--bar-view-idea); }
 
 * { box-sizing: border-box; }
@@ -121,6 +124,10 @@ body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-event
 /* 背景に自分の画像を選んだとき: 画像の上に薄い色を重ねて文字を読みやすく。水面の模様は出さない */
 html.has-bg body::before { background: var(--bg-veil), var(--user-bg) center / cover no-repeat; }
 html.has-bg body::after { display: none; }
+html.clear-bar .topbar.bar-search { background: color-mix(in srgb, var(--bg) 28%, transparent); background-image: none; box-shadow: none;
+  -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); border-bottom: 2px solid var(--sel-bg);
+  color: var(--ink); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-3); --accent-ink: var(--field-accent-ink); --tag: var(--sel-bg); }
+html.clear-bar .topbar.bar-search .tabs { background: color-mix(in srgb, var(--surface) 70%, transparent); }
 body {
   background: var(--bg); color: var(--ink);
   font-family: var(--font-body); font-size: 15px; line-height: 1.7;
@@ -260,7 +267,7 @@ main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true
 .crumbs::-webkit-scrollbar { display: none; }
 /* パスのタブ: 平行四辺形を隙間なく並べる。前の画面は詰めて、今の画面は普通の大きさで塗りつぶす */
 .crumb { position: relative; flex: 0 1 auto; min-width: 3.4em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: -10px; padding-right: 20px !important; box-shadow: 2px 0 6px rgba(0,8,40,.35);
-  border: 0; border-radius: 999px; background: rgba(4,14,60,.32); color: var(--ink-2); padding: 4px 12px; font-size: 12px; font-weight: 700; text-align: left; }
+  border: 0; border-radius: 999px; background: color-mix(in srgb, var(--bar-cur, var(--bar-search)) 60%, #020a2e); color: var(--ink-2); padding: 4px 12px; font-size: 12px; font-weight: 700; text-align: left; }
 .crumb.home { flex: 0 0 auto; max-width: none; }
 .crumb.current { flex: 0 1 auto; max-width: 62%; margin-right: 0; background: var(--sel-bg); color: var(--sel-ink); font-size: 13.5px; font-weight: 800; padding: 5px 14px; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
@@ -432,7 +439,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .genre-mark { position: absolute; right: -6px; top: 50%; transform: translateY(-58%) rotate(-12deg) skewX(-12deg); font-family: var(--font-title); font-size: 66px; font-weight: 900; letter-spacing: -.02em; line-height: 1; white-space: nowrap; pointer-events: none; z-index: 0; opacity: .16; color: #fff; }
 .g-体験 .genre-mark { color: #fff; opacity: .2; }
 .g-学び .genre-mark { color: #0a1a4f; opacity: .14; }
-.g-アイデア .genre-mark { color: #0a1a4f; opacity: .14; }
+.g-アイデア .genre-mark { color: #0a1a4f; opacity: .14; letter-spacing: -.16em; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .view-screen .topbar-in { align-items: center; min-height: 64px; }
 .view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 2px; }
@@ -477,6 +484,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .view-screen .view-main { height: 100%; overscroll-behavior: contain; }
 /* 本文を読む場所は、背景の光の模様を抑えて落ち着いた色に（長時間読んでも疲れにくいように） */
 .view-screen .view-main { background: color-mix(in srgb, var(--bg) 86%, transparent); }
+html.has-bg .view-screen .view-main { background: transparent; }
 
 /* ---------- edit screen ---------- */
 .field { margin-bottom: 18px; }
@@ -1245,6 +1253,16 @@ const hostTheme = document.documentElement.getAttribute("data-theme");
 function systemDark() { return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches; }
 function isDark() { const t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : systemDark(); }
 function applyTheme() { const p = lsGet("sm.theme", null); if (p) document.documentElement.setAttribute("data-theme", p); else if (hostTheme) document.documentElement.setAttribute("data-theme", hostTheme); }
+/* 設定のオン・オフの切り替え（ダークモードと同じ見た目） */
+function onOffSwitch(label, get, set) {
+  const btn = h("button", { class: "switch", role: "switch", "aria-checked": String(get()), title: label, "aria-label": label,
+    onclick: () => { set(!get()); btn.setAttribute("aria-checked", String(get())); btn.querySelector(".sw-state").textContent = get() ? "ON" : "OFF"; } },
+    h("span", { class: "sw-state" }, get() ? "ON" : "OFF"), h("span", { class: "track" }, h("span", { class: "knob" })));
+  return btn;
+}
+/* 検索画面の上部バーを透過するか（端末ごとの設定） */
+const clearBarOn = () => !!lsGet("sm.clearBar", false);
+function applyClearBar() { document.documentElement.classList.toggle("clear-bar", clearBarOn()); syncThemeColor(); }
 function themeSwitch() {
   const btn = h("button", { class: "switch", role: "switch", "aria-checked": String(isDark()), title: "ダークモード",
     onclick: () => { const next = isDark() ? "light" : "dark"; lsSet("sm.theme", next); document.documentElement.setAttribute("data-theme", next); syncThemeColor(); btn.setAttribute("aria-checked", String(next === "dark")); btn.querySelector(".sw-state").textContent = next === "dark" ? "ON" : "OFF"; } },
@@ -1256,6 +1274,7 @@ function themeSwitch() {
 const GENRE_KEY = { 体験: "exp", 学び: "learn", アイデア: "idea" };
 function syncThemeColor() {
   const s = current(); let name = "--bar-" + (s.name || "search");
+  if (s.name === "search" && document.documentElement.classList.contains("clear-bar")) name = "--top-color";
   if (s.name === "view") { const m = Manager.get(s.id); const g = m && GENRES.find(x => (m.genres || []).includes(x)); if (g) name = "--bar-view-" + GENRE_KEY[g]; }
   const c = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   if (c) document.querySelectorAll('meta[name="theme-color"]').forEach(m => { m.removeAttribute("media"); m.content = c; });
@@ -2845,7 +2864,8 @@ function openSettings() {
     return h("div", { style: "overflow:auto;min-height:0" },
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
         h("h4", {}, "表示"),
-        h("div", { class: "row" }, h("span", { style: "flex:1" }, "ダークモード"), themeSwitch())),
+        h("div", { class: "row" }, h("span", { style: "flex:1" }, "ダークモード"), themeSwitch()),
+        h("div", { class: "row" }, h("span", { style: "flex:1" }, "検索画面の上部バーを透過"), onOffSwitch("検索画面の上部バーを透過", clearBarOn, (v) => { lsSet("sm.clearBar", v); applyClearBar(); }))),
       bgSection(),
       syncSection(),
       h("div", { class: "settings-sec" },
@@ -2990,6 +3010,7 @@ function scheduleMidnight() {
 
 async function boot() {
   applyTheme();
+  document.documentElement.classList.toggle("clear-bar", clearBarOn());
   if (historyOk) try { history.replaceState({ depth: 1 }, ""); } catch {}
   $("#app").append(h("div", { class: "wrap" }, h("p", { class: "ai-hint" }, "メモを読み込んでいます…")));
   await Storage.init();
