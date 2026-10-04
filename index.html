@@ -17,27 +17,31 @@
 <style>
 /* Layout: one-column notebook (max 760px) for 検索・メモ画面; 閲覧画面 splits into 本文 + resizable AI panel on the right edge. */
 :root {
-  --bg: #e8edf5;
-  --surface: #f8fafd;
-  --surface-2: #e1e8f3;
-  --line: #ccd6e4;
-  --ink: #111a2e;
-  --ink-2: #39465f;
-  --ink-3: #53607a;
-  --accent: #1f54d6;
-  --accent-soft: #dbe5fa;
-  --accent-ink: #1846b0;
-  --field-ink: #111a2e; --field-ink-2: #39465f; --field-ink-3: #53607a; --field-accent-ink: #1846b0;   /* バーの上の入力欄・小窓の文字 */
+  /* ペルソナ3 リロードの色調: 群青色を基調にした寒色。選択中は「水色の地＋藍色の文字」 */
+  --bg: #e4eeff;
+  --surface: #f6faff;
+  --surface-2: #dce8fb;
+  --line: #c3d4ef;
+  --ink: #0a1a4f;
+  --ink-2: #2c3f78;
+  --ink-3: #4a5c8e;
+  --accent: #1236b8;
+  --accent-soft: #d6e3ff;
+  --accent-ink: #1236b8;
+  --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;   /* 選んでいるもの（タブ・パス・ボタン）の色 */
+  --water: linear-gradient(180deg, #c3dcff 0%, #e4eeff 38%, #eef4ff 100%);   /* 水の中から見上げたような背景 */
+  --caustic-op: .45;
+  --field-ink: #0a1a4f; --field-ink-2: #2c3f78; --field-ink-3: #4a5c8e; --field-accent-ink: #1236b8;   /* バーの上の入力欄・小窓の文字 */
   --tag: #1d9bf0;   /* タグの色（X のリンクと同じ鮮やかな青） */
-  --g-exp: #c8540c;  --g-exp-ink: #ffffff;   /* ジャンルは鮮やかな色＋白い文字 */
-  --g-learn: #0b8478; --g-learn-ink: #ffffff;
-  --g-idea: #7a3cd0; --g-idea-ink: #ffffff;
+  --g-exp: #e3262f;  --g-exp-ink: #ffffff;   /* ジャンル: 体験＝赤、学び＝黄、アイデア＝青緑（P3R の色） */
+  --g-learn: #f2d33c; --g-learn-ink: #1a1a2e;
+  --g-idea: #13b59a; --g-idea-ink: #04221d;
   --ok: #d6efe2; --ok-ink: #2d6f51;
   --ng: #f8dde0; --ng-ink: #a23b4b;
-  --scrim: rgba(8, 16, 36, .5);
-  --shadow: 0 1px 2px rgba(15,26,48,.08), 0 6px 20px rgba(15,26,48,.1);
-  --bar-search: #1f54d6; --bar-list: #3a4a6e; --bar-edit: #c42e6e; --bar-report: #a86e00;
-  --bar-view: #4a5574; --bar-view-exp: #c8540c; --bar-view-learn: #0b8478; --bar-view-idea: #7a3cd0;   /* 閲覧画面はメモのジャンルの色 */
+  --scrim: rgba(4, 12, 50, .55);
+  --shadow: 0 1px 2px rgba(10,26,79,.1), 0 6px 20px rgba(10,26,79,.12);
+  --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #3a2fc4; --bar-report: #0a7fd0;
+  --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #e8c62c; --bar-view-idea: #12a88e;   /* 閲覧画面はメモのジャンルの色 */
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
   --danger: #e0182f;   /* 削除などの警告色（はっきりした赤） */
@@ -48,34 +52,40 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0a1222; --surface: #111c30; --surface-2: #18253d; --line: #26364f;
-    --ink: #e9f0fb; --ink-2: #b1c0d8; --ink-3: #95a6c2;
-    --accent: #3cc4ff; --accent-soft: #12324e; --accent-ink: #9fdcff; --tag: #1d9bf0;
-    --g-exp: #c8540c; --g-exp-ink: #ffffff;
-    --g-learn: #0b8478; --g-learn-ink: #ffffff;
-    --g-idea: #7a3cd0; --g-idea-ink: #ffffff;
-    --field-ink: #e9f0fb; --field-ink-2: #b1c0d8; --field-ink-3: #95a6c2; --field-accent-ink: #9fdcff;
+    --bg: #050f3d; --surface: #0b1f66; --surface-2: #122c80; --line: #2b4cb0;
+    --ink: #eaf3ff; --ink-2: #bcd0f7; --ink-3: #a3bbec;
+    --accent: #4fd2ff; --accent-soft: #123a8a; --accent-ink: #8fe3ff; --tag: #5cc8ff;
+    --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;
+    --water: radial-gradient(120% 60% at 50% -8%, rgba(80,200,255,.38), rgba(80,200,255,0) 62%), linear-gradient(180deg, #0b2fa8 0%, #071c6e 34%, #050f3d 100%);
+    --caustic-op: .28;
+    --g-exp: #e3262f; --g-exp-ink: #ffffff;
+    --g-learn: #f2d33c; --g-learn-ink: #1a1a2e;
+    --g-idea: #13b59a; --g-idea-ink: #04221d;
+    --field-ink: #eaf3ff; --field-ink-2: #bcd0f7; --field-ink-3: #a3bbec; --field-accent-ink: #8fe3ff;
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
-    --scrim: rgba(0,4,14,.66);
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-search: #1846b0; --bar-list: #34466d; --bar-edit: #9c2457; --bar-report: #8a5a00; --bar-view: #3f4a68; --bar-view-exp: #a8460a; --bar-view-learn: #0b6e66; --bar-view-idea: #6a2fc0; --danger: #ff4d63;
+    --scrim: rgba(0,4,24,.7);
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,4,30,.45);
+    --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #3a2fc4; --bar-report: #0a7fd0; --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #e8c62c; --bar-view-idea: #12a88e; --danger: #ff4d63;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0a1222; --surface: #111c30; --surface-2: #18253d; --line: #26364f;
-  --ink: #e9f0fb; --ink-2: #b1c0d8; --ink-3: #95a6c2;
-  --accent: #3cc4ff; --accent-soft: #12324e; --accent-ink: #9fdcff; --tag: #1d9bf0;
-  --g-exp: #c8540c; --g-exp-ink: #ffffff;
-  --g-learn: #0b8478; --g-learn-ink: #ffffff;
-  --g-idea: #7a3cd0; --g-idea-ink: #ffffff;
-  --field-ink: #e9f0fb; --field-ink-2: #b1c0d8; --field-ink-3: #95a6c2; --field-accent-ink: #9fdcff;
+  --bg: #050f3d; --surface: #0b1f66; --surface-2: #122c80; --line: #2b4cb0;
+  --ink: #eaf3ff; --ink-2: #bcd0f7; --ink-3: #a3bbec;
+  --accent: #4fd2ff; --accent-soft: #123a8a; --accent-ink: #8fe3ff; --tag: #5cc8ff;
+  --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;
+  --water: radial-gradient(120% 60% at 50% -8%, rgba(80,200,255,.38), rgba(80,200,255,0) 62%), linear-gradient(180deg, #0b2fa8 0%, #071c6e 34%, #050f3d 100%);
+  --caustic-op: .28;
+  --g-exp: #e3262f; --g-exp-ink: #ffffff;
+  --g-learn: #f2d33c; --g-learn-ink: #1a1a2e;
+  --g-idea: #13b59a; --g-idea-ink: #04221d;
+  --field-ink: #eaf3ff; --field-ink-2: #bcd0f7; --field-ink-3: #a3bbec; --field-accent-ink: #8fe3ff;
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
-  --scrim: rgba(0,4,14,.66);
-  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-search: #1846b0; --bar-list: #34466d; --bar-edit: #9c2457; --bar-report: #8a5a00; --bar-view: #3f4a68; --bar-view-exp: #a8460a; --bar-view-learn: #0b6e66; --bar-view-idea: #6a2fc0; --danger: #ff4d63;
+  --scrim: rgba(0,4,24,.7);
+  --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,4,30,.45);
+  --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #3a2fc4; --bar-report: #0a7fd0; --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #e8c62c; --bar-view-idea: #12a88e; --danger: #ff4d63;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
@@ -86,7 +96,9 @@
 .topbar :is(.searchbox, select, input, .menu, .pop) { color: var(--field-ink); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-3); --accent-ink: var(--field-accent-ink); }
 .topbar.bar-search { --bar-cur: var(--bar-search); } .topbar.bar-list { --bar-cur: var(--bar-list); } .topbar.bar-edit { --bar-cur: var(--bar-edit); }
 .topbar.bar-report { --bar-cur: var(--bar-report); } .topbar.bar-view { --bar-cur: var(--bar-view); } .topbar.g-体験 { --bar-cur: var(--bar-view-exp); }
-.topbar.g-学び { --bar-cur: var(--bar-view-learn); } .topbar.g-アイデア { --bar-cur: var(--bar-view-idea); }
+.topbar.g-学び { --bar-cur: var(--bar-view-learn); }
+.topbar:is(.g-学び, .g-アイデア) .crumb:not(.current) { background: rgba(255,255,255,.42); }
+.topbar:is(.g-学び, .g-アイデア) { color: #0a1a4f; --ink-2: #14275e; --ink-3: #24387a; --accent-ink: #0a1a4f; --tag: #0b3a9f; } .topbar.g-アイデア { --bar-cur: var(--bar-view-idea); }
 
 * { box-sizing: border-box; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -94,6 +106,11 @@ body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 html, body { height: 100%; }
+/* 水の中から見上げたような背景: 上から光が差し、水面のゆらぎが細い光の筋になって映る（カードの中は無地で読みやすく） */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background: repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water);
+  opacity: 1; }
+body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='1600' preserveAspectRatio='none'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.006 0.011' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.62 0 0 0 0 0.9 0 0 0 0 1 -9 0 0 0 1.25'/%3E%3CfeGaussianBlur stdDeviation='1.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E") center top / 100% 100% no-repeat; opacity: var(--caustic-op); mix-blend-mode: screen; }
 body {
   background: var(--bg); color: var(--ink);
   font-family: var(--font-body); font-size: 15px; line-height: 1.7;
@@ -108,9 +125,9 @@ a { color: var(--accent-ink); }
 .screen { min-height: 100%; display: flex; flex-direction: column; }
 .topbar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  background: var(--bar-cur, var(--bar-search));
+  background-image: linear-gradient(180deg, rgba(0,8,40,.18) 0%, rgba(0,8,40,0) 40%, rgba(120,220,255,.22) 100%);
+  border-bottom: 0; box-shadow: 0 2px 10px rgba(0,10,50,.25);
 }
 .topbar-in {
   max-width: 760px; margin: 0 auto; padding: 8px 16px;
@@ -138,7 +155,7 @@ a { color: var(--accent-ink); }
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
 }
 a.btn { text-decoration: none; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; padding-inline: 18px; border-radius: 999px; }
+.btn.primary { background: var(--sel-bg); border-color: var(--sel-bg); color: var(--sel-ink); font-weight: 700; padding-inline: 18px; border-radius: 999px; }
 .btn.danger { color: var(--ng-ink); }
 .btn.ghost { border-color: transparent; background: transparent; }
 .btn:disabled { opacity: .5; cursor: default; }
@@ -168,13 +185,13 @@ a.btn { text-decoration: none; }
 .toolbar-row { display: flex; align-items: center; gap: 8px; margin-block: 14px 10px; flex-wrap: wrap; }
 /* タブ: 斜めの平行四辺形。選んでいる方を塗りつぶす */
 /* タブ: 丸角の切り替え（隙間なく並べる）。選んでいる方は白地にバーの色の文字 */
-.tabs { display: inline-flex; gap: 0; background: rgba(255,255,255,.16); padding: 3px; border-radius: 999px; }
+.tabs { display: inline-flex; gap: 0; background: rgba(4,14,60,.35); padding: 3px; border-radius: 999px; }
 .tabs button { border: 0; background: transparent; border-radius: 999px; padding: 6px 20px; font-size: 15px; font-weight: 700; color: var(--ink-2); }
-.tabs button[aria-selected="true"] { background: #fff; color: var(--bar-cur, var(--accent)); font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.tabs button[aria-selected="true"] { background: var(--sel-bg); color: var(--sel-ink); font-weight: 800; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
 /* まとめ画面の「要約／全文」など、バーの外のタブ */
 main .tabs, .modal .tabs { background: var(--surface-2); }
 main .tabs button, .modal .tabs button { color: var(--ink-2); }
-main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true"] { background: var(--accent); color: #fff; }
+main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true"] { background: var(--sel-bg); color: var(--sel-ink); }
 .spacer { flex: 1; }
 .result-meta { font-size: 14.5px; color: var(--ink-2); }
 .filter-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 14.5px; }
@@ -233,19 +250,11 @@ main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true
 .crumbs::-webkit-scrollbar { display: none; }
 /* パスのタブ: 平行四辺形を隙間なく並べる。前の画面は詰めて、今の画面は普通の大きさで塗りつぶす */
 .crumb { position: relative; flex: 0 1 auto; min-width: 3.4em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 4px;
-  border: 0; border-radius: 999px; background: rgba(255,255,255,.16); color: var(--ink-2); padding: 4px 12px; font-size: 12px; font-weight: 700; text-align: left; }
+  border: 0; border-radius: 999px; background: rgba(4,14,60,.32); color: var(--ink-2); padding: 4px 12px; font-size: 12px; font-weight: 700; text-align: left; }
 .crumb.home { flex: 0 0 auto; max-width: none; }
-.crumb.current { flex: 0 1 auto; max-width: 62%; margin-right: 0; background: #fff; color: var(--bar-cur, var(--accent)); font-size: 13.5px; font-weight: 800; padding: 5px 14px; }
+.crumb.current { flex: 0 1 auto; max-width: 62%; margin-right: 0; background: var(--sel-bg); color: var(--sel-ink); font-size: 13.5px; font-weight: 800; padding: 5px 14px; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
 /* bar colors per screen（屋外でも見分けやすいよう、画面ごとに色相を分ける） */
-.topbar.bar-search { background: var(--bar-search); }
-.topbar.bar-view { background: var(--bar-view); }
-.topbar.bar-view.g-体験 { background: var(--bar-view-exp); }
-.topbar.bar-view.g-学び { background: var(--bar-view-learn); }
-.topbar.bar-view.g-アイデア { background: var(--bar-view-idea); }
-.topbar.bar-list { background: var(--bar-list); }
-.topbar.bar-edit { background: var(--bar-edit); }
-.topbar.bar-report { background: var(--bar-report); }
 /* 画面下に固定されるバー（選択モード）も、その画面の色にする */
 .screen:has(.bar-search) { --sel-bar: var(--bar-search); }
 .screen:has(.bar-list) { --sel-bar: var(--bar-list); }
@@ -315,12 +324,12 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .memo-card > :not(.card-thumb):not(.genre-band):not(.pick-box) { position: relative; z-index: 1; }
 .list-row.selecting { position: relative; padding-left: 40px; }
 .list-row .pick-box { left: 12px; }
-.list-row.picked { border-color: var(--accent); background: var(--accent-soft); }
-.list-row.picked .pick-box { background: var(--accent); border-color: var(--accent); }
+.list-row.picked { border-color: var(--sel-bg); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--sel-bg); }
+.list-row.picked .pick-box { background: var(--sel-bg); border-color: var(--sel-bg); color: var(--sel-ink); }
 .list-row > button.open { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 .pick-box { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink-3); display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--surface); }
-.memo-card.picked { border-color: var(--accent); background: var(--accent-soft); }
-.memo-card.picked .pick-box { background: var(--accent); border-color: var(--accent); }
+.memo-card.picked { border-color: var(--sel-bg); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--sel-bg); }
+.memo-card.picked .pick-box { background: var(--sel-bg); border-color: var(--sel-bg); color: var(--sel-ink); }
 .pick-box svg { width: 17px; height: 17px; }
 .memo-list.with-bar { padding-bottom: 90px; }
 .select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--sel-bar, var(--surface)); border-top: 1px solid var(--line); box-shadow: var(--shadow); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
@@ -331,7 +340,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 /* search panel */
 .search-toggle { position: relative; }
 .search-toggle svg { width: 27px; height: 27px; }
-.search-toggle[aria-expanded="true"] { background: #fff; color: var(--bar-cur, var(--accent)); }   /* タブの選択と同じ色 */
+.search-toggle[aria-expanded="true"] { background: var(--sel-bg); color: var(--sel-ink); }   /* タブの選択と同じ色 */
 .search-toggle .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
 .search-toggle.active .dot { display: block; }
 .search-panel { padding-top: 6px; }
@@ -381,7 +390,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .fab {
   position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 25;
   height: 54px; padding: 0 22px 0 18px; border-radius: 999px; border: 0;
-  background: var(--accent); color: #fff; font-weight: 800; font-size: 15px;
+  background: var(--sel-bg); color: var(--sel-ink); font-weight: 800; font-size: 15px;
   display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(8,16,36,.3);
 }
 .fab svg { width: 26px; height: 26px; }
@@ -410,8 +419,8 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .view-screen .topbar-in { position: relative; z-index: 2; }
 .genre-mark { position: absolute; right: -6px; top: 50%; transform: translateY(-58%) rotate(-12deg) skewX(-12deg); font-family: var(--font-title); font-size: 66px; font-weight: 900; letter-spacing: -.02em; line-height: 1; white-space: nowrap; pointer-events: none; z-index: 0; opacity: .16; color: #fff; }
 .g-体験 .genre-mark { color: #fff; opacity: .2; }
-.g-学び .genre-mark { color: #fff; opacity: .2; }
-.g-アイデア .genre-mark { color: #fff; opacity: .2; }
+.g-学び .genre-mark { color: #0a1a4f; opacity: .14; }
+.g-アイデア .genre-mark { color: #0a1a4f; opacity: .14; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .view-screen .topbar-in { align-items: center; min-height: 64px; }
 .view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 2px; }
@@ -454,6 +463,8 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .view-screen .topbar { position: relative; top: 0; }
 .view-screen .view-shell { min-height: 0; overflow: hidden; }
 .view-screen .view-main { height: 100%; overscroll-behavior: contain; }
+/* 本文を読む場所は、背景の光の模様を抑えて落ち着いた色に（長時間読んでも疲れにくいように） */
+.view-screen .view-main { background: color-mix(in srgb, var(--bg) 86%, transparent); }
 
 /* ---------- edit screen ---------- */
 .field { margin-bottom: 18px; }
@@ -572,10 +583,37 @@ body.editing-body .edit-actions { display: none; }
 /* ---------- 情報まとめ（1つの新しいメモとして読める、すっきりした構成） ---------- */
 .report-btn { color: var(--ink-2); }
 .rp-tools { display: grid; gap: 10px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.rp-tool-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rp-tool-row { display: grid; grid-template-columns: 4em 1fr; align-items: center; gap: 8px; }
+.rp-tool-row > :only-child { grid-column: 1 / -1; }
+.rp-tool-row > .rp-check { grid-column: 2; justify-self: start; margin-left: 0; }
+.rp-tool-row.rp-actions { display: flex; }
+.rp-pick { justify-self: stretch; height: 38px; text-align: left; }
 .rp-tool-row.rp-actions { flex-wrap: nowrap; gap: 2px; }
-.rp-tools .genre-select { height: 38px; font-size: 14.5px; max-width: 100%; }
-.rp-tool-row > .fr-label { min-width: 3em; }
+.rp-tools .genre-select { height: 38px; font-size: 14.5px; width: 100%; max-width: none; }
+.rp-tool-row > .fr-label { min-width: 0; }
+.rp-index { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+.rp-idx { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; text-decoration: none; font-weight: 700; }
+.rp-idx.g-体験 { background: var(--g-exp); color: var(--g-exp-ink); } .rp-idx.g-学び { background: var(--g-learn); color: var(--g-learn-ink); } .rp-idx.g-アイデア { background: var(--g-idea); color: var(--g-idea-ink); }
+.rp-idx.g-その他 { background: var(--surface-2); color: var(--ink-2); }
+.rp-idx-ico { display: inline-flex; } .rp-idx-ico svg { width: 20px; height: 20px; }
+details.rp-sec { margin-top: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; }
+details.rp-sec > summary { list-style: none; cursor: pointer; padding: 10px 12px; margin: 0; border: 0; display: flex; align-items: center; gap: 8px; }
+details.rp-sec > summary::-webkit-details-marker, .rp-memo > summary::-webkit-details-marker { display: none; }
+.rp-sec-h .genre svg { width: 16px; height: 16px; margin-right: 4px; }
+.rp-chev { margin-left: auto; color: var(--ink-3); transition: transform .15s; }
+details[open] > summary .rp-chev { transform: rotate(180deg); }
+.rp-memos { display: grid; border-top: 1px solid var(--line); }
+.rp-memo + .rp-memo { border-top: 1px solid var(--line); }
+.rp-memo > summary { list-style: none; cursor: pointer; padding: 10px 14px; display: grid; gap: 2px; }
+.rp-memo-t { font-weight: 700; font-size: 15.5px; }
+.rp-memo-t::before { content: "▸"; color: var(--accent); margin-right: 6px; display: inline-block; transition: transform .15s; }
+.rp-memo[open] .rp-memo-t::before { transform: rotate(90deg); }
+.rp-memo-s { font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 1.1em; }
+.rp-memo[open] .rp-memo-s { display: none; }
+.rp-memo-body { padding: 2px 14px 14px 30px; font-size: 15px; line-height: 1.8; overflow-wrap: anywhere; }
+.rp-memo-body > * { margin: 0 0 4px; }
+.rp-memo-body img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 6px 0 10px; cursor: zoom-in; }
+.rp-files-sec { margin-top: 18px; } .rp-files-h { font-size: 1em; margin: 0 0 6px; }
 .swipe-area { min-height: calc(100vh - 170px); touch-action: pan-y; overflow-x: clip; }
 .rp-range { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
 .rp-date { padding: 0 6px; min-width: 0; }
@@ -1098,6 +1136,13 @@ function enterSelect(scope, firstId) {
   if (historyOk) try { history.pushState({ depth: UI.stack.length, select: true }, ""); } catch {}
   render();
 }
+/* 選択モードを終えてから次の画面へ（選択の履歴を戻し終わってから進む） */
+function exitSelectThen(fn) {
+  const needPop = historyOk && history.state && history.state.select;
+  exitSelect();
+  if (needPop) window.addEventListener("popstate", () => setTimeout(fn, 0), { once: true }); else fn();
+}
+const reportSelected = () => { const ids = [...UI.select.ids]; if (ids.length) exitSelectThen(() => go({ name: "report", ids })); };
 function exitSelect() {
   if (!UI.select.on) return;
   UI.select.on = false; UI.select.ids.clear(); render();
@@ -1295,7 +1340,7 @@ function renderSearch(s) {
     const list = h("div", { class: "memo-list" + (selecting ? " with-bar" : "") });
     items.forEach(m => list.append(memoCard(m, terms, sel, "search")));
     results.append(list);
-    if (selecting) results.append(selectBar(items.map(m => m.id), [{ label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
+    if (selecting) results.append(selectBar(items.map(m => m.id), [{ label: "まとめる", run: reportSelected }, { label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
   }
 
   fab = h("button", { class: "fab", onclick: () => {
@@ -1541,8 +1586,8 @@ function renderListScreen(s) {
     let items = sortMemos(filterByGenre(members, st.genre), st.sort);
     const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); draw(); } } : null;
     // 「まとめる」「選択」「名前の変更」は上部バーのアイコンに。本文側は件数と絞り込みの1行だけにする
-    headActions.replaceChildren(iconBtn("edit", "フォルダ名を変更", () => renameList(l, render)));
-    reportSlot.replaceChildren(...(items.length && !selecting ? [iconBtn("report", "まとめる", () => go({ name: "report", listId: l.id, genre: st.genre }), "report-btn")] : []));
+    headActions.replaceChildren(...[iconBtn("edit", "フォルダ名を変更", () => renameList(l, render)),
+      items.length && !selecting ? iconBtn("report", "まとめる", () => go({ name: "report", listId: l.id, genre: st.genre }), "report-btn") : null].filter(Boolean));
     body.replaceChildren(...[
       h("div", { class: "toolbar-row", style: "margin-top:0" },
         h("span", { class: "result-meta" }, st.genre ? `${items.length}件／${members.length}件` : `${members.length}件`),
@@ -1561,6 +1606,7 @@ function renderListScreen(s) {
           try { await Manager.setListMembers(l.id, keep); toast(`${ids.length}件をフォルダから外しました`); exitSelect(); }
           catch { toast("フォルダを更新できませんでした", true); }
         } },
+        { label: "まとめる", run: reportSelected },
         { label: "削除", cls: "danger-solid", run: bulkDelete }], draw) : null].filter(Boolean));
   };
   // 右下のボタン: 押すと「保存済から追加」「新規追加」を選ぶ小窓を出す
@@ -1571,13 +1617,12 @@ function renderListScreen(s) {
   document.addEventListener("click", closeAdd); cleanupFns.push(() => document.removeEventListener("click", closeAdd));
   const fabEl = h("button", { class: "fab", "aria-haspopup": "menu", onclick: () => { addMenu.hidden = !addMenu.hidden; } }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "メモを追加"));
   const headActions = h("div", { class: "head-actions" });
-  const reportSlot = h("span", { class: "report-slot" });
   draw();
   return h("div", { class: "screen" },
     h("header", { class: "topbar bar-list" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("div", { class: "folder-title" }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("h1", { style: "line-height:1.3" }, l.name)),
-      headActions), h("div", { class: "bar-bottom" }, crumbBar() || h("span"), reportSlot)),
+      headActions), crumbBar()),
     h("main", { class: "wrap" }, body),
     addMenu, fabEl);
 }
@@ -1596,9 +1641,10 @@ async function createList() {
   go({ name: "list", id: l.id });
   if (Manager.memos.size) pickMemosForList(l, render);
 }
-async function pickMemosForList(list, redraw) {
-  const picked = new Set(Manager.sorted.filter(m => (m.listIds || []).includes(list.id)).map(m => m.id));
-  const ok = await modal({ wide: true, title: `「${list.name}」に入れるメモ`, body: (close) => {
+/* メモを選ぶ小窓（フォルダに入れる・まとめるメモを選ぶ）。決定で選んだ id の配列、キャンセルで null */
+async function pickMemos(initial, title) {
+  const picked = new Set(initial || []);
+  const ok = await modal({ wide: true, title, body: (close) => {
     const q = h("input", { id: "listpickq", class: "text-input", placeholder: "題名や本文で絞り込み" });
     const countEl = h("span", { class: "result-meta", style: "margin-right:auto" });
     const listEl = h("div", { class: "picker-list" });
@@ -1615,8 +1661,12 @@ async function pickMemosForList(list, redraw) {
       h("div", { class: "modal-actions", style: "align-items:center" }, countEl, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"),
         h("button", { class: "btn primary", type: "button", onclick: () => close(true) }, "決定")));
   } });
-  if (!ok) return;
-  try { const n = await Manager.setListMembers(list.id, [...picked]); if (n) toast("フォルダを更新しました"); redraw(); }
+  return ok ? Manager.sorted.filter(m => picked.has(m.id)).map(m => m.id) : null;
+}
+async function pickMemosForList(list, redraw) {
+  const ids = await pickMemos(Manager.sorted.filter(m => (m.listIds || []).includes(list.id)).map(m => m.id), `「${list.name}」に入れるメモ`);
+  if (!ids) return;
+  try { const n = await Manager.setListMembers(list.id, ids); if (n) toast("フォルダを更新しました"); redraw(); }
   catch { toast("フォルダを更新できませんでした。もう一度お試しください。", true); }
 }
 async function renameList(l, redraw) {
@@ -1662,16 +1712,21 @@ function reportSource(s) {
   const l = o.listId ? Manager.lists.get(o.listId) : null;
   const terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
   const base = [], listId = l ? l.id : null;
+  const ids = o.ids && o.ids.length ? new Set(o.ids) : null;
   let items = filterByGenre(Manager.sorted, s.genre);
+  if (ids) items = items.filter(m => ids.has(m.id));
   if (l) { items = items.filter(m => (m.listIds || []).includes(l.id)); base.push(l.name); }
   if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
   if (s.q) base.push(s.q);
   if (s.genre) base.push(s.genre);
   const pr = periodRange(o);
   if (pr) items = items.filter(m => (!pr.from || m.createdAt >= pr.from.getTime()) && (!pr.to || m.createdAt < pr.to.getTime()));
+  if (ids) base.unshift(`選んだ${items.length}件のメモ`);
   const b = base.join("・");
+  // 何も条件がないとき（検索画面からそのまま開いたとき）は、すべてのメモのまとめは作らない
+  const empty = !ids && !l && !terms.length && !s.genre && !pr;
   const title = pr ? (b ? `${b}のまとめ（${pr.label}）` : `${pr.label}のまとめ`) : (b ? `${b}のまとめ` : "すべてのメモのまとめ");
-  return { title, items, terms, listId };
+  return { title, items: empty ? [] : items, terms, listId, empty };
 }
 const BLOCK_TAGS = new Set(["DIV", "P", "UL", "OL", "BLOCKQUOTE", "H2", "H3", "H4"]);
 const hasText = (b) => !!b.textContent.replace(/​/g, "").trim();
@@ -1709,110 +1764,81 @@ function pickBlocks(m, terms, excerpt) {
   }
   return raw.filter((b, i) => keep[i]);
 }
-/* 要約: 1件のメモを1〜2文の要点に縮める（キーワードを含む文を優先、なければ冒頭の文） */
-const SUM_LEN = 90, SUM_PER_GENRE = 8, SUM_IMAGES = 6;
+/* 要約: 1件のメモの要点（キーワードを含む文を優先、なければ冒頭の文）。題名の下に1行で添える */
+const SUM_LEN = 70;
 function summarize(m, terms) {
   const text = (m.bodyText || "").replace(/​/g, "").trim();
   const sents = text.split(/(?<=[。！？!?])|\n+/).map(x => x.trim()).filter(Boolean);
   if (!sents.length) return "";
   const hit = terms.length ? sents.filter(x => terms.some(t => x.toLowerCase().includes(t))) : [];
-  const pick = (hit.length ? hit : sents).slice(0, 2);
-  let out = pick[0];
-  if (pick[1] && out.length + pick[1].length <= SUM_LEN) out += pick[1];
+  const out = (hit.length ? hit : sents)[0];
   return out.length > SUM_LEN ? out.slice(0, SUM_LEN - 1) + "…" : out;
 }
-/* まとめの中身: ジャンルごとの文章（本文中の画像はその文章と一緒）、本文に入っていない画像、ファイル。
-   要約（既定）では、各メモを1〜2文に縮め、ジャンルごとの件数・画像の枚数にも上限を設ける */
+/* まとめの中身: ジャンル → メモの題名（要点を1行） → 中身（本文。画像は本文の中の位置のまま）。
+   画面でもファイルでも、ジャンルとメモは押すまで畳んでおき、コンパクトに見せる */
 function digest(s, src) {
   const o = s.opts;
-  const summary = o.body === "summary";
   const items = [...src.items].sort((a, b) => a.createdAt - b.createdAt);
-  const groups = new Map(), more = new Map();
-  const images = [], files = [], seen = new Set(), inlineAtts = [];
-  const tagCount = new Map(), genreCount = new Map();
+  const groups = new Map(), files = [], seen = new Set(), inlineAtts = [];
+  const tagCount = new Map();
   for (const m of items) {
     (m.tags || []).forEach(t => tagCount.set(t, (tagCount.get(t) || 0) + 1));
-    GENRES.filter(g => (m.genres || []).includes(g)).forEach(g => genreCount.set(g, (genreCount.get(g) || 0) + 1));
-  }
-  for (const m of items) {
     const key = GENRES.find(g => (m.genres || []).includes(g)) || "その他";
-    if (summary) {
-      const t = summarize(m, src.terms);
-      if (t) {
-        const list = groups.get(key) || []; groups.set(key, list);
-        if (list.length < SUM_PER_GENRE) { const d = document.createElement("div"); d.textContent = t; list.push([d]); }
-        else more.set(key, (more.get(key) || 0) + 1);
-      }
-      for (const a of m.attachments || []) {
-        const k = a.fileId || a.id; if (seen.has(k)) continue; seen.add(k);
-        (fileKind(a) === "image" ? images : files).push(a);
-      }
-      continue;
-    }
     const blocks = pickBlocks(m, src.terms, o.body === "excerpt");
     const inlineIds = new Set();
     for (const b of blocks) b.querySelectorAll("img").forEach(img => { if (!o.images) img.remove(); else if (img.dataset.att) inlineIds.add(img.dataset.att); });
     const kept = blocks.filter(b => hasText(b) || b.querySelector("img"));
-    if (kept.length) { if (!groups.has(key)) groups.set(key, []); groups.get(key).push(kept); }
+    // 本文に入っていない添付画像は、そのメモの中身の最後に添える（まとめの末尾にまとめて並べない）
+    if (o.images) for (const a of m.attachments || []) {
+      if (fileKind(a) !== "image" || inlineIds.has(a.id) || (m.bodyHtml || "").includes(`data-att="${a.id}"`)) continue;
+      const url = attUrl(a); if (!url) continue;
+      const d = document.createElement("div"); d.append(h("img", { src: url, alt: a.name, "data-att": a.id })); kept.push(d); inlineIds.add(a.id);
+    }
     for (const a of m.attachments || []) {
       const k = a.fileId || a.id;
-      if (inlineIds.has(a.id)) { inlineAtts.push(a); seen.add(k); continue; }
-      // 本文の中で使っている画像は、本文から外した段落でもここには出さない（関係の薄い画像が末尾に並ばないように）
-      if (fileKind(a) === "image" && (m.bodyHtml || "").includes(`data-att="${a.id}"`)) continue;
-      if (seen.has(k)) continue; seen.add(k);
-      (fileKind(a) === "image" ? images : files).push(a);
+      if (inlineIds.has(a.id)) { inlineAtts.push(a); continue; }
+      if (fileKind(a) === "image" || seen.has(k)) continue; seen.add(k);
+      files.push(a);
     }
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ id: m.id, title: m.title || "無題のメモ", sum: summarize(m, src.terms), blocks: kept });
   }
   const dates = items.map(m => m.createdAt);
-  const overview = items.length ? { from: Math.min(...dates), to: Math.max(...dates), genres: GENRES.filter(g => genreCount.has(g)).map(g => [g, genreCount.get(g)]),
-    tags: [...tagCount].sort((a, b) => b[1] - a[1]).slice(0, 6) } : null;
-  const allImages = o.images ? images : [];
-  return { title: src.title, count: items.length, summary, overview, more,
-    groups: [...GENRES, "その他"].filter(g => groups.has(g) && groups.get(g).length).map(g => [g, groups.get(g)]),
-    images: summary ? allImages.slice(0, SUM_IMAGES) : allImages, moreImages: summary ? Math.max(0, allImages.length - SUM_IMAGES) : 0, files, inlineAtts };
+  const overview = items.length ? { from: Math.min(...dates), to: Math.max(...dates), tags: [...tagCount].sort((a, b) => b[1] - a[1]).slice(0, 6) } : null;
+  return { title: src.title, count: items.length, overview,
+    groups: [...GENRES, "その他"].filter(g => groups.has(g)).map(g => [g, groups.get(g)]), files, inlineAtts };
 }
+const genreIcon = (g) => GENRES.includes(g) ? svgIcon(ICONS["g" + g]) : document.createTextNode("－");
 /* 画面・ファイル用の見た目 */
 function digestDoc(dg) {
   const ov = dg.overview;
   const day = (t) => fmtDate(t).slice(0, 10);
-  return h("article", { class: "rp-doc" + (dg.summary ? " rp-summary" : "") },
+  return h("article", { class: "rp-doc" },
     h("h1", { class: "rp-title" }, dg.title),
-    h("div", { class: "rp-meta" }, `${day(Date.now())} 作成 ・ ${dg.count}件のメモから`),
-    // 概要: 件数・期間・ジャンルの内訳・よく出てくるタグ
-    ov ? h("section", { class: "rp-sec rp-overview" }, h("h2", { class: "rp-sec-h" }, "概要"),
-      h("div", { class: "rp-stats" },
-        h("div", { class: "rp-stat" }, h("span", { class: "rp-stat-n" }, String(dg.count)), h("span", { class: "rp-stat-l" }, "件のメモ")),
-        h("div", { class: "rp-stat" }, h("span", { class: "rp-stat-n rp-stat-d" }, day(ov.from) === day(ov.to) ? day(ov.from) : day(ov.from) + " 〜 " + day(ov.to)), h("span", { class: "rp-stat-l" }, "期間"))),
-      ov.genres.length ? h("div", { class: "rp-chips" }, ov.genres.map(([g, n]) => h("span", { class: "genre g-" + g }, `${g} ${n}`))) : null,
-      ov.tags.length ? h("div", { class: "rp-chips" }, ov.tags.map(([t, n]) => h("span", { class: "tag-mini" }, `#${t}` + (n > 1 ? ` ×${n}` : "")))) : null) : null,
-    dg.groups.map(([g, list]) => h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, h("span", { class: "genre g-" + g }, g), h("span", { class: "rp-sec-n" }, `${list.length + (dg.more.get(g) || 0)}件`)),
-      h("ul", { class: "rp-list" }, list.map(blocks => h("li", {}, blocks.map(b => b.cloneNode(true))))),
-      dg.more.get(g) ? h("p", { class: "rp-more" }, `ほか${dg.more.get(g)}件（「全文」ですべて見られます）`) : null)),
-    dg.images.length ? h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, "画像"),
-      h("div", { class: "rp-gallery" }, dg.images.map(a => h("img", { src: attUrl(a), alt: a.name }))),
-      dg.moreImages ? h("p", { class: "rp-more" }, `ほか${dg.moreImages}枚`) : null) : null,
-    dg.files.length ? h("section", { class: "rp-sec" }, h("h2", { class: "rp-sec-h" }, "添付ファイル"),
+    h("div", { class: "rp-meta" }, `${day(Date.now())} 作成 ・ ${dg.count}件のメモから` + (ov ? ` ・ ${day(ov.from) === day(ov.to) ? day(ov.from) : day(ov.from) + "〜" + day(ov.to)}` : "")),
+    // 目次: ジャンルのアイコンと件数。押すとそのジャンルを開いて移動する
+    dg.groups.length ? h("nav", { class: "rp-index", "aria-label": "目次" }, dg.groups.map(([g, list]) =>
+      h("a", { class: "rp-idx g-" + g, href: "#rp-" + g, title: g, "aria-label": `${g} ${list.length}件`, "data-open": "rp-" + g }, h("span", { class: "rp-idx-ico" }, genreIcon(g)), h("span", { class: "rp-idx-n" }, String(list.length))))) : null,
+    ov && ov.tags.length ? h("div", { class: "rp-chips" }, ov.tags.map(([t, n]) => h("span", { class: "tag-mini" }, `#${t}` + (n > 1 ? ` ×${n}` : "")))) : null,
+    dg.groups.map(([g, list]) => h("details", { class: "rp-sec", id: "rp-" + g },
+      h("summary", { class: "rp-sec-h" }, h("span", { class: "genre g-" + g }, genreIcon(g), g), h("span", { class: "rp-chev", "aria-hidden": "true" }, "▾")),
+      h("div", { class: "rp-memos" }, list.map(it => h("details", { class: "rp-memo" },
+        h("summary", {}, h("span", { class: "rp-memo-t" }, it.title), it.sum ? h("span", { class: "rp-memo-s" }, it.sum) : null),
+        h("div", { class: "rp-memo-body" }, it.blocks.length ? it.blocks.map(b => b.cloneNode(true)) : h("p", { class: "rp-more" }, "本文はありません。"))))))),
+    dg.files.length ? h("section", { class: "rp-files-sec" }, h("h2", { class: "rp-files-h" }, "添付ファイル"),
       h("ul", { class: "rp-files" }, dg.files.map(a => h("li", {}, h("a", { class: "rp-file", href: attUrl(a), download: a.name, "data-size": String(a.size || 0) }, KIND_ICON[fileKind(a)] + " " + a.name))))) : null);
 }
 /* 新しいメモの下書きにする（画像・ファイルは元のメモと同じものを共有して添付。本文中の画像は文章と同じ位置に入れる） */
 function digestDraft(dg, src) {
   const idMap = new Map();
   const copy = (a) => { const n = { id: uid("a"), name: a.name, type: a.type, size: a.size, fileId: a.fileId }; idMap.set(a.id, n.id); return n; };
-  const atts = [...dg.inlineAtts.map(copy), ...dg.images.map(copy), ...dg.files.map(copy)];
+  const atts = [...dg.inlineAtts.map(copy), ...dg.files.map(copy)];
   const box = document.createElement("div");
-  if (dg.overview) {
-    const ov = dg.overview, day = (t) => fmtDate(t).slice(0, 10);
-    box.append(h("h2", {}, "概要"), h("ul", {},
-      h("li", {}, `${dg.count}件のメモ（${day(ov.from) === day(ov.to) ? day(ov.from) : day(ov.from) + "〜" + day(ov.to)}）`),
-      ov.genres.length ? h("li", {}, ov.genres.map(([g, n]) => `${g} ${n}件`).join("・")) : null,
-      ov.tags.length ? h("li", {}, ov.tags.map(([t]) => "#" + t).join(" ")) : null));
-  }
   for (const [g, list] of dg.groups) {
     box.append(h("h2", {}, g));
-    box.append(h("ul", {}, list.map(blocks => h("li", {}, blocks.map(b => b.cloneNode(true))))));
+    for (const it of list) { box.append(h("h3", {}, it.title)); it.blocks.forEach(b => box.append(b.cloneNode(true))); }
   }
   box.querySelectorAll("img[data-att]").forEach(img => { const id = idMap.get(img.dataset.att); if (id) { img.dataset.att = id; img.removeAttribute("src"); } else img.remove(); });
-  if (dg.images.length) { box.append(h("h2", {}, "画像")); dg.images.forEach(a => box.append(h("img", { "data-att": idMap.get(a.id), alt: "", style: "width:50%" }))); }
   const genres = GENRES.filter(g => src.items.some(m => (m.genres || []).includes(g)));
   return { id: uid("m"), isNew: true, title: dg.title, genres, bodyHtml: sanitize(box.innerHTML), attachments: atts, tags: [], parentId: null, links: [],
     listIds: src.listId ? [src.listId] : [], savedOnce: false, dirty: true };
@@ -1842,19 +1868,37 @@ async function reportFileHtml(doc, title) {
 * { box-sizing: border-box; } body { margin: 0; padding: 16px; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.75; }
 .rp-doc { margin: 0 auto; } a { color: var(--accent-ink); } img { max-width: 100%; }
 @media print { body { padding: 0; background: #fff; } .rp-doc { border: 0; } }
-</style></head><body>${clone.outerHTML}</body></html>`;
+.zoom { position: fixed; inset: 0; background: rgba(4,10,30,.9); display: grid; place-items: center; padding: 12px; z-index: 9; } .zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+</style></head><body>${clone.outerHTML}
+<script>
+/* 画像を押すと大きく表示（もう一度押すと閉じる）。目次を押すとそのジャンルを開いて移動。印刷・PDFでは畳んだ中身もすべて開く */
+document.addEventListener("click", function (e) {
+  var z = document.querySelector(".zoom"); if (z) { z.remove(); return; }
+  if (e.target.tagName === "IMG") { var d = document.createElement("div"); d.className = "zoom"; var i = document.createElement("img"); i.src = e.target.src; d.appendChild(i); document.body.appendChild(d); return; }
+  var a = e.target.closest && e.target.closest("[data-open]"); if (a) { e.preventDefault(); var s = document.getElementById(a.getAttribute("data-open")); if (s) { s.open = true; s.scrollIntoView({ behavior: "smooth" }); } }
+});
+window.addEventListener("beforeprint", function () { document.querySelectorAll("details").forEach(function (d) { d.open = true; }); });
+<\/script></body></html>`;
 }
 function renderReport(s) {
-  s.opts = s.opts || { body: "summary", images: true, period: "all", from: "", to: "", listId: s.listId || "" };
+  s.opts = s.opts || { body: s.q ? "excerpt" : "full", images: true, period: "all", from: "", to: "", listId: s.listId || "", ids: s.ids || null };
   const o = s.opts;
   const src = reportSource(s);
   const holder = h("div", { class: "rp-holder" }, h("p", { class: "ai-hint" }, "まとめを作っています…"));
   let doc = null, dg = null;
   const draw = () => {
     dg = digest(s, src); doc = digestDoc(dg);
-    holder.replaceChildren(src.items.length ? doc : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "期間や検索の言葉を変えるか、ジャンルの絞り込みを外してください。"));
+    holder.replaceChildren(src.items.length ? doc : src.empty
+      ? h("div", { class: "empty" }, h("b", {}, "まとめる条件を選んでください"), "フォルダ・期間・メモを選ぶと、ここにまとめができます。")
+      : h("div", { class: "empty" }, h("b", {}, "まとめるメモがありません"), "期間や検索の言葉を変えるか、ジャンルの絞り込みを外してください。"));
   };
   ensureFileUrls(src.items.flatMap(m => m.attachments || [])).then(draw, draw);
+  holder.addEventListener("click", (e) => {
+    if (e.target.tagName === "IMG") { lightbox(e.target.src); return; }
+    const a = e.target.closest("[data-open]"); if (!a) return;
+    e.preventDefault(); const d = holder.querySelector("#" + CSS.escape(a.dataset.open));
+    if (d) { d.open = true; d.scrollIntoView({ behavior: "smooth", block: "start" }); }
+  });
   // ファイル名は「まとめの題名_日付」（同じ日に同じまとめを保存し直した場合は上書きでよい、という利用者の方針）
   const fileName = () => { const d = new Date(), p = (n) => String(n).padStart(2, "0"); return `${src.title.replace(/[\\/:*?"<>|\s]+/g, "_").replace(/^_|_$/g, "")}_${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}.html`; };
   const makeFile = async () => new File([await reportFileHtml(doc, src.title)], fileName(), { type: "text/html" });
@@ -1872,7 +1916,7 @@ function renderReport(s) {
     catch (e) { if (!e || e.name !== "AbortError") toast("共有できませんでした。「ファイルに保存」をお使いください", true); }
   });
   const canShare = (() => { try { return !!(navigator.canShare && navigator.canShare({ files: [new File(["x"], "x.html", { type: "text/html" })] })); } catch { return false; } })();
-  const seg = h("div", { class: "tabs rp-seg", role: "group", "aria-label": "本文" }, [["summary", "要約"], ...(src.terms.length ? [["excerpt", "関連部分"]] : []), ["full", "全文"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o.body === v), "aria-selected": String(o.body === v),
+  const seg = h("div", { class: "tabs rp-seg", role: "group", "aria-label": "本文" }, [["excerpt", "関連部分"], ["full", "全文"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o.body === v), "aria-selected": String(o.body === v),
     onclick: (e) => { o.body = v; seg.querySelectorAll("button").forEach(b => { const on = b === e.currentTarget; b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-selected", String(on)); }); draw(); } }, l)));
   // 期間（作成日時）: 変えたら画面ごと作り直す（題名・対象のメモが変わるため）
   const periodSel = h("select", { id: "rp-period", class: "genre-select" + (o.period !== "all" ? " on" : ""), "aria-label": "期間", onchange: () => { o.period = periodSel.value; render(); } },
@@ -1884,10 +1928,14 @@ function renderReport(s) {
   listSel.value = Manager.lists.has(o.listId) ? o.listId : "";
   const tools = h("div", { class: "rp-tools" },
     Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "フォルダ"), listSel) : null,
+    // メモを1件ずつ選んでまとめる
+    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "メモ"),
+      h("button", { class: "btn rp-pick", type: "button", onclick: async () => { const ids = await pickMemos(o.ids || [], "まとめるメモを選ぶ"); if (ids) { o.ids = ids.length ? ids : null; render(); } } },
+        o.ids && o.ids.length ? `${o.ids.length}件を選択中` : "選ぶ…")),
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
-    // 「関連部分」はキーワードで探したときだけ出す
-    h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "本文"), seg,
+    // 「関連部分／全文」はキーワードで探したときだけ出す
+    h("div", { class: "rp-tool-row" }, src.terms.length ? [h("span", { class: "fr-label" }, "本文"), seg] : null,
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
     h("div", { class: "rp-tool-row rp-actions" },
@@ -1904,6 +1952,7 @@ function renderReport(s) {
 }
 /* まとめを印刷するときは、ダークモードでも明るい配色で印刷する */
 let printTheme = null;
+window.addEventListener("beforeprint", () => { document.querySelectorAll(".rp-doc details").forEach(d => { d.open = true; }); });
 window.addEventListener("beforeprint", () => { if (isDark()) { printTheme = document.documentElement.getAttribute("data-theme") || ""; document.documentElement.setAttribute("data-theme", "light"); } });
 window.addEventListener("afterprint", () => { if (printTheme != null) { if (printTheme) document.documentElement.setAttribute("data-theme", printTheme); else document.documentElement.removeAttribute("data-theme"); printTheme = null; } });
 
@@ -2329,7 +2378,7 @@ function renderEdit(s) {
     h("span", { class: "sep" }),
     colorBtn, markBtn,
     h("span", { class: "sep" }),
-    bulletBtn,
+    
     tb("🔗", "リンク", (e) => {
       const sel = savedRange ? savedRange.toString() : "";
       const url = h("input", { id: "linkurl", class: "text-input", placeholder: "https://（example.com のように省略可）", type: "text", inputmode: "url", autocapitalize: "off", autocomplete: "off", spellcheck: "false" });
