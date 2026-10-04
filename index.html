@@ -31,8 +31,9 @@
   --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;   /* 選んでいるもの（タブ・パス・ボタン）の色 */
   --water: linear-gradient(180deg, #c3dcff 0%, #e4eeff 38%, #eef4ff 100%);   /* 水の中から見上げたような背景 */
   --caustic-op: .45;
+  --bg-veil: linear-gradient(rgba(228,238,255,.45), rgba(228,238,255,.62));
   --field-ink: #0a1a4f; --field-ink-2: #2c3f78; --field-ink-3: #4a5c8e; --field-accent-ink: #1236b8;   /* バーの上の入力欄・小窓の文字 */
-  --tag: #1d9bf0;   /* タグの色（X のリンクと同じ鮮やかな青） */
+  --tag: #12b4f5;   /* タグの色（鮮やかな水色） */
   --g-exp: #e3262f;  --g-exp-ink: #ffffff;   /* ジャンル: 体験＝赤、学び＝黄、アイデア＝青緑（P3R の色） */
   --g-learn: #f2d33c; --g-learn-ink: #1a1a2e;
   --g-idea: #13b59a; --g-idea-ink: #04221d;
@@ -54,10 +55,12 @@
   :root:not([data-theme="light"]) {
     --bg: #050f3d; --surface: #0b1f66; --surface-2: #122c80; --line: #2b4cb0;
     --ink: #eaf3ff; --ink-2: #bcd0f7; --ink-3: #a3bbec;
-    --accent: #4fd2ff; --accent-soft: #123a8a; --accent-ink: #8fe3ff; --tag: #5cc8ff;
+    --accent: #4fd2ff; --accent-soft: #123a8a; --accent-ink: #8fe3ff; --tag: #4fd2ff;
     --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;
     --water: radial-gradient(120% 60% at 50% -8%, rgba(80,200,255,.38), rgba(80,200,255,0) 62%), linear-gradient(180deg, #0b2fa8 0%, #071c6e 34%, #050f3d 100%);
-    --caustic-op: .28;
+    --caustic-op: .28; --ray-fade: #050f3d;
+    --water: radial-gradient(120% 45% at 50% -6%, rgba(80,200,255,.34), rgba(80,200,255,0) 60%), linear-gradient(180deg, #0b2fa8 0%, #08206f 22%, #061650 42%, #050f3d 100%);
+    --bg-veil: linear-gradient(rgba(5,15,61,.45), rgba(5,15,61,.65));
     --g-exp: #e3262f; --g-exp-ink: #ffffff;
     --g-learn: #f2d33c; --g-learn-ink: #1a1a2e;
     --g-idea: #13b59a; --g-idea-ink: #04221d;
@@ -74,10 +77,12 @@
 :root[data-theme="dark"] {
   --bg: #050f3d; --surface: #0b1f66; --surface-2: #122c80; --line: #2b4cb0;
   --ink: #eaf3ff; --ink-2: #bcd0f7; --ink-3: #a3bbec;
-  --accent: #4fd2ff; --accent-soft: #123a8a; --accent-ink: #8fe3ff; --tag: #5cc8ff;
+  --accent: #4fd2ff; --accent-soft: #123a8a; --accent-ink: #8fe3ff; --tag: #4fd2ff;
   --sel-bg: #4fd2ff; --sel-ink: #0a1a4f;
   --water: radial-gradient(120% 60% at 50% -8%, rgba(80,200,255,.38), rgba(80,200,255,0) 62%), linear-gradient(180deg, #0b2fa8 0%, #071c6e 34%, #050f3d 100%);
-  --caustic-op: .28;
+  --caustic-op: .28; --ray-fade: #050f3d;
+  --water: radial-gradient(120% 45% at 50% -6%, rgba(80,200,255,.34), rgba(80,200,255,0) 60%), linear-gradient(180deg, #0b2fa8 0%, #08206f 22%, #061650 42%, #050f3d 100%);
+  --bg-veil: linear-gradient(rgba(5,15,61,.45), rgba(5,15,61,.65));
   --g-exp: #e3262f; --g-exp-ink: #ffffff;
   --g-learn: #f2d33c; --g-learn-ink: #1a1a2e;
   --g-idea: #13b59a; --g-idea-ink: #04221d;
@@ -92,7 +97,7 @@
 }
 
 /* バーは鮮やかな色なので、上の文字・アイコンは白に。入力欄や小窓（白地）の中は元の文字色に戻す */
-:is(.topbar, .edit-actions, .select-bar) { color: #fff; --ink-2: #eef2fb; --ink-3: #d3dcef; --accent-ink: #fff; --tag: #bfe6ff; }
+:is(.topbar, .edit-actions, .select-bar) { color: #fff; --ink-2: #eef2fb; --ink-3: #d3dcef; --accent-ink: #fff; --tag: #4fd2ff; }
 .topbar :is(.searchbox, select, input, .menu, .pop) { color: var(--field-ink); --ink-2: var(--field-ink-2); --ink-3: var(--field-ink-3); --accent-ink: var(--field-accent-ink); }
 .topbar.bar-search { --bar-cur: var(--bar-search); } .topbar.bar-list { --bar-cur: var(--bar-list); } .topbar.bar-edit { --bar-cur: var(--bar-edit); }
 .topbar.bar-report { --bar-cur: var(--bar-report); } .topbar.bar-view { --bar-cur: var(--bar-view); } .topbar.g-体験 { --bar-cur: var(--bar-view-exp); }
@@ -108,9 +113,14 @@ img { max-width: 100%; }
 html, body { height: 100%; }
 /* 水の中から見上げたような背景: 上から光が差し、水面のゆらぎが細い光の筋になって映る（カードの中は無地で読みやすく） */
 body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
-  background: repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water);
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--ray-fade, rgba(0,0,0,0)) 50%), repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water);
   opacity: 1; }
 body::after { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='1600' preserveAspectRatio='none'%3E%3Cfilter id='f' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='turbulence' baseFrequency='0.006 0.011' numOctaves='2' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0.62 0 0 0 0 0.9 0 0 0 0 1 -9 0 0 0 1.25'/%3E%3CfeGaussianBlur stdDeviation='1.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E") center top / 100% 100% no-repeat; opacity: var(--caustic-op); mix-blend-mode: screen; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) body::after { -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.5) 22%, transparent 48%); mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.5) 22%, transparent 48%); } }
+:root[data-theme="dark"] body::after { -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.5) 22%, transparent 48%); mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.5) 22%, transparent 48%); }
+/* 背景に自分の画像を選んだとき: 画像の上に薄い色を重ねて文字を読みやすく。水面の模様は出さない */
+html.has-bg body::before { background: var(--bg-veil), var(--user-bg) center / cover no-repeat; }
+html.has-bg body::after { display: none; }
 body {
   background: var(--bg); color: var(--ink);
   font-family: var(--font-body); font-size: 15px; line-height: 1.7;
@@ -126,7 +136,7 @@ a { color: var(--accent-ink); }
 .topbar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
   background: var(--bar-cur, var(--bar-search));
-  background-image: linear-gradient(180deg, rgba(0,8,40,.18) 0%, rgba(0,8,40,0) 40%, rgba(120,220,255,.22) 100%);
+  background-image: linear-gradient(180deg, rgba(120,220,255,0) 0%, rgba(120,220,255,0) 45%, rgba(120,220,255,.22) 100%);
   border-bottom: 0; box-shadow: 0 2px 10px rgba(0,10,50,.25);
 }
 .topbar-in {
@@ -249,7 +259,7 @@ main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true
 .crumbs { display: flex; align-items: flex-end; padding: 4px 12px 6px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; max-width: 760px; margin: 0 auto; }
 .crumbs::-webkit-scrollbar { display: none; }
 /* パスのタブ: 平行四辺形を隙間なく並べる。前の画面は詰めて、今の画面は普通の大きさで塗りつぶす */
-.crumb { position: relative; flex: 0 1 auto; min-width: 3.4em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 4px;
+.crumb { position: relative; flex: 0 1 auto; min-width: 3.4em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: -10px; padding-right: 20px !important; box-shadow: 2px 0 6px rgba(0,8,40,.35);
   border: 0; border-radius: 999px; background: rgba(4,14,60,.32); color: var(--ink-2); padding: 4px 12px; font-size: 12px; font-weight: 700; text-align: left; }
 .crumb.home { flex: 0 0 auto; max-width: none; }
 .crumb.current { flex: 0 1 auto; max-width: 62%; margin-right: 0; background: var(--sel-bg); color: var(--sel-ink); font-size: 13.5px; font-weight: 800; padding: 5px 14px; }
@@ -266,9 +276,9 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .search-tools .spacer { min-width: 0; }
 .search-tools .genre-select { padding: 0 6px; font-size: 14.5px; height: 38px; min-width: 0; }
 /* tags */
-.tag-mini { font-size: 13.5px; color: var(--tag); font-weight: 500; }
+.tag-mini { font-size: 13.5px; color: var(--tag); font-weight: 700; }
 .tag-row { margin-top: 6px; }
-.tag-chip { border: 1px solid var(--line); background: var(--surface); color: var(--tag); font-weight: 500; border-radius: 999px; padding: 1px 10px; font-size: 13px; }
+.tag-chip { border: 1px solid var(--line); background: var(--surface); color: var(--tag); font-weight: 700; border-radius: 999px; padding: 1px 10px; font-size: 13px; }
 .tag-add { display: flex; gap: 6px; margin-top: 8px; }
 .tag-input { height: 38px; font-size: 15px; }
 .tag-sugg { margin-top: 8px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
@@ -315,10 +325,12 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .memo-card.selecting { padding-left: 74px; }
 /* カードの右側に敷く画像（境目をぼかし、少し透かす。文字は手前） */
 .card-thumb { position: absolute; top: 0; right: 0; bottom: 0; width: 46%; pointer-events: none; z-index: 0;
-  -webkit-mask-image: linear-gradient(to right, transparent, #000 70%); mask-image: linear-gradient(to right, transparent, #000 70%); opacity: .42; }
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 70%); mask-image: linear-gradient(to right, transparent, #000 60%); opacity: .75; }
 .card-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card-thumb { opacity: .3; } }
-:root[data-theme="dark"] .card-thumb { opacity: .3; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .card-thumb { opacity: .62; } }
+:root[data-theme="dark"] .card-thumb { opacity: .62; }
+/* 画像に重なる文字は、カードの地の色で縁取って読みやすく */
+.memo-card.has-thumb :is(.card-title, .card-date, .card-sum, .tag-mini, .att-count) { text-shadow: 0 0 2px var(--surface), 0 0 2px var(--surface), 0 0 4px var(--surface), 0 0 8px var(--surface); }
 /* バーの上の「削除」は白い文字に（鮮やかなバーの上で赤い文字は読みにくい） */
 .topbar .btn.danger { color: #fff; background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.45); border-radius: 999px; }
 .memo-card > :not(.card-thumb):not(.genre-band):not(.pick-box) { position: relative; z-index: 1; }
@@ -487,8 +499,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .genre-pick button[aria-pressed="true"].g-体験 { background: var(--g-exp); color: var(--g-exp-ink); border-color: var(--g-exp-ink); }
 .genre-pick button[aria-pressed="true"].g-学び { background: var(--g-learn); color: var(--g-learn-ink); border-color: var(--g-learn-ink); }
 .genre-pick button[aria-pressed="true"].g-アイデア { background: var(--g-idea); color: var(--g-idea-ink); border-color: var(--g-idea-ink); }
-.genre-pick .tick { display: none; }
-.genre-pick button[aria-pressed="true"] .tick { display: inline; }
+.genre-pick .gp-ico { display: inline-flex; } .genre-pick .gp-ico svg { width: 18px; height: 18px; }
 .field-err { color: var(--ng-ink); font-size: 12.5px; margin-top: 6px; }
 
 .editor-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
@@ -587,7 +598,7 @@ body.editing-body .edit-actions { display: none; }
 .rp-tool-row > :only-child { grid-column: 1 / -1; }
 .rp-tool-row > .rp-check { grid-column: 2; justify-self: start; margin-left: 0; }
 .rp-tool-row.rp-actions { display: flex; }
-.rp-pick { justify-self: stretch; height: 38px; text-align: left; }
+.rp-pick { justify-self: stretch; height: 38px; text-align: left; font-weight: 400; font-size: 14.5px; color: var(--ink-2); padding: 0 12px; }
 .rp-tool-row.rp-actions { flex-wrap: nowrap; gap: 2px; }
 .rp-tools .genre-select { height: 38px; font-size: 14.5px; width: 100%; max-width: none; }
 .rp-tool-row > .fr-label { min-width: 0; }
@@ -600,13 +611,13 @@ details.rp-sec { margin-top: 14px; border: 1px solid var(--line); border-radius:
 details.rp-sec > summary { list-style: none; cursor: pointer; padding: 10px 12px; margin: 0; border: 0; display: flex; align-items: center; gap: 8px; }
 details.rp-sec > summary::-webkit-details-marker, .rp-memo > summary::-webkit-details-marker { display: none; }
 .rp-sec-h .genre svg { width: 16px; height: 16px; margin-right: 4px; }
-.rp-chev { margin-left: auto; color: var(--ink-3); transition: transform .15s; }
+.rp-chev { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--sel-bg); color: var(--sel-ink); font-size: 16px; font-weight: 900; transition: transform .15s; flex: 0 0 auto; }
 details[open] > summary .rp-chev { transform: rotate(180deg); }
 .rp-memos { display: grid; border-top: 1px solid var(--line); }
 .rp-memo + .rp-memo { border-top: 1px solid var(--line); }
 .rp-memo > summary { list-style: none; cursor: pointer; padding: 10px 14px; display: grid; gap: 2px; }
 .rp-memo-t { font-weight: 700; font-size: 15.5px; }
-.rp-memo-t::before { content: "▸"; color: var(--accent); margin-right: 6px; display: inline-block; transition: transform .15s; }
+.rp-memo-t::before { content: "▶"; color: var(--accent); font-size: 14px; margin-right: 8px; display: inline-block; transition: transform .15s; }
 .rp-memo[open] .rp-memo-t::before { transform: rotate(90deg); }
 .rp-memo-s { font-size: 13px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-left: 1.1em; }
 .rp-memo[open] .rp-memo-s { display: none; }
@@ -660,6 +671,7 @@ details[open] > summary .rp-chev { transform: rotate(180deg); }
 .settings-sec h4 { margin: 0; font-size: 14px; font-weight: 700; color: var(--ink); border-left: 4px solid var(--accent); padding-left: 8px; }
 .settings-sec .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .sync-btn svg { width: 22px; height: 22px; }
+.bg-preview { width: 44px; height: 60px; border-radius: 8px; background: center / cover no-repeat; border: 1px solid var(--line); flex: 0 0 auto; }
 .sync-btn[aria-pressed="true"] { background: var(--ok); color: var(--ok-ink); border-color: var(--ok-ink); font-weight: 700; }
 .sync-status.ng { color: var(--ng-ink); }
 .sync-setup summary { cursor: pointer; font-size: 14px; color: var(--accent-ink); }
@@ -1015,7 +1027,7 @@ const Manager = {
     }
     // どのメモからも参照されていない添付ファイルを削除（作成から1日以内のものは編集中の可能性があるので残す）
     try {
-      const used = new Set(); for (const m of this.memos.values()) for (const a of m.attachments || []) if (a.fileId) used.add(a.fileId);
+      const used = new Set([BG_FILE]); for (const m of this.memos.values()) for (const a of m.attachments || []) if (a.fileId) used.add(a.fileId);
       for (const f of await Storage.allFiles()) if (!used.has(f.id) && Date.now() - (f.createdAt || 0) > 864e5) await Storage.delFile(f.id);
     } catch {}
     this.reindex();
@@ -1812,10 +1824,9 @@ const genreIcon = (g) => GENRES.includes(g) ? svgIcon(ICONS["g" + g]) : document
 /* 画面・ファイル用の見た目 */
 function digestDoc(dg) {
   const ov = dg.overview;
-  const day = (t) => fmtDate(t).slice(0, 10);
   return h("article", { class: "rp-doc" },
     h("h1", { class: "rp-title" }, dg.title),
-    h("div", { class: "rp-meta" }, `${day(Date.now())} 作成 ・ ${dg.count}件のメモから` + (ov ? ` ・ ${day(ov.from) === day(ov.to) ? day(ov.from) : day(ov.from) + "〜" + day(ov.to)}` : "")),
+    h("div", { class: "rp-meta" }, `${fmtDate(Date.now())} 作成`),
     // 目次: ジャンルのアイコンと件数。押すとそのジャンルを開いて移動する
     dg.groups.length ? h("nav", { class: "rp-index", "aria-label": "目次" }, dg.groups.map(([g, list]) =>
       h("a", { class: "rp-idx g-" + g, href: "#rp-" + g, title: g, "aria-label": `${g} ${list.length}件`, "data-open": "rp-" + g }, h("span", { class: "rp-idx-ico" }, genreIcon(g)), h("span", { class: "rp-idx-n" }, String(list.length))))) : null,
@@ -1827,21 +1838,6 @@ function digestDoc(dg) {
         h("div", { class: "rp-memo-body" }, it.blocks.length ? it.blocks.map(b => b.cloneNode(true)) : h("p", { class: "rp-more" }, "本文はありません。"))))))),
     dg.files.length ? h("section", { class: "rp-files-sec" }, h("h2", { class: "rp-files-h" }, "添付ファイル"),
       h("ul", { class: "rp-files" }, dg.files.map(a => h("li", {}, h("a", { class: "rp-file", href: attUrl(a), download: a.name, "data-size": String(a.size || 0) }, KIND_ICON[fileKind(a)] + " " + a.name))))) : null);
-}
-/* 新しいメモの下書きにする（画像・ファイルは元のメモと同じものを共有して添付。本文中の画像は文章と同じ位置に入れる） */
-function digestDraft(dg, src) {
-  const idMap = new Map();
-  const copy = (a) => { const n = { id: uid("a"), name: a.name, type: a.type, size: a.size, fileId: a.fileId }; idMap.set(a.id, n.id); return n; };
-  const atts = [...dg.inlineAtts.map(copy), ...dg.files.map(copy)];
-  const box = document.createElement("div");
-  for (const [g, list] of dg.groups) {
-    box.append(h("h2", {}, g));
-    for (const it of list) { box.append(h("h3", {}, it.title)); it.blocks.forEach(b => box.append(b.cloneNode(true))); }
-  }
-  box.querySelectorAll("img[data-att]").forEach(img => { const id = idMap.get(img.dataset.att); if (id) { img.dataset.att = id; img.removeAttribute("src"); } else img.remove(); });
-  const genres = GENRES.filter(g => src.items.some(m => (m.genres || []).includes(g)));
-  return { id: uid("m"), isNew: true, title: dg.title, genres, bodyHtml: sanitize(box.innerHTML), attachments: atts, tags: [], parentId: null, links: [],
-    listIds: src.listId ? [src.listId] : [], savedOnce: false, dirty: true };
 }
 /* 画像入りの1つの HTML ファイルにする（オフラインでも開け、そのまま印刷・PDF化できる） */
 async function reportFileHtml(doc, title) {
@@ -1930,7 +1926,7 @@ function renderReport(s) {
     Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "フォルダ"), listSel) : null,
     // メモを1件ずつ選んでまとめる
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "メモ"),
-      h("button", { class: "btn rp-pick", type: "button", onclick: async () => { const ids = await pickMemos(o.ids || [], "まとめるメモを選ぶ"); if (ids) { o.ids = ids.length ? ids : null; render(); } } },
+      h("button", { class: "genre-select rp-pick", type: "button", onclick: async () => { const ids = await pickMemos(o.ids || [], "まとめるメモを選ぶ"); if (ids) { o.ids = ids.length ? ids : null; render(); } } },
         o.ids && o.ids.length ? `${o.ids.length}件を選択中` : "選ぶ…")),
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
@@ -1939,9 +1935,8 @@ function renderReport(s) {
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
     h("div", { class: "rp-tool-row rp-actions" },
-      h("button", { class: "btn primary", type: "button", title: "このまとめを新しいメモとして保存", onclick: () => { if (dg && src.items.length) go({ name: "edit", id: null, draft: digestDraft(dg, src) }); } }, svgIcon(ICONS.note), "メモにする"),
+      h("button", { class: "btn primary rp-save", type: "button", "aria-label": "ファイルに保存", title: "ファイルに保存", onclick: (e) => save(e.currentTarget) }, svgIcon(ICONS.save), "ダウンロード"),
       h("span", { class: "spacer" }),
-      iconBtn("save", "ファイルに保存", (e) => save(e.currentTarget)),
       iconBtn("print", "印刷・PDF", () => window.print()),
       canShare ? iconBtn("share", "共有", (e) => share(e.currentTarget)) : null));
   return h("div", { class: "screen report-screen" },
@@ -2087,7 +2082,7 @@ function renderEdit(s) {
       const b = h("button", { type: "button", class: "g-" + g, "aria-pressed": String(d.genres.includes(g)), onclick: () => {
         d.genres = d.genres.includes(g) ? d.genres.filter(x => x !== g) : [...d.genres, g];
         b.setAttribute("aria-pressed", String(d.genres.includes(g))); genreErr.hidden = true; markDirty();
-      } }, h("span", { class: "tick" }, "✓"), g);
+      } }, h("span", { class: "gp-ico", "aria-hidden": "true" }, svgIcon(ICONS["g" + g])), g);
       return b;
     })), genreErr);
 
@@ -2851,6 +2846,7 @@ function openSettings() {
       h("div", { class: "settings-sec", style: "border-top:0;margin-top:0;padding-top:0" },
         h("h4", {}, "表示"),
         h("div", { class: "row" }, h("span", { style: "flex:1" }, "ダークモード"), themeSwitch())),
+      bgSection(),
       syncSection(),
       h("div", { class: "settings-sec" },
         h("h4", {}, "バックアップ"),
@@ -2865,6 +2861,41 @@ function openSettings() {
           h("button", { class: "btn", type: "button", onclick: () => impIn.click() }, "バックアップを読み込む"), impIn)),
       h("div", { class: "modal-actions", style: "margin-top:16px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "閉じる")));
   } });
+}
+/* 背景の画像（設定で端末の画像から選ぶ。端末内に保存し、大きい写真は縮めてから使う） */
+const BG_FILE = "app-bg";
+let bgUrl = "";
+async function applyUserBg() {
+  const rec = await Storage.getFile(BG_FILE).catch(() => null);
+  if (bgUrl) { URL.revokeObjectURL(bgUrl); bgUrl = ""; }
+  const root = document.documentElement;
+  if (rec && rec.blob) { bgUrl = URL.createObjectURL(rec.blob); root.style.setProperty("--user-bg", `url("${bgUrl}")`); root.classList.add("has-bg"); }
+  else { root.style.removeProperty("--user-bg"); root.classList.remove("has-bg"); }
+  return !!bgUrl;
+}
+async function shrinkImage(file, max = 1600) {
+  try {
+    const bmp = await createImageBitmap(file);
+    const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return await new Promise(res => c.toBlob(b => res(b || file), "image/jpeg", .86));
+  } catch { return file; }
+}
+function bgSection() {
+  const preview = h("span", { class: "bg-preview", "aria-hidden": "true" });
+  const resetBtn = h("button", { class: "btn", type: "button", onclick: async () => { await Storage.delFile(BG_FILE).catch(() => {}); await applyUserBg(); draw(); toast("背景を元に戻しました"); } }, "元に戻す");
+  const inp = h("input", { type: "file", accept: "image/*", hidden: true, onchange: async (e) => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    try { const blob = await shrinkImage(f); await Storage.putFile({ id: BG_FILE, blob, name: "背景", type: blob.type, createdAt: Date.now() }); await applyUserBg(); draw(); toast("背景を変えました"); }
+    catch { toast("この画像は背景に使えませんでした", true); }
+  } });
+  const draw = () => { preview.style.backgroundImage = bgUrl ? `url("${bgUrl}")` : ""; preview.hidden = !bgUrl; resetBtn.hidden = !bgUrl; };
+  draw();
+  return h("div", { class: "settings-sec" },
+    h("h4", {}, "背景"),
+    h("p", { class: "ai-hint", style: "margin:0" }, "端末の写真や画像から、好きな背景を選べます（画像はこの端末の中にだけ保存されます）。"),
+    h("div", { class: "row" }, preview, h("button", { class: "btn", type: "button", onclick: () => inp.click() }, "画像を選ぶ"), resetBtn, inp));
 }
 /* 設定の「Googleドライブ同期」: 「同期」ボタンで オン／オフ（押すまで状態を保つ）。接続先と合言葉はこの端末に保存 */
 const SYNC_HELP = "https://github.com/kokoharu1108/sosaku-memo/blob/main/docs/Googleドライブ同期の設定.md";
@@ -2938,7 +2969,7 @@ async function importBackup(file) {
     for (const f of data.files || []) { const blob = await (await fetch(f.data)).blob(); await Storage.putFile({ id: f.id, blob, name: f.name, type: f.type, createdAt: f.createdAt || Date.now() }); }
     for (const l of data.lists || []) await Storage.putList(l);
     for (const m of data.memos || []) await Storage.putMemo(stripRuntime(normalizeMemo(m)));
-    await Manager.load();
+    await Manager.load(); applyUserBg().catch(() => {});
     toast("バックアップを読み込みました"); resetTo(); afterChange();
   } catch (e) { toast(e && e.code === "quota_exceeded" ? "端末の空き容量が足りません" : "読み込みの途中で失敗しました", true); }
 }
@@ -2962,6 +2993,7 @@ async function boot() {
   if (historyOk) try { history.replaceState({ depth: 1 }, ""); } catch {}
   $("#app").append(h("div", { class: "wrap" }, h("p", { class: "ai-hint" }, "メモを読み込んでいます…")));
   await Storage.init();
+  applyUserBg().catch(() => {});
   try { await Manager.load(); }
   catch (e) { toast("メモを読み込めませんでした。アプリを開き直してください。", true); }
   render();
