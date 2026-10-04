@@ -53,7 +53,7 @@ with sync_playwright() as p:
     # ツリー（階層）は廃止: タブ・閲覧画面・編集画面に出ない
     new_memo(pg, "鞍馬の火祭")
     check("ツリーのタブがない", pg.locator(".tabs >> text=ツリー").count() == 0)
-    check("カードは題名・日付・冒頭・ジャンルだけ（リスト名・時刻なし）", pg.locator(".memo-card .list-tag").count() == 0 and ":" not in pg.locator(".memo-card .card-date").first.inner_text())
+    check("カードは題名・日付・冒頭・ジャンルだけ（フォルダ名・時刻なし）", pg.locator(".memo-card .list-tag").count() == 0 and ":" not in pg.locator(".memo-card .card-date").first.inner_text())
     pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
     check("閲覧画面の上部バーに題名、背景に大きくジャンル（「メモを読む」はない）", pg.inner_text("header .view-title") == "京都取材" and "体験" in pg.inner_text("header .genre-mark") and pg.locator("header.topbar.g-体験").count() == 1 and "メモを読む" not in pg.inner_text("header"))
     check("アプリ名はヒフミヨ", pg.title() == "ヒフミヨ")
@@ -96,39 +96,45 @@ with sync_playwright() as p:
     pg.click(".modal >> text=破棄して戻る"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
     check("破棄すると最初の画面へ・変更は保存されない", pg.locator(".memo-card", has_text="京都取材（仮）").count() == 0)
 
-    # リスト画面で新規メモ → 保存後はリスト画面に戻る
-    pg.click(".tabs >> text=リスト"); pg.click(".fab"); pg.fill("#newlist", "京都"); pg.click(".modal >> text=作成"); time.sleep(0.3)
+    # フォルダ画面で新規メモ → 保存後はフォルダ画面に戻る
+    pg.click(".tabs >> text=フォルダ"); pg.click(".fab"); pg.fill("#newlist", "京都"); pg.click(".modal >> text=作成"); time.sleep(0.3)
     if pg.locator(".modal").count(): pg.click(".modal >> text=キャンセル"); time.sleep(0.2)
-    pg.click(".fab"); pg.fill("#title", "リスト内メモ"); pg.click(".genre-pick >> text=学び"); pg.click(".edit-actions .btn.primary"); time.sleep(0.4)
-    check("リストで作ったメモは保存後リスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 1)
+    check("フォルダ画面の上部は名前の左にフォルダのアイコン（「フォルダ」の見出しなし）", pg.locator(".folder-title .folder-ico svg").count() == 1 and pg.locator(".list-head-label").count() == 0)
+    check("2画面まではパス表示を出さない", pg.locator(".crumbs").count() == 0)
+    check("「保存済みのメモを入れる」ボタンはない", pg.locator("text=保存済みのメモを入れる").count() == 0)
+    pg.click(".fab")
+    check("右下のボタンで「保存済から追加」「新規追加」を選べる", pg.locator(".fab-menu >> text=保存済から追加").is_visible() and pg.locator(".fab-menu >> text=新規追加").is_visible())
+    pg.click(".fab-menu >> text=新規追加"); pg.fill("#title", "フォルダ内メモ"); pg.click(".genre-pick >> text=学び"); pg.click(".edit-actions .btn.primary"); time.sleep(0.4)
+    check("フォルダで作ったメモは保存後フォルダ画面に戻る", pg.locator(".folder-title").count() == 1 and pg.locator(".memo-card", has_text="フォルダ内メモ").count() == 1)
 
     # 選択モードのままパンくずで戻っても、その後の「戻る」が効く
     long_press(pg, pg.locator(".memo-card").first)
-    check("リスト画面でもメモの長押しで選択が始まる", pg.locator(".select-bar").count() == 1 and pg.locator(".memo-card.picked").count() == 1)
-    pg.click(".crumb.home"); time.sleep(0.4)
+    check("フォルダ画面でもメモの長押しで選択が始まる", pg.locator(".select-bar").count() == 1 and pg.locator(".memo-card.picked").count() == 1)
+    pg.click(".topbar .back"); time.sleep(0.4)
+    if pg.locator(".search-toggle").count() == 0: pg.click(".topbar .back"); time.sleep(0.4)
     pg.click(".tabs >> text=メモ"); pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
     pg.go_back(); time.sleep(0.3)
     check("選択モード後も戻る操作が効く", pg.locator(".search-toggle").count() == 1)
 
-    pg.click(".tabs >> text=リスト")
-    check("リスト一覧の更新日は「更新」の文字ではなくアイコン", pg.locator(".list-sub .upd-ico svg").count() >= 1 and "更新" not in pg.inner_text(".list-sub"))
+    pg.click(".tabs >> text=フォルダ")
+    check("フォルダ一覧の更新日は「更新」の文字ではなくアイコン", pg.locator(".list-sub .upd-ico svg").count() >= 1 and "更新" not in pg.inner_text(".list-sub"))
     pg.click(".list-row .open"); time.sleep(0.3)
-    # リスト → 閲覧 → 編集で削除すると、リスト画面に戻り「戻る」もずれない
-    pg.locator(".memo-card", has_text="リスト内メモ").click(); pg.wait_for_selector(".view-title")
+    # フォルダ → 閲覧 → 編集で削除すると、フォルダ画面に戻り「戻る」もずれない
+    pg.locator(".memo-card", has_text="フォルダ内メモ").click(); pg.wait_for_selector(".view-title")
     pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.click(".topbar .btn.danger"); time.sleep(0.2)
     if pg.locator(".modal").count(): pg.click(".modal >> text=Yes")
     time.sleep(0.6)
-    check("編集画面で削除するとリスト画面に戻る", pg.locator(".list-head-label").count() == 1 and pg.locator(".memo-card", has_text="リスト内メモ").count() == 0)
+    check("編集画面で削除するとフォルダ画面に戻る", pg.locator(".folder-title").count() == 1 and pg.locator(".memo-card", has_text="フォルダ内メモ").count() == 0)
     pg.go_back(); time.sleep(0.4)
     check("削除後の戻る操作で最初の画面へ", pg.locator(".search-toggle").count() == 1)
 
     # 本文エディタ（本文より上は題名とジャンルだけ・書式ボタンは1行）
     pg.click(".tabs >> text=メモ"); pg.click(".fab")
     check("題名の欄は「題名」だけ", pg.get_attribute("#title", "placeholder") == "題名")
-    check("リストはプルダウンで選ぶ", pg.locator("select#elist").count() == 1)
-    check("メモ画面の下部の見出しは「タグ」「リスト」だけ", "そのほかの設定" not in pg.inner_text("main") and "自由に付けられます" not in pg.inner_text("main") and "リストに入れる" not in pg.inner_text("main"))
+    check("フォルダはプルダウンで選ぶ", pg.locator("select#elist").count() == 1)
+    check("メモ画面の下部の見出しは「タグ」「フォルダ」だけ", "そのほかの設定" not in pg.inner_text("main") and "自由に付けられます" not in pg.inner_text("main") and "フォルダに入れる" not in pg.inner_text("main"))
     check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
-    check("タグ・リストは本文より下・階層の欄はない", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&!document.querySelector('.parent-box')})()"))
+    check("タグ・フォルダは本文より下・階層の欄はない", pg.evaluate("(()=>{const e=document.querySelector('.editor').getBoundingClientRect().top;return document.querySelector('#taginput').getBoundingClientRect().top>e&&!document.querySelector('.parent-box')})()"))
     check("書式ボタンが1行に収まる", pg.evaluate("(()=>{const f=document.querySelector('.fmt-bar');return f.scrollWidth<=f.clientWidth+1})()"))
     pg.click("#title"); check("題名を触ると直近の題名が出る", pg.locator(".recent-titles").is_visible())
     pg.click(".topbar .back"); pg.wait_for_selector(".search-toggle")
@@ -149,7 +155,9 @@ with sync_playwright() as p:
     pg.click("#title"); pg.click(".edit-actions .btn.primary"); pg.wait_for_selector(".search-toggle"); time.sleep(0.2)
     pg.locator(".memo-card", has_text="書式").click(); pg.wait_for_selector(".view-title")
     check("閲覧画面の本文は16px・行間は詰めめ", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.view-body'));return c.fontSize==='16px'&&parseFloat(c.lineHeight)/16<=1.65})()"))
-    pg.click("text=添付ファイル（1件）"); pg.click(".att-row"); pg.wait_for_selector(".lightbox img")
+    pg.click("text=添付ファイル（1件）")
+    check("添付ファイルの欄はサイズまで枠内に収まる", pg.evaluate("document.querySelector('.att-size').getBoundingClientRect().right <= document.querySelector('.att-details').getBoundingClientRect().right"))
+    pg.click(".att-row"); pg.wait_for_selector(".lightbox img")
     pg.click(".lightbox img"); time.sleep(0.2)
     check("画像を押しても原寸表示にならず、拡大表示が閉じる", pg.locator(".lightbox").count() == 0 and "原寸" not in pg.content())
     body = pg.inner_html(".view-body")
@@ -201,10 +209,10 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     pg.click(".topbar .back"); time.sleep(0.3)
     if pg.locator(".modal").count(): pg.click(".modal >> text=破棄して戻る"); time.sleep(0.3)
     pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".filter-chip button"); pg.click(".search-toggle")
-    pg.click(".tabs >> text=リスト"); pg.click(".list-row .open"); time.sleep(0.2)
-    pg.click("text=保存済みのメモを入れる"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
+    pg.click(".tabs >> text=フォルダ"); pg.click(".list-row .open"); time.sleep(0.2)
+    pg.click(".fab"); pg.click(".fab-menu >> text=保存済から追加"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
-    check("リストからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
+    check("フォルダからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".search-toggle"); pg.click(".tabs >> text=メモ")
 
     # 検索パネルはスマホの戻る操作で閉じる・検索履歴は出さない（撤廃）
@@ -217,7 +225,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     # 検索ボタンを2回押して閉じたら、押したままの見た目が残らない（スマホ）
     pg.tap(".search-toggle"); time.sleep(0.3); pg.tap(".search-toggle"); time.sleep(0.3)
     check("検索パネルを閉じると検索ボタンは押していない見た目に戻る", pg.evaluate("getComputedStyle(document.querySelector('.search-toggle')).backgroundColor") == "rgba(0, 0, 0, 0)")
-    check("メモ／リストのタブは選んでいる方が塗りつぶし", pg.evaluate("(()=>{const [a,b]=document.querySelectorAll('.tabs button');const c=e=>getComputedStyle(e).backgroundColor;return c(a)!==c(b)&&c(a)!=='rgba(0, 0, 0, 0)'})()"))
+    check("メモ／フォルダのタブは選んでいる方が塗りつぶし", pg.evaluate("(()=>{const [a,b]=document.querySelectorAll('.tabs button');const c=e=>getComputedStyle(e).backgroundColor;return c(a)!==c(b)&&c(a)!=='rgba(0, 0, 0, 0)'})()"))
     check("タグは鮮やかな青", pg.evaluate("getComputedStyle(document.querySelector('.tag-mini')||document.body).color") == "rgb(29, 155, 240)" if pg.locator(".tag-mini").count() else True)
     check("メモのカードの左端にジャンルのアイコンを置いた色の帯がある", pg.evaluate("(()=>{const b=document.querySelector('.memo-card .genre-band .gb');const c=getComputedStyle(b);return c.backgroundColor!=='rgba(0, 0, 0, 0)'&&!!b.querySelector('svg')})()"))
     check("カードの下段にジャンルの重複表示はない", pg.locator(".memo-card .card-foot .genre").count() == 0)
@@ -226,7 +234,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     # まとめ: キーワードなしでも作れて、作成日時の期間（今日など）で絞れる
     pg.click(".report-btn"); pg.wait_for_selector(".rp-tools")
     check("キーワードなしで全メモのまとめ", pg.inner_text(".rp-title") == "すべてのメモのまとめ")
-    check("リスト・期間は「未選択」から選ぶ", pg.locator("#rp-period option").first.inner_text() == "未選択")
+    check("フォルダ・期間は「未選択」から選ぶ", pg.locator("#rp-period option").first.inner_text() == "未選択")
     check("キーワードなしでは「関連部分だけ／全文」を出さない", pg.locator(".rp-seg").count() == 0)
     pg.select_option("#rp-period", "today"); time.sleep(0.3)
     import datetime as _dt
@@ -250,16 +258,16 @@ window.__midX=getComputedStyle(document.querySelector('.swipe-area > div:last-ch
 fire('touchend',x1,false);}"""
     pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
     check("スライド中は指に合わせて一覧が動く", pg.evaluate("window.__midX") not in ("none", ""))
-    check("左へスライドでリストタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "リスト")
+    check("左へスライドでフォルダタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "フォルダ")
     pg.evaluate(SWIPE, [8, 250]); time.sleep(0.6)
-    check("画面の端からの操作ではタブが変わらない", pg.locator(".tabs [aria-selected=true]").inner_text() == "リスト")
+    check("画面の端からの操作ではタブが変わらない", pg.locator(".tabs [aria-selected=true]").inner_text() == "フォルダ")
     pg.evaluate(SWIPE, [120, 300]); time.sleep(0.6)
     check("右へスライドでメモタブ", pg.locator(".tabs [aria-selected=true]").inner_text() == "メモ")
 
-    # まとめ: リストを選べる
+    # まとめ: フォルダを選べる
     pg.click(".report-btn"); pg.wait_for_selector("#rp-list")
     pg.select_option("#rp-list", label="京都"); time.sleep(0.3)
-    check("まとめでリストを選べる", pg.inner_text(".rp-title").startswith("京都のまとめ"))
+    check("まとめでフォルダを選べる", pg.inner_text(".rp-title").startswith("京都のまとめ"))
     pg.go_back(); pg.wait_for_selector(".search-toggle")
 
     # 検索画面: 「null」が出ない・「選択」は上部の固定バー
@@ -288,7 +296,9 @@ fire('touchend',x1,false);}"""
     check("選択中は押すたびに選ぶ・外す", pg.locator(".memo-card.picked").count() == 2)
     pg.locator(".memo-card").nth(1).click()
     check("選択のチェックは太い線の印", pg.evaluate("(()=>{const s=document.querySelector('.memo-card.picked .pick-box svg');return !!s&&parseFloat(s.getAttribute('stroke-width'))>=3})()"))
-    pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.4)
+    pg.click(".select-bar >> text=削除")
+    check("削除の確認の「Yes」は警告色の赤", "danger-solid" in pg.get_attribute(".modal >> text=Yes", "class"))
+    pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
     # 作成・更新の日時: 1時間未満は「○分前」、24時間未満は「○時間前」、それより前は日付
     tc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
@@ -299,7 +309,7 @@ fire('touchend',x1,false);}"""
     tp.clock.fast_forward(2 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
     check("作成2時間半後は「2時間前」", tp.inner_text(".memo-card .card-date") == "2時間前", tp.inner_text(".memo-card .card-date"))
     tp.locator(".memo-card").click(); tp.wait_for_selector(".view-title")
-    check("閲覧画面の作成日時も同じ表示", "2時間前 作成" in tp.inner_text(".view-meta"), tp.inner_text(".view-meta"))
+    check("閲覧画面の作成日時も同じ表示（「作成」はアイコン）", "2時間前" in tp.inner_text(".view-meta") and tp.locator(".view-meta .date-ico[aria-label=作成] svg").count() == 1 and "作成" not in tp.inner_text(".view-meta"), tp.inner_text(".view-meta"))
     tp.go_back(); tp.clock.fast_forward(22 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
     check("24時間をすぎたら日付", "/" in tp.inner_text(".memo-card .card-date"), tp.inner_text(".memo-card .card-date"))
     tc.close()
