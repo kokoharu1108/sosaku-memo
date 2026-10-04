@@ -17,62 +17,62 @@
 <style>
 /* Layout: one-column notebook (max 760px) for 検索・メモ画面; 閲覧画面 splits into 本文 + resizable AI panel on the right edge. */
 :root {
-  --bg: #f3f4f8;
+  --bg: #eef2f8;
   --surface: #ffffff;
-  --surface-2: #eceef5;
-  --line: #dfe2ec;
-  --ink: #2c2f3d;
-  --ink-2: #636879;
-  --ink-3: #6e7386;
-  --accent: #6f7bc4;
-  --accent-soft: #e4e7f7;
-  --accent-ink: #4b56a0;
+  --surface-2: #e3e9f2;
+  --line: #d0d9e6;
+  --ink: #0f1a30;
+  --ink-2: #3d4a63;
+  --ink-3: #56637c;
+  --accent: #1a5fd6;
+  --accent-soft: #dde8fb;
+  --accent-ink: #154bb0;
   --tag: #1d9bf0;   /* タグの色（X のリンクと同じ鮮やかな青） */
   --g-exp: #fbe3d8;  --g-exp-ink: #9a5539;
   --g-learn: #d9f0e6; --g-learn-ink: #2f7a5c;
   --g-idea: #ece3f8; --g-idea-ink: #6a4ba3;
   --ok: #d6efe2; --ok-ink: #2d6f51;
   --ng: #f8dde0; --ng-ink: #a23b4b;
-  --scrim: rgba(40, 42, 58, .38);
-  --shadow: 0 1px 2px rgba(44,47,61,.06), 0 6px 20px rgba(44,47,61,.07);
+  --scrim: rgba(8, 16, 36, .5);
+  --shadow: 0 1px 2px rgba(15,26,48,.08), 0 6px 20px rgba(15,26,48,.1);
   --bar-search: #d5e2fb; --bar-list: #dde1e9; --bar-edit: #f8d5e3; --bar-report: #f5eaa6;
   --bar-view: #e1e3ea; --bar-view-exp: #fbd8c3; --bar-view-learn: #c8ecd6; --bar-view-idea: #e1d5f6;   /* 閲覧画面はメモのジャンルの色 */
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
-  --danger: #c9566a;
+  --danger: #e0182f;   /* 削除などの警告色（はっきりした赤） */
   /* X（旧Twitter）と同じく端末標準のゴシック体（Android は Noto Sans JP、iPhone はヒラギノ、PC は游ゴシック/メイリオ等） */
   --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Noto Sans CJK JP", "Yu Gothic UI", Meiryo, Helvetica, Arial, sans-serif;
   --font-title: var(--font-body);
-  --radius: 12px;
+  --radius: 6px;   /* 角は鋭めに */
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1b1c23; --surface: #24262f; --surface-2: #2c2f3a; --line: #363a47;
-    --ink: #e7e8f0; --ink-2: #b2b6c5; --ink-3: #a3a8b9;
-    --accent: #a5aeea; --accent-soft: #333852; --accent-ink: #c4caf5; --tag: #1d9bf0;
+    --bg: #0a1222; --surface: #111c30; --surface-2: #18253d; --line: #26364f;
+    --ink: #e9f0fb; --ink-2: #b1c0d8; --ink-3: #95a6c2;
+    --accent: #3cc4ff; --accent-soft: #12324e; --accent-ink: #9fdcff; --tag: #1d9bf0;
     --g-exp: #4a352e; --g-exp-ink: #f3c4ae;
     --g-learn: #2b4239; --g-learn-ink: #a9e1c8;
     --g-idea: #3b3350; --g-idea-ink: #d3c2f2;
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
-    --scrim: rgba(0,0,0,.55);
+    --scrim: rgba(0,4,14,.66);
     --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-    --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #7c4a2c; --bar-view-learn: #1f6a49; --bar-view-idea: #5b3c8e; --danger: #e48a9a;
+    --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #7c4a2c; --bar-view-learn: #1f6a49; --bar-view-idea: #5b3c8e; --danger: #ff4d63;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #1b1c23; --surface: #24262f; --surface-2: #2c2f3a; --line: #363a47;
-  --ink: #e7e8f0; --ink-2: #b2b6c5; --ink-3: #a3a8b9;
-  --accent: #a5aeea; --accent-soft: #333852; --accent-ink: #c4caf5; --tag: #1d9bf0;
+  --bg: #0a1222; --surface: #111c30; --surface-2: #18253d; --line: #26364f;
+  --ink: #e9f0fb; --ink-2: #b1c0d8; --ink-3: #95a6c2;
+  --accent: #3cc4ff; --accent-soft: #12324e; --accent-ink: #9fdcff; --tag: #1d9bf0;
   --g-exp: #4a352e; --g-exp-ink: #f3c4ae;
   --g-learn: #2b4239; --g-learn-ink: #a9e1c8;
   --g-idea: #3b3350; --g-idea-ink: #d3c2f2;
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
-  --scrim: rgba(0,0,0,.55);
+  --scrim: rgba(0,4,14,.66);
   --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.3);
-  --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #7c4a2c; --bar-view-learn: #1f6a49; --bar-view-idea: #5b3c8e; --danger: #e48a9a;
+  --bar-search: #2b4a86; --bar-list: #4a5266; --bar-edit: #7e3a5c; --bar-report: #6a5d12; --bar-view: #4a5064; --bar-view-exp: #7c4a2c; --bar-view-learn: #1f6a49; --bar-view-idea: #5b3c8e; --danger: #ff4d63;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
@@ -114,9 +114,9 @@ a { color: var(--accent-ink); }
   display: flex; align-items: center; gap: 8px; min-height: 52px;
 }
 .topbar-in.wide { max-width: none; }
-.topbar h1 { font-size: 16px; font-weight: 700; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.topbar h1 { font-size: 17px; font-weight: 900; font-style: italic; margin: 0; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
-.brand b { font-family: var(--font-title); font-size: 20px; letter-spacing: .04em; }
+.brand b { font-family: var(--font-title); font-size: 22px; font-weight: 900; letter-spacing: .08em; display: inline-block; transform: skewX(-12deg); }
 .brand small { color: var(--ink-3); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .icon-btn {
   border: 0; background: transparent; border-radius: 10px; min-width: 46px; height: 46px;
@@ -133,7 +133,7 @@ a { color: var(--accent-ink); }
   display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
 }
 a.btn { text-decoration: none; }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--surface); font-weight: 700; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding-inline: 18px; }
 .btn.danger { color: var(--ng-ink); }
 .btn.ghost { border-color: transparent; background: transparent; }
 .btn:disabled { opacity: .5; cursor: default; }
@@ -161,9 +161,11 @@ a.btn { text-decoration: none; }
 .search-go { height: 46px; padding: 0 16px; }
 
 .toolbar-row { display: flex; align-items: center; gap: 8px; margin-block: 14px 10px; flex-wrap: wrap; }
-.tabs { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; }
-.tabs button { border: 0; background: transparent; border-radius: 8px; padding: 5px 14px; font-size: 15px; color: var(--ink-2); }
-.tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); font-weight: 700; box-shadow: 0 1px 3px rgba(0,0,0,.18); }
+/* タブ: 斜めの平行四辺形。選んでいる方を塗りつぶす */
+.tabs { display: inline-flex; gap: 2px; background: none; padding: 0; }
+.tabs button { border: 0; background: color-mix(in srgb, var(--surface) 55%, transparent); padding: 6px 20px; font-size: 15px; font-weight: 700; color: var(--ink-2);
+  clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.tabs button[aria-selected="true"] { background: var(--accent); color: var(--surface); font-weight: 900; font-style: italic; }
 .spacer { flex: 1; }
 .result-meta { font-size: 14.5px; color: var(--ink-2); }
 .filter-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-ink); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: 14.5px; }
@@ -222,11 +224,13 @@ a.btn { text-decoration: none; }
 .crumbs::-webkit-scrollbar { display: none; }
 .crumb { position: relative; flex: 0 1 auto; min-width: 3.2em; max-width: 6.5em; overflow: hidden; text-overflow: ellipsis; margin-right: -8px;
   border: 1px solid color-mix(in srgb, var(--ink-3) 35%, transparent); border-bottom: 0; border-radius: 9px 9px 0 0;
-  background: color-mix(in srgb, var(--bg) 55%, transparent); color: var(--ink-2); padding: 4px 14px 5px 10px; font-size: 12px; text-align: left; }
+  background: var(--surface-2); color: var(--ink-2); padding: 4px 14px 5px 10px; font-size: 12px; text-align: left; box-shadow: -2px 0 4px rgba(8,16,36,.12); }
 .crumb.home { flex: 0 0 auto; max-width: none; }
 .crumb.current { flex: 0 0 auto; max-width: 62%; z-index: 50; margin-right: 0; background: var(--bg); color: var(--ink); font-size: 13.5px; font-weight: 700; padding: 6px 14px; border-color: transparent; }
 button.brand { border: 0; background: none; padding: 0; text-align: left; color: inherit; cursor: pointer; }
 /* bar colors per screen（屋外でも見分けやすいよう、画面ごとに色相を分ける） */
+.topbar::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 3px; pointer-events: none;
+  background: linear-gradient(105deg, var(--accent) 0 34%, transparent 34.3%, transparent 36%, var(--accent) 36.3% 39%, transparent 39.3%); }
 .topbar.bar-search { background: var(--bar-search); }
 .topbar.bar-view { background: var(--bar-view); }
 .topbar.bar-view.g-体験 { background: var(--bar-view-exp); }
@@ -267,7 +271,12 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .recall-title { display: block; font-family: var(--font-title); font-weight: 700; font-size: 16px; overflow-wrap: anywhere; }
 .recall-text { display: block; font-size: 13px; color: var(--ink-2); overflow-wrap: anywhere; }
 /* dates */
-.dates .upd { color: var(--ink-3); }
+.dates { display: inline-flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.date-item { display: inline-flex; align-items: center; gap: 4px; }
+.date-ico { display: inline-flex; color: var(--ink-3); }
+.date-ico svg { width: 16px; height: 16px; }
+.list-tag .folder-ico svg { width: 16px; height: 16px; }
+.list-tag.link { display: inline-flex; align-items: center; gap: 4px; }
 /* マウスを重ねたときの色は、マウスのある端末だけ（スマホでは触ったあとに色が残り、押したままに見えるため） */
 @media (hover: hover) {
   .icon-btn:hover { background: var(--surface-2); }
@@ -296,7 +305,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--sel-bar, var(--surface)); border-top: 1px solid var(--line); box-shadow: var(--shadow); padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
 .select-bar-in { max-width: 760px; margin: 0 auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .sel-count { font-size: 14px; }
-.btn.danger-solid { background: var(--danger); border-color: var(--danger); color: var(--surface); }
+.btn.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 700; clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%); padding-inline: 18px; }
 .btn.sel-start { padding: 2px 10px; font-size: 13px; color: var(--accent-ink); }
 /* search panel */
 .search-toggle { position: relative; }
@@ -316,20 +325,21 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .att-details[open] .att-chev { transform: rotate(180deg); }
 .att-chev { transition: transform .15s; color: var(--ink-3); }
 .att-rows { border-top: 1px solid var(--line); display: grid; }
-.att-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; background: none; padding: 10px 14px; color: inherit; font-size: 14.5px; }
+.att-row { display: flex; align-items: center; gap: 10px; width: 100%; min-width: 0; max-width: 100%; text-align: left; border: 0; background: none; padding: 10px 14px; color: inherit; font-size: 14.5px; }
 .att-row + .att-row { border-top: 1px solid var(--line); }
 .att-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.att-size { font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
-.att-go { color: var(--ink-3); }
+.att-size { flex: 0 0 auto; white-space: nowrap; font-size: 12px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.att-go { flex: 0 0 auto; color: var(--ink-3); }
 .pv { display: flex; flex-direction: column; min-height: 0; }
 .pv-meta { font-size: 12px; color: var(--ink-3); margin-bottom: 8px; }
 .pv-text { white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; max-height: 55vh; background: var(--surface-2); border-radius: 10px; padding: 12px; margin: 0; font-size: 13.5px; font-family: ui-monospace, "SFMono-Regular", Menlo, monospace; }
 .pv-media { width: 100%; max-height: 55vh; border-radius: 10px; background: #000; }
 .modal h3 { overflow-wrap: anywhere; }
 .list-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--accent-soft); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px; }
+.folder-title { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
 .list-head-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--accent-ink); }
 .list-head-name { font-size: 17px; font-weight: 700; overflow-wrap: anywhere; }
-.list-row { display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius); padding: 4px 4px 4px 0; }
+.list-row { display: flex; align-items: center; gap: 4px; border: 1px solid color-mix(in srgb, var(--line) 70%, var(--ink-3)); box-shadow: 0 1px 3px rgba(0, 0, 0, .07); background: var(--surface); border-radius: var(--radius); padding: 4px 4px 4px 0; }
 .list-row > button.open { flex: 1; min-width: 0; text-align: left; border: 0; background: none; padding: 8px 14px; color: inherit; }
 .list-name { font-weight: 700; overflow-wrap: anywhere; display: flex; align-items: center; gap: 8px; }
 .folder-ico { flex: 0 0 auto; display: inline-flex; color: var(--accent); }
@@ -345,11 +355,16 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 
 .fab {
   position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom, 0px)); z-index: 25;
-  height: 54px; padding: 0 20px 0 16px; border-radius: 27px; border: 0;
-  background: var(--accent); color: var(--surface); font-weight: 700; font-size: 15px;
-  display: inline-flex; align-items: center; gap: 6px; box-shadow: var(--shadow);
+  height: 54px; padding: 0 26px 0 22px; border-radius: 0; border: 0;
+  background: var(--accent); color: var(--surface); font-weight: 900; font-size: 15px; font-style: italic; letter-spacing: .04em;
+  display: inline-flex; align-items: center; gap: 6px; filter: drop-shadow(0 4px 10px rgba(8,16,36,.35));
+  clip-path: polygon(14px 0, 100% 0, calc(100% - 14px) 100%, 0 100%);
 }
 .fab svg { width: 26px; height: 26px; }
+.fab-menu { position: fixed; right: 18px; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 6px; justify-items: end; }
+.fab-menu button { border: 0; background: var(--surface); color: var(--ink); font-weight: 900; font-style: italic; font-size: 15px; padding: 11px 26px 11px 22px;
+  border-left: 4px solid var(--accent); box-shadow: var(--shadow); clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+.fab-menu button:disabled { opacity: .45; }
 
 /* ---------- view screen ---------- */
 .view-shell { flex: 1; display: flex; min-height: 0; position: relative; }
@@ -497,13 +512,13 @@ body.editing-body .edit-actions { display: none; }
 
 /* ---------- overlays ---------- */
 .toast-host { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 10px); left: 0; right: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 100; pointer-events: none; padding-inline: 16px; }
-.toast { background: var(--ok); color: var(--ok-ink); border-radius: 999px; padding: 8px 18px; font-weight: 700; font-size: 14px; box-shadow: var(--shadow); animation: toastLife 3s ease forwards; max-width: 100%; }
+.toast { background: var(--ok); color: var(--ok-ink); border-radius: var(--radius); padding: 8px 18px; font-weight: 700; font-size: 14px; box-shadow: var(--shadow); animation: toastLife 3s ease forwards; max-width: 100%; }
 .toast.ng { background: var(--ng); color: var(--ng-ink); }
 @keyframes toastLife { 0% { opacity: 0; transform: translateY(-8px); } 8% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; } }
 .modal-scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 90; display: grid; place-items: center; padding: 16px; }
-.modal { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); width: min(380px, 100%); padding: 20px; }
+.modal { background: var(--surface); border-radius: var(--radius); border-top: 4px solid var(--accent); box-shadow: var(--shadow); width: min(380px, 100%); padding: 20px; }
 .modal.wide { width: min(560px, 100%); max-height: min(80vh, 640px); display: flex; flex-direction: column; }
-.modal h3 { margin: 0 0 6px; font-size: 16px; }
+.modal h3 { margin: 0 0 6px; font-size: 17px; font-weight: 900; font-style: italic; }
 .modal p { margin: 0 0 16px; color: var(--ink-2); font-size: 14px; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .picker-list { overflow: auto; display: grid; gap: 6px; margin-block: 10px; min-height: 0; flex: 1; }
@@ -566,7 +581,7 @@ body.editing-body .edit-actions { display: none; }
   .rp-sec { break-inside: auto; } .rp-list > li { break-inside: avoid; }
 }
 .settings-sec { border-top: 1px solid var(--line); padding-top: 14px; margin-top: 14px; display: grid; gap: 8px; }
-.settings-sec h4 { margin: 0; font-size: 14px; color: var(--ink-2); }
+.settings-sec h4 { margin: 0; font-size: 14px; font-weight: 900; font-style: italic; color: var(--ink); border-left: 4px solid var(--accent); padding-left: 8px; }
 .settings-sec .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .sync-btn svg { width: 22px; height: 22px; }
 .sync-btn[aria-pressed="true"] { background: var(--ok); color: var(--ok-ink); border-color: var(--ok-ink); font-weight: 700; }
@@ -634,6 +649,7 @@ const ICONS = {
   more: '<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   updated: '<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/><path d="M12 7.5V12l3 2"/>',
   folder: '<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2.2h8.4A1.5 1.5 0 0 1 21 8.7v9.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z"/>',
+  created: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11.5v6M9 14.5h6"/>',
   share: '<circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.4M8.2 13.2l7.6 4.4"/>',
 };
 /* 選択のチェック印（太い線・角ばった形） */
@@ -875,7 +891,7 @@ const Manager = {
     this.reindex(); afterChange();
     return l;
   },
-  /* リストに入れるメモをまとめて更新 */
+  /* フォルダに入れるメモをまとめて更新 */
   async setListMembers(listId, memoIds) {
     const want = new Set(memoIds);
     const changed = [];
@@ -887,7 +903,7 @@ const Manager = {
     }
     if (!changed.length) return 0;
     const l = this.lists.get(listId); if (l) { l.updatedAt = Date.now(); await Storage.putList(l); }
-    // リストの出入りはメモ側の情報なので、同期で新しい方が勝つよう更新日時も進める
+    // フォルダの出入りはメモ側の情報なので、同期で新しい方が勝つよう更新日時も進める
     const now = Date.now(); for (const m of changed) { m.updatedAt = Math.max(m.updatedAt, now); await Storage.putMemo(stripRuntime(m)); }
     this.reindex(); afterChange();
     return changed.length;
@@ -907,7 +923,7 @@ const Manager = {
     for (const m of this.sorted) { if (m.title && !out.includes(m.title)) out.push(m.title); if (out.length >= 5) break; }
     return out;
   },
-  /* 毎日0時の整理: 壊れた参照・リスト紐づけを掃除し、索引を作り直す */
+  /* 毎日0時の整理: 壊れた参照・フォルダ紐づけを掃除し、索引を作り直す */
   async maintain(force) {
     if (!force && this.meta.lastMaintenance === todayKey()) return;
     const ids = new Set(this.memos.keys());
@@ -1061,7 +1077,7 @@ function selectBar(visibleIds, actions, redraw) {
 async function bulkDelete() {
   const ids = [...UI.select.ids].filter(id => Manager.get(id));
   if (!ids.length) return;
-  const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のメモを削除します。元に戻すことはできません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
+  const ok = await modal({ title: "本当に削除しますか？", message: `選択した${ids.length}件のメモを削除します。元に戻すことはできません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "danger-solid" }] });
   if (!ok) return;
   let done = 0;
   for (const id of ids) { try { await Manager.deleteMemo(id); done++; } catch {} }
@@ -1069,22 +1085,22 @@ async function bulkDelete() {
   exitSelect();
 }
 
-/* 現在地のパス表示（例：ヒフミヨ › リスト「京都」 › 鞍馬の火祭） */
+/* 現在地のパス表示（例：ヒフミヨ › フォルダ「京都」 › 鞍馬の火祭） */
 const clip = (t, n = 14) => (t.length > n ? t.slice(0, n) + "…" : t);
 function crumbLabel(sc) {
   if (sc.name === "search") return sc.st ? "検索「" + clip(sc.st.committed || "", 10) + "」" : "ホーム";
-  if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "リスト「" + clip(l ? l.name : "削除済み", 10) + "」"; }
+  if (sc.name === "list") { const l = Manager.lists.get(sc.id); return "フォルダ「" + clip(l ? l.name : "削除済み", 10) + "」"; }
   if (sc.name === "view") { const m = Manager.get(sc.id); return clip(m ? (m.title || "無題のメモ") : "削除済み"); }
-  // リストから開いたまとめは、1つ前の「リスト「…」」と重複するので「まとめ」だけにする（長いとパンくずの先頭が隠れる）
+  // フォルダから開いたまとめは、1つ前の「フォルダ「…」」と重複するので「まとめ」だけにする（長いとパンくずの先頭が隠れる）
   if (sc.name === "report") { if (sc.listId) return "まとめ"; return "まとめ" + ((sc.q || sc.genre) ? "「" + clip(sc.q || sc.genre, 8) + "」" : ""); }
   if (sc.name === "edit") { if (!sc.id) return "新しいメモ"; const m = Manager.get(sc.id); return "編集：" + clip(m ? (m.title || "無題のメモ") : "", 10); }
   return "";
 }
 /* パス表示（ブラウザのタブのような形）: 「ホーム」から今の画面まで。今の画面のタブは普通の大きさで手前に、
-   前の画面のタブは詰めて後ろに重ねる。押すとその画面に戻る。画面が1つだけのときは出さない */
+   前の画面のタブは詰めて後ろに重ねる。押すとその画面に戻る。3画面以上のときだけ出す */
 function crumbBar() {
   const stack = UI.stack;
-  if (stack.length < 2) return null;
+  if (stack.length < 3) return null;   // 2画面までは上部バーの戻る矢印で足りるので出さない
   const items = stack.map((sc, i) => {
     const last = i === stack.length - 1;
     return last ? h("span", { class: "crumb current", "aria-current": "page" }, crumbLabel(sc))
@@ -1117,7 +1133,7 @@ function modal({ title, message, buttons, wide, body }) {
     const f = box.querySelector("input, .btn.primary, .btn"); if (f) f.focus();
   });
 }
-const confirmDelete = () => modal({ title: "本当に削除しますか？", buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
+const confirmDelete = () => modal({ title: "本当に削除しますか？", buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "danger-solid" }] });
 function lightbox(src) {
   const close = () => { lb.remove(); document.removeEventListener("keydown", k); };
   const k = (e) => { if (e.key === "Escape") close(); };
@@ -1153,7 +1169,7 @@ try { matchMedia("(prefers-color-scheme: dark)").addEventListener("change", sync
    Render
    ========================================================= */
 let cleanupFns = [];
-/* 削除済みのメモ・リストの画面は飛ばして1つ前へ（ブラウザの履歴も一緒に戻し、「戻る」操作がずれないようにする） */
+/* 削除済みのメモ・フォルダの画面は飛ばして1つ前へ（ブラウザの履歴も一緒に戻し、「戻る」操作がずれないようにする） */
 function dropMissing() {
   if (atDepth() && !history.state.select) { history.back(); return; }
   UI.stack.pop(); render();
@@ -1202,14 +1218,14 @@ function renderSearch(s) {
   function drawResults() {
     toolbar.replaceChildren(); results.replaceChildren(); filterRow.replaceChildren();
     toolbar.append(h("div", { class: "tabs", role: "tablist" },
-      [["memos", "メモ"], ["lists", "リスト"]].map(([k, l]) => h("button", { role: "tab", "aria-selected": String(st.tab === k), onclick: () => switchTab(k) }, l))));
+      [["memos", "メモ"], ["lists", "フォルダ"]].map(([k, l]) => h("button", { role: "tab", "aria-selected": String(st.tab === k), onclick: () => switchTab(k) }, l))));
     filterRow.append(...[h("span", { class: "fr-label" }, "絞り込み"), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
       sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
     searchBtn.classList.toggle("active", !!(st.committed || st.genre));
     const selecting = UI.select.on && UI.select.scope === "search";
     fab.hidden = selecting;
 
-    fabLabel.textContent = st.tab === "lists" ? "新規リスト" : "新規メモ";
+    fabLabel.textContent = st.tab === "lists" ? "新規フォルダ" : "新規メモ";
     fab.setAttribute("aria-label", fabLabel.textContent);
     if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
 
@@ -1273,7 +1289,7 @@ function renderSearch(s) {
     filterRow);
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
-  /* 画面を横にスライドして「メモ」「リスト」タブを切り替える。指の動きに合わせて一覧が横に動き、
+  /* 画面を横にスライドして「メモ」「フォルダ」タブを切り替える。指の動きに合わせて一覧が横に動き、
      離した位置（または素早いはらい）で次のタブへ滑らかに切り替わる。足りなければ元に戻る。
      画面の端から始まる操作はスマホの「戻る」なので無視し、横スクロールする部分の上でも反応しない */
   const area = scr.querySelector(".swipe-area");
@@ -1361,7 +1377,9 @@ const relDate = (ms) => {
 };
 function dateLine(m) {
   const edited = m.updatedAt - m.createdAt > 60000;
-  return h("span", { class: "dates" }, relDate(m.createdAt) + " 作成", edited ? h("span", { class: "upd" }, " ・ " + relDate(m.updatedAt) + " 更新") : null);
+  return h("span", { class: "dates" },
+    h("span", { class: "date-item", title: "作成" }, h("span", { class: "date-ico", "aria-label": "作成" }, svgIcon(ICONS.created)), relDate(m.createdAt)),
+    edited ? h("span", { class: "date-item upd", title: "更新" }, h("span", { class: "date-ico", "aria-label": "更新" }, svgIcon(ICONS.updated)), relDate(m.updatedAt)) : null);
 }
 /* メモのカード。長押し（PCは右クリック）で複数選択を始め、そのメモを選んだ状態にする */
 const LONG_PRESS = 500;
@@ -1399,7 +1417,7 @@ function renderLists(redraw) {
   const wrap = h("div");
   let lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
   if (st.sort === "upd-asc") lists.reverse();
-  if (!lists.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "リストはまだありません"), "右下の「新規リスト」から、旅行やイベントごとのリストを作ると、メモをプレイリストのようにまとめられます。")); return wrap; }
+  if (!lists.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "フォルダはまだありません"), "右下の「新規フォルダ」から、旅行やイベントごとのフォルダを作ると、メモをフォルダにまとめられます。")); return wrap; }
   const rows = h("div", { class: "list-rows" });
   for (const l of lists) {
     const count = Manager.sorted.filter(m => (m.listIds || []).includes(l.id)).length;
@@ -1408,11 +1426,11 @@ function renderLists(redraw) {
         h("div", { class: "list-name" }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("span", {}, l.name)),
         h("div", { class: "list-sub" }, `${count}件 ・ `, h("span", { class: "upd-ico", title: "更新", "aria-label": "更新" }, svgIcon(ICONS.updated)), relDate(l.updatedAt))),
       iconBtn("edit", "名前を変更", () => renameList(l, redraw)),
-      h("button", { class: "icon-btn ico", title: "リストを削除", "aria-label": "リストを削除", onclick: async () => {
-        const ok = await modal({ title: "本当に削除しますか？", message: `リスト「${l.name}」を削除します。中のメモは削除されません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
+      h("button", { class: "icon-btn ico", title: "フォルダを削除", "aria-label": "フォルダを削除", onclick: async () => {
+        const ok = await modal({ title: "本当に削除しますか？", message: `フォルダ「${l.name}」を削除します。中のメモは削除されません。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "danger-solid" }] });
         if (!ok) return;
-        try { await Manager.deleteList(l.id); toast("リストを削除しました"); redraw(); }
-        catch { toast("リストを削除できませんでした。", true); }
+        try { await Manager.deleteList(l.id); toast("フォルダを削除しました"); redraw(); }
+        catch { toast("フォルダを削除できませんでした。", true); }
       } }, svgIcon(ICONS.trash))));
   }
   wrap.append(rows);
@@ -1438,7 +1456,7 @@ function genreSelect(state, redraw, id) {
   return sel;
 }
 
-/* ---------- リスト画面 ---------- */
+/* ---------- フォルダ画面 ---------- */
 function renderListScreen(s) {
   const l = Manager.lists.get(s.id);
   const st = UI.listView;
@@ -1453,41 +1471,46 @@ function renderListScreen(s) {
     // 「まとめる」「選択」「名前の変更」は上部バーのアイコンに。本文側は件数と絞り込みの1行だけにする
     headActions.replaceChildren(...[
       items.length && !selecting ? iconBtn("report", "まとめる", () => go({ name: "report", listId: l.id, genre: st.genre }), "report-btn") : null,
-      iconBtn("edit", "リスト名を変更", () => renameList(l, render))].filter(Boolean));
+      iconBtn("edit", "フォルダ名を変更", () => renameList(l, render))].filter(Boolean));
     body.replaceChildren(...[
       h("div", { class: "toolbar-row", style: "margin-top:0" },
         h("span", { class: "result-meta" }, st.genre ? `${items.length}件／${members.length}件` : `${members.length}件`),
         h("span", { class: "spacer" }),
         members.length ? genreSelect(st, draw, "genre-list") : null,
         members.length ? sortSelect(st, draw, "sort-list") : null),
-      selecting ? null : h("button", { class: "btn add-memos", type: "button", onclick: () => pickMemosForList(l, draw) }, "＋ 保存済みのメモを入れる"),
       !members.length
-        ? h("div", { class: "empty" }, h("b", {}, "このリストにはまだメモがありません"),
-            Manager.memos.size ? "「保存済みのメモを入れる」から選ぶか、右下の「新規メモ」で書くと、このリストに入ります。" : "右下の「新規メモ」で書いたメモは、このリストに入ります。")
+        ? h("div", { class: "empty" }, h("b", {}, "このフォルダにはまだメモがありません"),
+            "右下の「メモを追加」から、保存済みのメモを選ぶか、新しく書くと、このフォルダに入ります。")
         : !items.length ? h("div", { class: "empty" }, h("b", {}, "このジャンルのメモはありません"), "ジャンルを「全ジャンル」に戻してください。")
         : h("div", { class: "memo-list" + (selecting ? " with-bar" : "") }, items.map(m => memoCard(m, [], sel, scope))),
       selecting ? selectBar(items.map(m => m.id), [
-        { label: "リストから外す", run: async () => {
+        { label: "フォルダから外す", run: async () => {
           const ids = [...UI.select.ids];
           const keep = members.map(m => m.id).filter(id => !ids.includes(id));
-          try { await Manager.setListMembers(l.id, keep); toast(`${ids.length}件をリストから外しました`); exitSelect(); }
-          catch { toast("リストを更新できませんでした", true); }
+          try { await Manager.setListMembers(l.id, keep); toast(`${ids.length}件をフォルダから外しました`); exitSelect(); }
+          catch { toast("フォルダを更新できませんでした", true); }
         } },
         { label: "削除", cls: "danger-solid", run: bulkDelete }], draw) : null].filter(Boolean));
   };
-  const fabEl = h("button", { class: "fab", onclick: () => go({ name: "edit", id: null, presetList: l.id }) }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "新規メモ"));
+  // 右下のボタン: 押すと「保存済から追加」「新規追加」を選ぶ小窓を出す
+  const addMenu = h("div", { class: "fab-menu", hidden: true },
+    h("button", { type: "button", disabled: !Manager.memos.size, onclick: () => { addMenu.hidden = true; pickMemosForList(l, draw); } }, "保存済から追加"),
+    h("button", { type: "button", onclick: () => { addMenu.hidden = true; go({ name: "edit", id: null, presetList: l.id }); } }, "新規追加"));
+  const closeAdd = (e) => { if (!addMenu.hidden && !e.target.closest(".fab-menu, .fab")) addMenu.hidden = true; };
+  document.addEventListener("click", closeAdd); cleanupFns.push(() => document.removeEventListener("click", closeAdd));
+  const fabEl = h("button", { class: "fab", "aria-haspopup": "menu", onclick: () => { addMenu.hidden = !addMenu.hidden; } }, svgIcon('<path d="M12 5v14M5 12h14"/>'), h("span", {}, "メモを追加"));
   const headActions = h("div", { class: "head-actions" });
   draw();
   return h("div", { class: "screen" },
     h("header", { class: "topbar bar-list" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
-      h("div", { style: "flex:1;min-width:0" }, h("div", { class: "list-head-label" }, "リスト"), h("h1", { style: "line-height:1.3" }, l.name)),
+      h("div", { class: "folder-title" }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("h1", { style: "line-height:1.3" }, l.name)),
       headActions), crumbBar()),
     h("main", { class: "wrap" }, body),
-    fabEl);
+    addMenu, fabEl);
 }
-const askListName = () => modal({ title: "新しいリスト", body: (close) => {
-  const inp = h("input", { id: "newlist", class: "text-input", placeholder: "リスト名（例：京都旅行2026）", maxlength: "60" });
+const askListName = () => modal({ title: "新しいフォルダ", body: (close) => {
+  const inp = h("input", { id: "newlist", class: "text-input", placeholder: "フォルダ名（例：京都旅行2026）", maxlength: "60" });
   return h("form", { onsubmit: (e) => { e.preventDefault(); const v = inp.value.trim(); if (v) close(v); else inp.focus(); } }, inp,
     h("div", { class: "modal-actions", style: "margin-top:14px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"), h("button", { class: "btn primary", type: "submit" }, "作成")));
 } });
@@ -1496,8 +1519,8 @@ async function createList() {
   if (!name) return;
   let l;
   try { l = await Manager.saveList({ id: uid("l"), name }); }
-  catch { toast("リストを作成できませんでした。もう一度お試しください。", true); return; }
-  toast("リストを作成しました");
+  catch { toast("フォルダを作成できませんでした。もう一度お試しください。", true); return; }
+  toast("フォルダを作成しました");
   go({ name: "list", id: l.id });
   if (Manager.memos.size) pickMemosForList(l, render);
 }
@@ -1521,22 +1544,22 @@ async function pickMemosForList(list, redraw) {
         h("button", { class: "btn primary", type: "button", onclick: () => close(true) }, "決定")));
   } });
   if (!ok) return;
-  try { const n = await Manager.setListMembers(list.id, [...picked]); if (n) toast("リストを更新しました"); redraw(); }
-  catch { toast("リストを更新できませんでした。もう一度お試しください。", true); }
+  try { const n = await Manager.setListMembers(list.id, [...picked]); if (n) toast("フォルダを更新しました"); redraw(); }
+  catch { toast("フォルダを更新できませんでした。もう一度お試しください。", true); }
 }
 async function renameList(l, redraw) {
-  const name = await modal({ title: "リスト名を変更", body: (close) => {
+  const name = await modal({ title: "フォルダ名を変更", body: (close) => {
     const inp = h("input", { id: "rename", class: "text-input", value: l.name, maxlength: "60" });
     return h("form", { onsubmit: (e) => { e.preventDefault(); close(inp.value.trim()); } }, inp,
       h("div", { class: "modal-actions", style: "margin-top:14px" }, h("button", { class: "btn", type: "button", onclick: () => close(null) }, "キャンセル"), h("button", { class: "btn primary", type: "submit" }, "変更")));
   } });
   if (!name || name === l.name) return;
-  try { await Manager.saveList({ ...l, name }); Manager.reindex(); toast("リスト名を変更しました"); redraw(); }
-  catch { toast("リスト名を変更できませんでした。", true); }
+  try { await Manager.saveList({ ...l, name }); Manager.reindex(); toast("フォルダ名を変更しました"); redraw(); }
+  catch { toast("フォルダ名を変更できませんでした。", true); }
 }
 
 /* ---------- 情報まとめ画面 ----------
-   検索と同じ条件（キーワード・ジャンル）またはリストをもとに、該当するメモから文章・画像・ファイルを抜き出し、
+   検索と同じ条件（キーワード・ジャンル）またはフォルダをもとに、該当するメモから文章・画像・ファイルを抜き出し、
    元のメモの題名などは載せずに「1つの新しいメモ（資料）」として組み立てる。新しいメモとして保存・ファイル保存・印刷ができる */
 /* 作成日時での期間（今日のメモ・過去の出来事などをまとめるため） */
 const PERIODS = [["all", "未選択"], ["today", "今日"], ["yesterday", "昨日"], ["week", "過去7日間"], ["month", "今月"], ["lastmonth", "先月"], ["year", "今年"], ["custom", "日付を指定"]];
@@ -1563,7 +1586,7 @@ function periodRange(o) {
 }
 function reportSource(s) {
   const o = s.opts || {};
-  // リストはまとめ画面で選び直せる（リスト画面から開いたときは、そのリストが選ばれた状態）
+  // フォルダはまとめ画面で選び直せる（フォルダ画面から開いたときは、そのフォルダが選ばれた状態）
   const l = o.listId ? Manager.lists.get(o.listId) : null;
   const terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
   const base = [], listId = l ? l.id : null;
@@ -1728,14 +1751,14 @@ function renderReport(s) {
     PERIODS.map(([v, l]) => h("option", { value: v }, l)));
   periodSel.value = o.period;
   const dateIn = (key, label) => h("input", { type: "date", class: "genre-select rp-date", "aria-label": label, value: o[key] || "", max: ymd(new Date()), onchange: (e) => { o[key] = e.target.value; render(); } });
-  const listSel = h("select", { id: "rp-list", class: "genre-select" + (o.listId ? " on" : ""), "aria-label": "リスト", onchange: () => { o.listId = listSel.value; render(); } },
+  const listSel = h("select", { id: "rp-list", class: "genre-select" + (o.listId ? " on" : ""), "aria-label": "フォルダ", onchange: () => { o.listId = listSel.value; render(); } },
     h("option", { value: "" }, "未選択"), [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt).map(x => h("option", { value: x.id }, x.name)));
   listSel.value = Manager.lists.has(o.listId) ? o.listId : "";
   const tools = h("div", { class: "rp-tools" },
-    Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "リスト"), listSel) : null,
+    Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "フォルダ"), listSel) : null,
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
-    // 「関連部分だけ／全文」はキーワードで探したときだけ意味があるので、キーワードなし（リストや期間だけ）のときは出さない
+    // 「関連部分だけ／全文」はキーワードで探したときだけ意味があるので、キーワードなし（フォルダや期間だけ）のときは出さない
     h("div", { class: "rp-tool-row" }, src.terms.length ? [h("span", { class: "fr-label" }, "本文"), seg] : null,
       h("label", { class: "rp-check" }, h("input", { type: "checkbox", checked: o.images, onchange: (e) => { o.images = e.target.checked; draw(); } }), "画像")),
     // スマホ幅でもアイコンが折り返さないよう、ボタンは短い言葉＋アイコンを1行に並べる
@@ -1775,9 +1798,9 @@ function renderView(s) {
   body.addEventListener("click", (e) => { if (e.target.tagName === "IMG") lightbox(e.target.src); });
 
   const doc = h("article", { class: "view-doc" },
-    // 題名・ジャンル・タグは上部バーへ。本文の上は日付と所属リストだけにする
+    // 題名・ジャンル・タグは上部バーへ。本文の上は日付と所属フォルダだけにする
     h("div", { class: "view-meta" }, dateLine(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
-      h("button", { class: "list-tag link", title: "リストを開く", onclick: () => go({ name: "list", id: l.id }) }, "▸ " + l.name))),
+      h("button", { class: "list-tag link", title: "フォルダを開く", onclick: () => go({ name: "list", id: l.id }) }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), l.name))),
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
     m.attachments.length ? attList(m.attachments) : null);
 
@@ -2292,25 +2315,25 @@ function renderEdit(s) {
 
   // lists
   const listBox = h("div", { class: "chips" });
-  // 作成済みのリストはプルダウンから選ぶ。選んだリストは「✕」付きで並べ、最後の項目から新しいリストも作れる
+  // 作成済みのフォルダはプルダウンから選ぶ。選んだフォルダは「✕」付きで並べ、最後の項目から新しいフォルダも作れる
   const drawListsPick = () => {
     const lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
     const chosen = d.listIds.map(id => Manager.lists.get(id)).filter(Boolean);
-    const sel = h("select", { id: "elist", class: "genre-select list-pick", "aria-label": "リストを選ぶ", onchange: async () => {
+    const sel = h("select", { id: "elist", class: "genre-select list-pick", "aria-label": "フォルダを選ぶ", onchange: async () => {
       const v = sel.value; sel.value = "";
       if (v === "__new") {
         const name = await askListName(); if (!name) return;
         try { const l = await Manager.saveList({ id: uid("l"), name }); d.listIds.push(l.id); }
-        catch { toast("リストを作成できませんでした", true); return; }
+        catch { toast("フォルダを作成できませんでした", true); return; }
       } else if (v && !d.listIds.includes(v)) d.listIds.push(v);
       else return;
       markDirty(); drawListsPick();
-    } }, h("option", { value: "" }, "＋ リストを選ぶ"), lists.filter(l => !d.listIds.includes(l.id)).map(l => h("option", { value: l.id }, l.name)), h("option", { value: "__new" }, "＋ 新しいリストを作る"));
+    } }, h("option", { value: "" }, "＋ フォルダを選ぶ"), lists.filter(l => !d.listIds.includes(l.id)).map(l => h("option", { value: l.id }, l.name)), h("option", { value: "__new" }, "＋ 新しいフォルダを作る"));
     listBox.replaceChildren(...chosen.map(l => h("span", { class: "chip on" }, h("span", { class: "tx" }, l.name),
       h("button", { type: "button", "aria-label": l.name + " から外す", onclick: () => { d.listIds = d.listIds.filter(x => x !== l.id); markDirty(); drawListsPick(); } }, "✕"))), sel);
   };
   drawListsPick();
-  const listField = h("div", { class: "field" }, h("div", { class: "label" }, "リスト"), listBox);
+  const listField = h("div", { class: "field" }, h("div", { class: "label" }, "フォルダ"), listBox);
 
   // free tags
   const tagBox = h("div", { class: "chips" });
@@ -2366,7 +2389,7 @@ function renderEdit(s) {
       if (auto) return true;
       toast("保存完了");
       if (stay) return true;
-      // 新しいメモも、編集したメモも、保存したら1つ前の画面（リスト・親メモなど）に戻る
+      // 新しいメモも、編集したメモも、保存したら1つ前の画面（フォルダ・親メモなど）に戻る
       activeEditor = null; back();
       return true;
     } catch (e) {
@@ -2526,7 +2549,7 @@ const Sync = {
       if (ver < 2) throw new Error("接続先のプログラムが古いままです。最新の gas/Code.gs を貼り付けて保存し、「デプロイを管理」→ 鉛筆 →「新しいバージョン」で公開し直してください");
       const remote = (await this.call("pull")).data || {};
       const changed = await this.merge(remote);
-      // メモ・リストのデータを先に保存する（添付ファイルの途中で失敗しても、メモ本体はドライブに残るように）
+      // メモ・フォルダのデータを先に保存する（添付ファイルの途中で失敗しても、メモ本体はドライブに残るように）
       await this.call("push", { data: this.snapshot() });
       Manager.meta.lastSync = Date.now(); await Storage.putMeta(Manager.meta).catch(() => {});
       const failed = await this.syncFiles(force);
@@ -2631,7 +2654,7 @@ const resumeSync = () => {
 };
 document.addEventListener("visibilitychange", resumeSync);
 window.addEventListener("pageshow", (e) => { if (e.persisted) resumeSync(); });
-/* メモ・リストを変えたら（同期がオンのときだけ）少し待ってから送る */
+/* メモ・フォルダを変えたら（同期がオンのときだけ）少し待ってから送る */
 function afterChange() { Sync.schedule(); }
 
 /* =========================================================
@@ -2732,7 +2755,7 @@ async function importBackup(file) {
   let data;
   try { data = JSON.parse(await file.text()); } catch { toast("バックアップファイルを読み込めませんでした", true); return; }
   if (!data || data.app !== "sosaku-memo") { toast("ヒフミヨのバックアップファイルではありません", true); return; }
-  const ok = await modal({ title: "バックアップを読み込みますか？", message: `メモ${(data.memos || []).length}件・リスト${(data.lists || []).length}件を読み込みます。同じメモがある場合はバックアップの内容で上書きされます。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
+  const ok = await modal({ title: "バックアップを読み込みますか？", message: `メモ${(data.memos || []).length}件・フォルダ${(data.lists || []).length}件を読み込みます。同じメモがある場合はバックアップの内容で上書きされます。`, buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "primary" }] });
   if (!ok) return;
   try {
     for (const f of data.files || []) { const blob = await (await fetch(f.data)).blob(); await Storage.putFile({ id: f.id, blob, name: f.name, type: f.type, createdAt: f.createdAt || Date.now() }); }
