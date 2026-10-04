@@ -102,6 +102,7 @@ with sync_playwright() as p:
     pg.click(".tabs >> text=フォルダ"); pg.click(".fab"); pg.fill("#newlist", "京都"); pg.click(".modal >> text=作成"); time.sleep(0.3)
     if pg.locator(".modal").count(): pg.click(".modal >> text=キャンセル"); time.sleep(0.2)
     check("フォルダ画面の上部は名前の左にフォルダのアイコン（「フォルダ」の見出しなし）", pg.locator(".folder-title .folder-ico svg").count() == 1 and pg.locator(".list-head-label").count() == 0)
+    check("パスのタブは透けない（重なりが見えない）", pg.evaluate("(()=>{const c=document.querySelector('.crumb:not(.current)');return !c||!getComputedStyle(c).backgroundColor.startsWith('rgba')})()"))
     check("2画面からパス表示を出す（丸角・斜体なし）", pg.locator(".crumbs .crumb").count() == 2 and pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.crumb.current'));return c.clipPath==='none'&&parseFloat(c.borderTopLeftRadius)>0&&c.fontStyle==='normal'})()"))
     check("「保存済みのメモを入れる」ボタンはない", pg.locator("text=保存済みのメモを入れる").count() == 0)
     pg.click(".fab")
@@ -304,6 +305,10 @@ fire('touchend',x1,false);}"""
     check("背景を端末の画像にできる", pg.evaluate("document.documentElement.classList.contains('has-bg')") and pg.locator(".bg-preview").is_visible())
     pg.click(".modal >> text=元に戻す"); time.sleep(0.4)
     check("背景を元に戻せる", not pg.evaluate("document.documentElement.classList.contains('has-bg')"))
+    pg.click(".modal [aria-label=検索画面の上部バーを透過]"); time.sleep(0.3)
+    check("検索画面の上部バーを透過でき、境目に線が出る", pg.evaluate("document.documentElement.classList.contains('clear-bar') && getComputedStyle(document.querySelector('.topbar.bar-search')).borderBottomWidth === '2px'"))
+    pg.click(".modal [aria-label=検索画面の上部バーを透過]"); time.sleep(0.2)
+    check("透過をオフに戻せる", not pg.evaluate("document.documentElement.classList.contains('clear-bar')"))
     check("設定の見出しは斜体にしない", pg.evaluate("getComputedStyle(document.querySelector('.settings-sec h4')).fontStyle") == "normal")
     pg.click(".modal >> text=閉じる")
 
