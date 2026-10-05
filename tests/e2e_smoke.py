@@ -260,8 +260,10 @@ with sync_playwright() as p:
     pg.fill(".ie-input", "メモ"); pg.click(".ie-panel [aria-label='文字を置く']")
     time.sleep(0.4)   # 文字を打ち終わると下の道具が戻り、写真の位置が少し動くので待つ
     fs0 = pg.evaluate("parseFloat(document.querySelector('.ie-text').style.fontSize)")
+    pg.evaluate("document.querySelector('.ie-text').dataset.mark='1'")
     tb = pg.locator(".ie-tsize").bounding_box(); pg.mouse.move(tb["x"] + 13, tb["y"] + 13); pg.mouse.down(); pg.mouse.move(tb["x"] + 70, tb["y"] + 40, steps=5); pg.mouse.up()
     check("右下の丸を引っぱって文字を大きくできる", pg.evaluate("parseFloat(document.querySelector('.ie-text').style.fontSize)") > fs0 * 1.2)
+    check("大きさを変えている間も文字は作り直さない（一瞬消えない）", pg.evaluate("document.querySelector('.ie-text').dataset.mark") == "1")
     pg.click(".ie-panel [aria-label='決定（次の文字へ）']")
     check("✓で決めると、次の文字を入れられる", pg.input_value(".ie-input") == "" and pg.locator(".ie-panel [aria-label='文字を置く']").count() == 1)
     pg.fill(".ie-input", "二つ目"); pg.click(".ie-panel [aria-label='文字を置く']")
@@ -325,7 +327,7 @@ with sync_playwright() as p:
 
     # ジャンル2つのメモ・フォルダの表示・閲覧画面を開く／閉じる動き（動きありの画面で確かめる）
     ac = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
-    ap = ac.new_page(); ap.on("pageerror", lambda e: errors.append(str(e))); ap.goto(URL); ap.wait_for_selector(".fab")
+    ap = ac.new_page(); ap.on("pageerror", lambda e: errors.append(str(e))); ap.clock.install(); ap.goto(URL); ap.wait_for_selector(".fab")
     ap.click(".bottom-nav .bn-lists"); time.sleep(0.4); ap.click(".fab"); ap.fill("#newlist", "旅"); ap.click(".modal >> text=作成"); time.sleep(0.6)
     if ap.locator(".modal").count(): ap.click(".modal >> text=キャンセル"); time.sleep(0.4)
     if ap.locator(".folder-title").count() == 0: ap.click(".list-row .open"); time.sleep(0.5)
@@ -345,11 +347,35 @@ with sync_playwright() as p:
     time.sleep(0.7)
     check("閉じ終わったら写しは消える", ap.locator(".nav-ghost").count() == 0)
     check("カードの題名は2行まで折り返して出す（日時は題名の後ろ）", ap.evaluate("(()=>{const l=document.querySelector('.memo-card .tw-line');return !!l&&getComputedStyle(l).webkitLineClamp==='2'&&!!l.querySelector('.card-date')})()"))
+    check("フォルダの中の「＋」は他の画面と同じ位置", ap.evaluate("innerHeight - document.querySelector('.fab').getBoundingClientRect().bottom") >= 50)
     ap.click(".fab"); time.sleep(0.3); ap.click(".fab-menu >> text=新規追加"); time.sleep(0.05)
-    check("「＋」から開くメモ画面は「＋」から広がる（ズーム）", ap.locator(".edit-screen.zooming").count() == 1)
-    time.sleep(0.6); ap.click(".topbar .back"); time.sleep(0.05)
-    check("閉じるときは「＋」へ縮んで戻る（ズーム）", ap.locator(".nav-ghost.over").count() == 1)
+    check("「＋」から開くメモ画面は右から入る（ムーブイン）", ap.locator(".edit-screen.zooming").count() == 1 and "matrix" in ap.evaluate("getComputedStyle(document.querySelector('.edit-screen')).transform"))
+    time.sleep(0.6)
+    check("入り終わったら前の画面の写しは残らない（ちらつかない）", ap.locator(".nav-ghost").count() == 0 and ap.locator(".zooming, .pagebg").count() == 0)
+    ap.click(".topbar .back"); time.sleep(0.05)
+    check("閉じるときは右へ抜ける（ムーブアウト）", ap.locator(".nav-ghost.over").count() == 1)
     time.sleep(0.7)
+    # フォルダ一覧 → フォルダの中も右から入る
+    ap.go_back(); time.sleep(0.6)
+    ap.click(".bottom-nav .bn-lists"); time.sleep(0.5); ap.click(".list-row .open"); time.sleep(0.05)
+    check("フォルダを押すとフォルダの中が右から入る", ap.locator(".screen.zooming .folder-title").count() == 1)
+    time.sleep(0.6); ap.go_back(); time.sleep(0.6)
+    # 最近: 読んでいた位置から戻る・新しい並びのボタン
+    ap.evaluate("window.__fade=[];new MutationObserver(()=>{const a=document.querySelector('.home-screen .swipe-area');if(a)for(const c of ['tab-out','tab-in'])if(a.classList.contains(c)&&!__fade.includes(c))__fade.push(c)}).observe(document.body,{subtree:true,attributes:true,childList:true,attributeFilter:['class']})")
+    ap.click(".bottom-nav .bn-memos"); time.sleep(0.5)
+    check("下のアイコンで切り替えるときは軽く消えてから出る", ap.evaluate("__fade.join(',')") == "tab-out,tab-in", ap.evaluate("__fade.join(',')"))
+    time.sleep(0.5)
+    for i in range(7):
+        new_screen(ap); ap.keyboard.insert_text("長い本文。" * 40); ap.fill("#title", f"並び{i}"); ap.click(".genre-pick >> text=体験"); ap.click(".save-btn"); ap.wait_for_selector(".bottom-nav"); time.sleep(0.6)
+    ap.mouse.move(200, 400); ap.mouse.wheel(0, 900); time.sleep(0.6)
+    y0 = ap.evaluate("scrollY"); idv = ap.evaluate("(()=>{const c=[...document.querySelectorAll('.memo-card')].find(e=>e.getBoundingClientRect().top>120);return c.dataset.id})()")
+    ap.locator(f".memo-card[data-id='{idv}']").click(); time.sleep(0.7); ap.go_back(); time.sleep(0.7)
+    check("閲覧画面から戻ると、読んでいた位置から（先頭に戻らない）", abs(ap.evaluate("scrollY") - y0) < 30, str((y0, ap.evaluate("scrollY"))))
+    ap.clock.fast_forward("11:00"); time.sleep(0.3)
+    check("並びが入れ替わる時間になると「新しい並びを見る」が出る", ap.locator(".fresh-pill").is_visible())
+    ap.click(".fresh-pill"); time.sleep(0.8)
+    check("押すと消えて先頭へ", ap.locator(".fresh-pill").count() == 0 and ap.evaluate("scrollY") < 5)
+    check("最近のアイコンは家の形・画面の名前はバーの右端", ap.evaluate("(()=>{const n=document.querySelector('.tab-name').getBoundingClientRect();return n.right>innerWidth-40})()"))
     ac.close()
 
     # マーカー・文字色を付けて「なし」「標準」で外す（選んだ部分だけ外れる）
