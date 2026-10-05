@@ -346,12 +346,15 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .memo-card.tweet .pick-box { left: 10px; top: 10px; transform: none; background: var(--surface); z-index: 2; }
 .memo-card.tweet.picked .pick-box { background: var(--sel-bg); }
 .tw-main { flex: 1; min-width: 0; }
-.tw-head { display: flex; align-items: center; gap: 5px; min-width: 0; font-size: 15px; line-height: 1.4; }
-.tw-title { font-weight: 800; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 0 1 auto; }
+.tw-head { display: flex; align-items: flex-start; gap: 6px; min-width: 0; font-size: 15px; line-height: 1.4; }
+.tw-line { flex: 1; min-width: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.tw-title { font-weight: 800; color: var(--ink); }
 .tw-title.untitled { color: var(--ink-3); font-weight: 700; }
-.tw-dot { color: var(--ink-3); flex: 0 0 auto; }
-.memo-card.tweet .card-date { font-size: 14px; flex: 0 0 auto; }
-.tw-genres { margin-left: auto; display: flex; gap: 3px; flex: 0 0 auto; padding-left: 4px; }
+.tw-dot { color: var(--ink-3); }
+.memo-card.tweet .card-date { font-size: 14px; white-space: nowrap; }
+/* ジャンルのアイコンは少し重ねて、横幅を取りすぎないように */
+.tw-genres { display: flex; flex: 0 0 auto; padding-top: 1px; }
+.tw-genres .tw-g + .tw-g { margin-left: -6px; box-shadow: 0 0 0 2px var(--surface); }
 .tw-g { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; }
 .tw-g svg { width: 14px; height: 14px; stroke-width: 2.2; }
 .tw-text { margin-top: 2px; font-size: 14.5px; line-height: 1.45; color: var(--ink); white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
@@ -523,11 +526,11 @@ html.clear-bar .topbar:not(.bar-view) .folder-ico svg { fill: color-mix(in srgb,
 .g-体験 .genre-mark { color: #fff; opacity: .3; }
 .g-学び .genre-mark { color: #0a1a4f; opacity: .2; }
 .g-アイデア .genre-mark { color: #0a1a4f; opacity: .14; letter-spacing: -.16em; }
-/* ジャンルが2つ以上: 名前は1つずつ行を分け、それぞれの色の上で読める色に */
-.genre-mark.multi { display: flex; flex-direction: column; align-items: flex-end; font-size: 34px; line-height: 1.02; opacity: 1; letter-spacing: -.04em; right: 4px; }
-.topbar.n3 .genre-mark.multi { font-size: 25px; }
-.genre-mark.multi span { opacity: .26; color: #fff; }
-.genre-mark.multi :is(.gm-learn, .gm-idea) { color: #0a1a4f; opacity: .2; }
+/* ジャンルが2つ以上: 名前はそれぞれの色の帯の真ん中に、その色の上で読める色で */
+.genre-mark.multi { right: auto; transform: translate(-50%, -58%) rotate(-12deg) skewX(-12deg); font-size: 40px; color: #fff; opacity: .3; letter-spacing: -.04em; }
+.topbar.n3 .genre-mark.multi { font-size: 29px; }
+.genre-mark.multi:is(.gm-learn, .gm-idea) { color: #0a1a4f; opacity: .2; }
+.genre-mark.multi.gm-idea { letter-spacing: -.1em; }
 /* 塗り分けたバーの文字は、最初のジャンルの文字色に縁取りを付けて、どの色の上でも読めるように */
 .topbar.multi .view-title { text-shadow: 0 0 2px var(--mh), 0 0 6px var(--mh); }
 .topbar.multi { --mh: rgba(10,20,60,.55); }
@@ -592,10 +595,9 @@ html.has-bg :is(.view-meta, .view-body, .view-tags, .field > .label, .field > la
 .title-input { width: 100%; border: 1.5px solid color-mix(in srgb, var(--line) 60%, var(--ink-3)); border-radius: 10px; background: color-mix(in srgb, var(--surface) 88%, transparent); font-family: var(--font-title); font-size: 22px; font-weight: 700; padding: 6px 12px; }
 .title-input::placeholder { color: var(--ink-3); opacity: 1; font-weight: 700; }
 .title-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.recent-titles { display: flex; gap: 6px; margin-top: 8px; align-items: center; overflow-x: auto; scrollbar-width: none; }
-.recent-titles::-webkit-scrollbar { display: none; }
-.recent-titles span { font-size: 12px; color: var(--ink-3); flex: 0 0 auto; }
-.recent-titles .chip-btn { flex: 0 0 auto; max-width: 12em; }
+/* 本文と同じ枠の下に題名（境目に線） */
+.editor-box .title-input { display: block; border: 0; border-top: 1px solid var(--line); border-radius: 0 0 var(--radius) var(--radius); background: transparent; padding: 10px 16px 12px; box-shadow: none; }
+.editor-box .title-input:focus { border-color: var(--line); box-shadow: none; }
 /* 新規・編集画面: 本文より上は題名とジャンルだけにし、細かい設定は本文の下にまとめる */
 .field.genre-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .field.genre-row > .label { margin: 0; }
@@ -655,8 +657,18 @@ body.editing-body .edit-actions { display: none; }
 .ie-icon svg { width: 24px; height: 24px; }
 .ie-stage { flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; touch-action: none; }
 .ie-holder { position: relative; line-height: 0; }
-.ie-holder canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.ie-holder .ie-base { position: relative; }
+.ie-clip { position: absolute; inset: 0; overflow: hidden; }
+.ie-holder canvas { position: absolute; max-width: none; }
+.ie-loading { color: #9aa6c4; font-size: 14px; }
+/* 写真を選ぶ画面から戻ったとき、メモ画面を見せずに編集画面へつなぐための黒い下地 */
+.ie-cover { position: fixed; inset: 0; z-index: 119; background: #05070d; }
+/* 文字を打っている間は、下の道具と保存を隠す（キーボードで押し上げられて誤って押さないように） */
+.img-editor.typing :is(.ie-tabs, .ie-foot) { display: none; }
+/* 大きさ: メモの見本の上で、本文での幅を見せる */
+.ie-sizeprev { width: min(320px, calc(100% - 32px)); }
+.isp-page { background: #f4f7ff; border-radius: 14px; padding: 16px; display: grid; gap: 8px; box-shadow: 0 6px 24px rgba(0,0,0,.4); }
+.isp-page i { display: block; height: 8px; border-radius: 4px; background: #c9d3ea; }
+.isp-img { display: block; border-radius: 6px; margin: 4px 0; transition: width .15s ease; }
 .ie-holder.drawing { cursor: crosshair; }
 .ie-crop { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.55); pointer-events: none; z-index: 2; animation: ie-fade .2s ease both; }
 .ie-crop::before, .ie-crop::after { content: ""; position: absolute; pointer-events: none; border: 1px solid rgba(255,255,255,.35); opacity: 0; transition: opacity .15s; }
@@ -673,6 +685,9 @@ body.editing-body .edit-actions { display: none; }
 .ie-text { position: absolute; font-weight: 800; line-height: 1.2; white-space: pre; padding: 0; animation: ie-pop .18s ease both; }
 .ie-holder.texting .ie-text { pointer-events: auto; cursor: move; outline: 1px dashed rgba(255,255,255,.6); }
 .ie-holder.texting .ie-text.sel { outline: 2px solid var(--sel-bg); }
+/* 選んだ文字の右下の丸: 引っぱると大きさが変わる */
+.ie-tsize { position: absolute; right: -14px; bottom: -14px; width: 26px; height: 26px; border-radius: 50%; background: var(--sel-bg); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.4); cursor: nwse-resize; }
+.ie-tsize::before { content: ""; position: absolute; inset: -10px; }
 @keyframes ie-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ie-pop { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
 .ie-panel { position: relative; min-height: 112px; overflow: hidden; }
@@ -808,18 +823,17 @@ body.editing-body .edit-actions { display: none; }
 .lb-btn svg { width: 24px; height: 24px; }
 .lb-close { left: 12px; } .lb-save { right: 12px; }
 
-/* 閲覧画面を開く・閉じる動き（X の投稿を開く・閉じるときのように） */
+/* 画面のズーム切り替え */
 .nav-ghost { position: fixed; inset: 0; overflow: hidden; pointer-events: none; transform: translateX(0); }
-.nav-ghost.push { z-index: 30; animation: nav-under .28s cubic-bezier(.2,.8,.2,1) both; }
-.nav-ghost.push::after { content: ""; position: absolute; inset: 0; background: #000; animation: nav-dim-in .28s ease both; }
-.view-screen.nav-in { background: var(--bg); z-index: 40; animation: nav-in .28s cubic-bezier(.2,.8,.2,1) both; box-shadow: -8px 0 24px rgba(0,10,40,.25); }
-.nav-ghost.pop { background: var(--bg); z-index: 60; animation: nav-out .26s cubic-bezier(.4,0,.6,1) both; box-shadow: -8px 0 24px rgba(0,10,40,.25); }
-.nav-dim { position: fixed; inset: 0; z-index: 59; background: #000; pointer-events: none; animation: nav-dim-out .26s ease both; }
-@keyframes nav-in { from { transform: translateX(100%); } to { transform: none; } }
-@keyframes nav-under { from { transform: none; } to { transform: translateX(-22%); } }
-@keyframes nav-out { from { transform: none; } to { transform: translateX(100%); } }
-@keyframes nav-dim-in { from { opacity: 0; } to { opacity: .22; } }
-@keyframes nav-dim-out { from { opacity: .22; } to { opacity: 0; } }
+.nav-ghost.under { z-index: 30; }
+.nav-ghost.under::after { content: ""; position: absolute; inset: 0; background: #000; animation: nav-dim-in .34s ease both; }
+.nav-ghost.over { z-index: 60; }
+.zooming { position: relative; z-index: 40; }
+.view-screen.zooming { position: fixed; }
+@keyframes nav-dim-in { from { opacity: 0; } to { opacity: .18; } }
+/* 動いている画面の下地は、アプリの背景と同じ（背景画像を選んでいればその画像） */
+.pagebg { background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--ray-fade, rgba(0,0,0,0)) 50%), repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water) fixed; background-attachment: fixed; }
+html.has-bg .pagebg { background: var(--bg-veil), var(--user-bg) center / cover no-repeat fixed; }
 @media (prefers-reduced-motion: reduce) {
   .img-editor, .img-editor *, .lightbox, .lightbox *, .modal-scrim, .modal, .menu, .pop { animation: none !important; }
   .toast { animation: toastFade 3s steps(1) forwards; }
@@ -1273,11 +1287,6 @@ const Manager = {
     this.meta.deletedLists = { ...(this.meta.deletedLists || {}), [id]: Date.now() }; Storage.putMeta(this.meta).catch(() => {});
     this.reindex(); afterChange();
   },
-  recentTitles() {
-    const out = [];
-    for (const m of this.sorted) { if (m.title && !out.includes(m.title)) out.push(m.title); if (out.length >= 5) break; }
-    return out;
-  },
   /* 毎日0時の整理: 壊れた参照・フォルダ紐づけを掃除し、索引を作り直す */
   async maintain(force) {
     if (!force && this.meta.lastMaintenance === todayKey()) return;
@@ -1292,7 +1301,7 @@ const Manager = {
     }
     // どのメモからも参照されていない添付ファイルを削除（作成から1日以内のものは編集中の可能性があるので残す）
     try {
-      const used = new Set([BG_FILE, AVATAR_FILE]); for (const m of this.memos.values()) for (const a of m.attachments || []) if (a.fileId) used.add(a.fileId);
+      const used = new Set([BG_FILE, AVATAR_FILE]); for (const m of this.memos.values()) for (const a of m.attachments || []) for (const f of attFiles(a)) used.add(f.id);
       for (const f of await Storage.allFiles()) if (!used.has(f.id) && Date.now() - (f.createdAt || 0) > 864e5) await Storage.delFile(f.id);
     } catch {}
     this.reindex();
@@ -1321,6 +1330,10 @@ function allTags() {
 }
 function stripRuntime(m) { const { _search, ...rest } = m; return rest; }
 function listNames(m) { return (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l => l.name); }
+/* 添付が使うファイル（できあがりの画像・編集前の写真・描いた線）。整理や同期で、どれも残す・送る */
+function attFiles(a) {
+  return [a.fileId && { id: a.fileId, name: a.name, type: a.type }, a.orig && { id: a.orig, name: a.name, type: a.origType || a.type }, a.drawId && { id: a.drawId, name: "draw.png", type: "image/png" }].filter(Boolean);
+}
 function attUrl(att) { if (!att) return ""; if (att.fileId) return FileUrls.get(att.fileId) || ""; return att.url || att.dataUrl || ""; }
 function resolveBodyHtml(html, attachments) {
   const tpl = document.createElement("template");
@@ -1578,8 +1591,9 @@ function dropMissing() {
 /* 動きを減らす設定の端末では、画面の動きを省く */
 const reduceMotion = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
 const motionMs = (ms) => reduceMotion() ? 0 : ms;
-/* X の投稿を開く・閉じるときのように、閲覧画面を右から重ねて開き、閉じるときは右へ滑らせて下の画面を見せる。
-   前の画面は写し（クリック等は効かない）を一時的に残して動かす */
+/* 画面のズーム切り替え（押したメモのカード・「＋」から広がって開き、閉じるときはそこへ縮んで戻る）。
+   前の画面は写し（押しても反応しない）を一時的に残す。動いている画面には、アプリの背景（選んだ背景画像も）をそのまま敷く */
+function zoomFrom(el, round) { if (el && el.getBoundingClientRect) UI.zoomFrom = { rect: el.getBoundingClientRect(), round: round || 16 }; }
 function screenGhost(el, kind) {
   const g = h("div", { class: "nav-ghost " + kind, "aria-hidden": "true", inert: "" });
   const c = el.cloneNode(true);
@@ -1595,10 +1609,38 @@ function screenGhost(el, kind) {
   } else g.append(c);
   document.body.append(g);
   if (el.classList.contains("view-screen")) { const a = el.querySelector(".view-main"), b = c.querySelector(".view-main"); if (a && b) b.scrollTop = a.scrollTop; }
-  const done = () => g.remove();
-  g.addEventListener("animationend", (e) => { if (e.target === g) done(); });
-  setTimeout(done, 600);
+  setTimeout(() => g.remove(), 700);
   return g;
+}
+const ZOOM_MS = 340, ZOOM_EASE = "cubic-bezier(.2,0,0,1)";
+const insetOf = (r, box, round) => `inset(${Math.max(0, r.top - box.top)}px ${Math.max(0, box.right - r.right)}px ${Math.max(0, box.bottom - r.bottom)}px ${Math.max(0, r.left - box.left)}px round ${round}px)`;
+/* 開く: 新しい画面を、押した場所の形から画面いっぱいまで広げる */
+function zoomIn(el, from) {
+  const fixed = getComputedStyle(el).position === "fixed";
+  const er = el.getBoundingClientRect();
+  // 新しい画面は一番上から表示するので、そのときの位置で計算する
+  const box = fixed ? er : { top: er.top + window.scrollY, left: er.left, right: er.right, bottom: er.bottom + window.scrollY };
+  el.classList.add("zooming", "pagebg");
+  const anim = el.animate([
+    { clipPath: insetOf(from.rect, box, from.round), opacity: .55 },
+    { opacity: 1, offset: .45 },
+    { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 }], { duration: ZOOM_MS, easing: ZOOM_EASE });
+  const end = () => el.classList.remove("zooming", "pagebg");
+  anim.onfinish = end; anim.oncancel = end;
+}
+/* 閉じる: 前の画面の写しを、戻り先（カード・「＋」）の形まで縮めて消す */
+function zoomOut(ghost, target, round) {
+  ghost.classList.add("pagebg");
+  const vw = window.innerWidth, vh = window.innerHeight;
+  let r = target && target.getBoundingClientRect();
+  if (!r || r.bottom < 0 || r.top > vh || !r.width) r = { top: vh * .3, bottom: vh * .7, left: vw * .2, right: vw * .8 };
+  const box = { top: 0, left: 0, right: vw, bottom: vh };
+  const anim = ghost.animate([
+    { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 },
+    { opacity: 1, offset: .5 },
+    { clipPath: insetOf(r, box, round), opacity: 0 }], { duration: ZOOM_MS - 40, easing: ZOOM_EASE, fill: "forwards" });
+  anim.onfinish = () => ghost.remove();
+  if (target) target.animate([{ opacity: 0 }, { opacity: 0, offset: .35 }, { opacity: 1 }], { duration: ZOOM_MS });
 }
 function render() {
   const cs = current();
@@ -1607,13 +1649,14 @@ function render() {
   if (needAtts && needAtts.some(a => a.fileId && !FileUrls.has(a.fileId))) { ensureFileUrls(needAtts).then(render); return; }
   const app = $("#app");
   const prev = render.last || {}, len = UI.stack.length;
-  let anim = null;
+  const from = UI.zoomFrom; UI.zoomFrom = null;
+  let anim = null, ghost = null;
   if (!reduceMotion() && app.firstElementChild) {
-    if (cs.name === "view" && len > prev.len && (prev.name === "search" || prev.name === "list")) anim = "push";
-    else if (prev.name === "view" && len < prev.len && cs.name !== "edit") anim = "pop";
+    if (from && len > prev.len && (cs.name === "view" || cs.name === "edit")) anim = "in";
+    else if (len < prev.len && (prev.name === "view" || (prev.name === "edit" && prev.fab))) anim = "out";
   }
-  if (anim) screenGhost(app.firstElementChild, anim);
-  render.last = { name: cs.name, len };
+  if (anim) ghost = screenGhost(app.firstElementChild, anim === "in" ? "under" : "over");
+  render.last = { name: cs.name, len, id: cs.id, fab: !!cs.fromFab };
   cleanupFns.forEach(f => { try { f(); } catch {} }); cleanupFns = [];
   app.replaceChildren();
   const s = current();
@@ -1622,13 +1665,11 @@ function render() {
   else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
   else if (s.name === "report") app.append(renderReport(s));
-  if (anim === "push" && app.firstElementChild) {
-    // 動いている間だけ下地を塗る（前の画面が透けないように）。動き終わったら元に戻す
-    const v = app.firstElementChild; v.classList.add("nav-in");
-    const end = () => v.classList.remove("nav-in");
-    v.addEventListener("animationend", (e) => { if (e.target === v) end(); }); setTimeout(end, 600);
+  if (anim === "in" && app.firstElementChild) zoomIn(app.firstElementChild, from);
+  if (anim === "out") {
+    const target = prev.name === "view" ? app.querySelector(`.memo-card[data-id="${prev.id}"]`) : app.querySelector(".fab");
+    zoomOut(ghost, target, prev.name === "view" ? 16 : 30);
   }
-  if (anim === "pop") { const dim = h("div", { class: "nav-dim", "aria-hidden": "true" }); document.body.append(dim); setTimeout(() => dim.remove(), 400); }
   // スマホ上端の帯の色は、新しい画面が表示されてから変える（先に色だけ変わると、遅れて画面が出るように見えるため）
   // （描いた直後の2フレームでは、端末によってはまだ前の画面が見えているので、さらに少し待つ）
   clearTimeout(render.tc);
@@ -1775,9 +1816,9 @@ function renderSearch(s) {
     results.replaceChildren(buildTab(st.tab));
   }
 
-  fab = h("button", { class: "fab round", onclick: () => {
+  fab = h("button", { class: "fab round", onclick: (e) => {
     if (st.tab === "lists") createList();
-    else go({ name: "edit", id: null });
+    else { zoomFrom(e.currentTarget, 30); go({ name: "edit", id: null, fromFab: true }); }
   } }, svgIcon('<path d="M12 5v14M5 12h14"/>'));
   const storeNote = Storage.mode === "memory"
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
@@ -1925,7 +1966,7 @@ function pressHandlers(scope, id, sel, open) {
     onpointermove: (e) => { if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10) cancel(); },
     onpointerup: cancel, onpointercancel: cancel, onpointerleave: cancel,
     oncontextmenu: (e) => { e.preventDefault(); if (!sel && scope && !longDone) { cancel(); start(); } },
-    onclick: (e) => { if (longDone || longPressHeld || Date.now() - longPressAt < 200) { longDone = false; e.preventDefault(); return; } sel ? sel.toggle(id) : open(); },
+    onclick: (e) => { if (longDone || longPressHeld || Date.now() - longPressAt < 200) { longDone = false; e.preventDefault(); return; } sel ? sel.toggle(id) : open(e); },
   };
 }
 /* 題名に合いそうな画像を1枚選ぶ（題名の言葉を名前に含む画像 → 本文中の最初の画像 → 最初の添付画像） */
@@ -1971,15 +2012,18 @@ function memoCard(m, terms = [], sel, scope) {
   }
   const others = (m.attachments || []).filter(a => a !== ci).length;
   return h("button", { class: "memo-card tweet" + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null,
-    ...pressHandlers(scope, m.id, sel, () => go({ name: "view", id: m.id })) },
+    "data-id": m.id,
+    ...pressHandlers(scope, m.id, sel, (e) => { zoomFrom(e && e.currentTarget, 16); go({ name: "view", id: m.id }); }) },
     h("span", { class: "tw-ava", title: "アイコンを変える", onclick: (e) => { if (sel) return; e.stopPropagation(); e.preventDefault(); avatarModal(); } }, avatarImg()),
     sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? checkMark() : "") : null,
     h("div", { class: "tw-main" },
       h("div", { class: "tw-head" },
+        // 題名は2行まで折り返して出し、日時はその後ろに続ける（ジャンルの数や日時の長さで題名が詰められないように）。
         // 題名がないメモは、X の投稿のように日時だけにする
-        m.title ? h("span", { class: "card-title tw-title" }, m.title) : null,
-        m.title ? h("span", { class: "tw-dot", "aria-hidden": "true" }, "·") : null,
-        h("span", { class: "card-date" }, relDate(m.createdAt)),
+        h("span", { class: "tw-line" },
+          m.title ? h("span", { class: "card-title tw-title" }, m.title) : null,
+          m.title ? h("span", { class: "tw-dot", "aria-hidden": "true" }, " · ") : null,
+          h("span", { class: "card-date" }, relDate(m.createdAt))),
         h("span", { class: "tw-genres", "aria-label": "ジャンル：" + (gs.join("・") || "未選択") },
           gs.map(g => h("span", { class: "tw-g gb g-" + g, title: g }, svgIcon(ICONS["g" + g]))))),
       text ? h("div", { class: "tw-text card-sum" }, decorateText(text, terms)) : null,
@@ -2122,7 +2166,7 @@ function renderListScreen(s) {
   // 開くときは下から順にふわっと出し、閉じるときは逆に引っ込める。「＋」は開いている間「×」に回る
   const addMenu = h("div", { class: "fab-menu", hidden: true },
     h("button", { type: "button", disabled: !Manager.memos.size, onclick: () => { showAdd(false); pickMemosForList(l, draw); } }, "保存済から追加"),
-    h("button", { type: "button", onclick: () => { showAdd(false); go({ name: "edit", id: null, presetList: l.id }); } }, "新規追加"));
+    h("button", { type: "button", onclick: () => { showAdd(false); zoomFrom(fabEl, 30); go({ name: "edit", id: null, presetList: l.id, fromFab: true }); } }, "新規追加"));
   let addTimer = 0;
   const showAdd = (on) => {
     clearTimeout(addTimer);
@@ -2469,7 +2513,7 @@ window.addEventListener("afterprint", () => { if (printTheme != null) { if (prin
 /* ジャンルが2つ以上のときの上部バー: 色を混ぜずに、斜めの線でくっきり塗り分ける（左が最初のジャンル） */
 function barStripes(gs) {
   const col = (g) => `var(--bar-view-${GENRE_KEY[g]})`;
-  const cuts = gs.length === 2 ? [0, 60, 100] : [0, 52, 76, 100];
+  const cuts = gs.map((_, i) => Math.round(i * 100 / gs.length)).concat(100);   // 均等に分ける
   const stops = gs.map((g, i) => `${col(g)} ${cuts[i]}% ${cuts[i + 1]}%`).join(", ");
   return `background-color: ${col(gs[0])}; background-image: linear-gradient(180deg, rgba(120,220,255,0) 45%, rgba(120,220,255,.18) 100%), linear-gradient(105deg, ${stops});`;
 }
@@ -2520,7 +2564,8 @@ function renderView(s) {
       // ジャンルは、背景に大きく斜めの薄い文字で示す（ペルソナシリーズの画面のような見せ方）。
       // 2つ以上なら、バーをジャンルの色で斜めに塗り分け、ジャンル名は1つずつ行を分けて小さめに重ねる
       gs.length ? h("div", { class: "genre-mark-wrap", "aria-hidden": "true" },
-        gs.length > 1 ? h("div", { class: "genre-mark multi" }, gs.map(g => h("span", { class: "gm-" + GENRE_KEY[g] }, g)))
+        // それぞれの色の帯の真ん中に、その色のジャンル名を出す
+        gs.length > 1 ? gs.map((g, i) => h("div", { class: "genre-mark multi gm-" + GENRE_KEY[g], style: `left:${(i + .5) * 100 / gs.length}%` }, g))
           : h("div", { class: "genre-mark" }, gs[0])) : null,
       h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
@@ -2638,15 +2683,6 @@ function renderEdit(s) {
 
   // title
   const titleIn = h("input", { id: "title", class: "title-input", placeholder: "題名", "aria-label": "題名", value: d.title, oninput: (e) => { d.title = e.target.value; markDirty(); } });
-  // 直近の題名は、題名の欄を触っている間だけ1行で出す（常に出すと本文が下に押し出されるため）
-  const recents = Manager.recentTitles();
-  const recentRow = recents.length ? h("div", { class: "recent-titles", hidden: true }, h("span", {}, "直近の題名："),
-    recents.map(t => h("button", { class: "chip-btn", type: "button", title: t, onmousedown: (e) => e.preventDefault(), onclick: () => { titleIn.value = t; d.title = t; markDirty(); } }, t))) : null;
-  if (recentRow) {
-    titleIn.addEventListener("focus", () => { recentRow.hidden = false; });
-    titleIn.addEventListener("blur", () => setTimeout(() => { if (document.activeElement !== titleIn) recentRow.hidden = true; }, 200));
-  }
-  const titleField = h("div", { class: "field" }, titleIn, recentRow);
 
   // genre
   const genreErr = h("div", { class: "field-err", hidden: true }, "ジャンルを1つ以上選んでください。");
@@ -2896,6 +2932,12 @@ function renderEdit(s) {
     if (!img) return;
     e.preventDefault(); editPlaced(img);
   });
+  // 画像を押したときにキーボードが一瞬出ないよう、押している間だけ本文を書けない状態にする（カーソルが入らない）
+  editor.addEventListener("pointerdown", (e) => {
+    if (e.target.tagName !== "IMG" || document.activeElement === editor) return;
+    editor.contentEditable = "false";
+    setTimeout(() => { editor.contentEditable = "true"; }, 600);
+  });
   /* 本文の画像の右上に「×」を出し、押すとその画像を本文から消す（キーボードの削除キーでも消せる） */
   const imgXLayer = h("div", { class: "img-x-layer", "aria-hidden": "false" });
   const placeImgX = () => {
@@ -2950,38 +2992,61 @@ function renderEdit(s) {
   /* 本文に置いた写真をあとから編集する（切り取り・補正・描く・文字）。編集した写真は新しい添付として置き換える */
   async function editPlaced(img) {
     const a = d.attachments.find(x => x.id === img.dataset.att);
-    const rec = a && a.fileId ? await Storage.getFile(a.fileId).catch(() => null) : null;
-    if (!rec || !rec.blob) { toast("この写真は編集できませんでした", true); return; }
     // キーボードを閉じてから開く（本文の入力中に積んだ履歴も戻す。戻る操作は写真の編集を閉じるだけにする）
     if (document.activeElement === editor) editor.blur();
     else if (historyOk && history.state && history.state.edfocus) { UI.backHook = null; popAndWait(); }
+    const get = (id) => id ? Storage.getFile(id).catch(() => null) : null;
+    const rec = a && await get(a.fileId);
+    if (!rec || !rec.blob) { toast("この写真は編集できませんでした", true); return; }
     const src = new File([rec.blob], a.name, { type: a.type });
-    const res = await editImage(src, { size: Math.round(parseFloat(img.style.width) || 100) });
+    // 前に編集した写真は、編集前の写真・描いた線・文字から続きを開く
+    let project = null;
+    if (a.orig && a.edit) {
+      const o = await get(a.orig), dr = await get(a.drawId);
+      if (o && o.blob) project = { ...a.edit, orig: o.blob, draw: dr && dr.blob ? dr.blob : null };
+    }
+    const res = await editImage(src, { size: Math.round(parseFloat(img.style.width) || 100), project });
     if (!res) return;   // やめた
     if (res.size && img.style.width !== res.size + "%") { img.style.width = res.size + "%"; markDirty(); }
-    const f = res.file;
-    if (f === src) return;   // 写真は変えなかった
+    if (!res.changed) return;   // 写真は変えなかった
     try {
-      const na = await storeFile(f); d.attachments.push(na);
+      const na = await storeEdited(res, a); d.attachments.push(na);
       img.dataset.att = na.id; img.src = attUrl(na); markDirty();
     } catch (err) { toast(err.message || "写真を保存できませんでした", true); }
+  }
+  /* 編集した写真を保存する。できあがりの画像のほかに、編集前の写真・描いた線・文字なども覚えておき、あとで続きから直せるようにする */
+  async function storeEdited(res, prevA) {
+    const na = await storeFile(res.file);
+    const p = res.project;
+    if (!p) return na;
+    // 編集前の写真: 前に編集したものはそのまま、初めて編集する置いた写真はその写真を、新しく選んだ写真は保存して使う
+    let orig, origType;
+    if (prevA && prevA.orig) { orig = prevA.orig; origType = prevA.origType; }
+    else if (prevA) { orig = prevA.fileId; origType = prevA.type; }
+    else { const o = await storeFile(p.orig instanceof File ? p.orig : new File([p.orig], na.name, { type: p.orig.type })); orig = o.fileId; origType = o.type; }
+    na.origType = origType;
+    let drawId = null;
+    if (p.draw) { drawId = uid("f"); await Storage.putFile({ id: drawId, blob: p.draw, name: "draw.png", type: "image/png", createdAt: Date.now() }); }
+    return { ...na, orig, drawId, edit: { crop: p.crop, adj: p.adj, texts: p.texts } };
   }
   /* 写真・動画・ファイルを、ボタン1つで本文のカーソルの位置に置く（X の投稿のように）。画像は押すと大きさを変えられる */
   const escName = (t) => String(t).replace(/[<>&"]/g, "");
   async function insertFiles(files) {
-    let list = [...files]; if (!list.length) return;
-    let firstSize = 50;
+    let list = [...files];
+    if (!list.length) { document.querySelectorAll(".ie-cover").forEach(c => c.remove()); return; }
+    let firstSize = 50, edited = null;
     // 写真を1枚だけ選んだときは、先に編集（切り取り・補正・描く・文字）できるようにする
     if (list.length === 1 && /^image\/(jpeg|png|webp|heic|heif|avif|bmp)/.test(list[0].type || "")) {
       const res = await editImage(list[0], { size: 50 });
       if (!res) { restoreRange(); return; }
-      list = [res.file]; firstSize = res.size || 50;
+      list = [res.file]; firstSize = res.size || 50; if (res.changed) edited = res;
     }
+    document.querySelectorAll(".ie-cover").forEach(c => c.remove());
     toast(list.length > 1 ? `${list.length}件を追加しています…` : "追加しています…");
     let html = "";
     for (const f of list) {
       try {
-        const a = await storeFile(f); d.attachments.push(a);
+        const a = edited ? await storeEdited(edited, null) : await storeFile(f); d.attachments.push(a);
         const k = fileKind(a);
         html += k === "image" ? `<img data-att="${a.id}" src="${attUrl(a)}" alt="" style="width:${firstSize}%"><div><br></div>`
           : `<a data-att="${a.id}" href="${attUrl(a)}">${KIND_ICON[k]} ${escName(a.name)}</a>&nbsp;`;
@@ -2993,7 +3058,19 @@ function renderEdit(s) {
     onchange: (e) => { const fs = [...e.target.files]; e.target.value = ""; insertFiles(fs); } });
   const camIn = fileInput("file-cam", "image/*", "environment");
   const mediaIn = fileInput("file-media", "image/*,video/*");
-  const pickWith = (inp) => () => { keepRange(); inp.click(); };
+  /* 写真を選ぶ画面から戻ったとき、メモ画面を見せずに写真の編集へつなぐ（スマホだけ。選ばずに戻ったら外す） */
+  const coverWhilePicking = (inp) => {
+    let coarse = false; try { coarse = matchMedia("(pointer: coarse)").matches; } catch {}
+    if (!coarse) return;
+    const cover = h("div", { class: "ie-cover", "aria-hidden": "true" });
+    document.body.append(cover);
+    const off = () => cover.remove();
+    inp.addEventListener("cancel", off, { once: true });
+    const onFocus = () => setTimeout(() => { if (!inp.files || !inp.files.length) { if (!document.querySelector(".img-editor")) off(); } }, 1500);
+    window.addEventListener("focus", onFocus, { once: true });
+    setTimeout(() => { if (!document.querySelector(".img-editor") && document.visibilityState === "visible" && document.hasFocus()) off(); }, 60000);
+  };
+  const pickWith = (inp) => () => { keepRange(); coverWhilePicking(inp); inp.click(); };
   /* ハッシュタグ: 「#」を打つと、これまでに使ったタグを候補に出す（押すと入る）。新しいタグもそのまま打てる */
   const tagSuggest = h("div", { class: "tag-suggest", role: "listbox", "aria-label": "タグの候補", hidden: true });
   document.body.append(tagSuggest); cleanupFns.push(() => tagSuggest.remove());
@@ -3137,7 +3214,7 @@ function renderEdit(s) {
   }
   cleanupFns.push(() => { document.body.classList.remove("editing-body"); if (UI.backHook) UI.backHook = null; });
 
-  const bodyField = h("div", { class: "field body-field" }, h("div", { class: "editor-box" }, fmtBar, editor, imgXLayer));
+  const bodyField = h("div", { class: "field body-field" }, h("div", { class: "editor-box" }, fmtBar, editor, imgXLayer, titleIn));   // 本文と題名は1つの枠に（境目に線）
 
   // lists
   const listBox = h("div", { class: "chips" });
@@ -3251,7 +3328,7 @@ function renderEdit(s) {
   });
   return h("div", { class: "screen edit-screen" },
     editHeader,
-    h("main", { class: "wrap", style: "padding-bottom:40px" }, bodyField, titleField, genreField, listField));
+    h("main", { class: "wrap", style: "padding-bottom:40px" }, bodyField, genreField, listField));
 }
 
 /* file storage: attachment blobs live in IndexedDB on this device */
@@ -3311,51 +3388,79 @@ function ieRuler({ min, max, value, snap, unit = "%", onInput }) {
   el.setValue = (nv) => { v = nv; snapped = nv === snap; show(); };
   return el;
 }
+/* 写真の編集の本体。切り取り・文字・描いた線は元の写真に焼き付けずに覚えておき（project）、
+   あとから開き直しても続きから直せる（文字を消す・線を消しゴムで消す・切り取りを広げ直す）。
+   opts.size … 本文での表示幅（%）。渡したときだけ「大きさ」を出す。opts.project … 前回の編集の続き。
+   戻り値: { file（できあがりの画像。何も変えなければ元のファイル）, size, project, changed }。やめたら null */
 function editImage(file, opts = {}) {
   return new Promise(async (resolve) => {
+    const prj = opts.project || null;
+    // 先に画面を出してから写真を読み込む（メモ画面が一瞬見えないように）
+    const stage = h("div", { class: "ie-stage" }, h("div", { class: "ie-loading" }, "読み込んでいます…"));
+    const panel = h("div", { class: "ie-panel" });
+    const tabs = h("div", { class: "ie-tabs", role: "tablist" });
+    let done = false;
+    const finish = (v) => {
+      if (done) return; done = true;
+      window.removeEventListener("resize", fit);
+      // 閉じるときは少しの間だけ画面を残して、指を離したときの押下がメモ画面のボタンに届かないようにする
+      root.classList.add("leaving"); setTimeout(() => root.remove(), motionMs(320) || 60);
+      resolve(v);
+    };
+    const root = h("div", { class: "img-editor", role: "dialog", "aria-modal": "true", "aria-label": "写真の編集" },
+      h("div", { class: "ie-top" },
+        h("button", { type: "button", class: "ie-icon", "aria-label": "やめる", title: "やめる", onclick: () => finish(null) }, svgIcon(ICONS.close)),
+        h("b", {}, "写真の編集"), h("span", { class: "ie-icon ghost" })),
+      stage, panel, tabs,
+      h("div", { class: "ie-foot" }, h("button", { type: "button", class: "ie-save", onclick: () => save() }, "保存")));
+    root.__close = () => finish(null);   // スマホの戻る操作でも閉じる（やめる）
+    document.body.append(root);
+    document.querySelectorAll(".ie-cover").forEach(c => c.remove());
+    const src = (prj && prj.orig) || file;
     let bmp;
-    try { bmp = await createImageBitmap(file); } catch { resolve({ file, size: opts.size }); return; }   // 読めない形式はそのまま使う
+    try { bmp = await createImageBitmap(src); } catch { if (!done) { done = true; root.remove(); resolve({ file, size: opts.size, project: prj, changed: false }); } return; }   // 読めない形式はそのまま使う
+    if (done) return;
     const k0 = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
     const mk = (w, hh) => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(hh)); return c; };
-    let base = mk(bmp.width * k0, bmp.height * k0); base.getContext("2d").drawImage(bmp, 0, 0, base.width, base.height);
-    let over = mk(base.width, base.height);
-    const adj = { b: 100, c: 100, s: 100 };
+    const base = mk(bmp.width * k0, bmp.height * k0); base.getContext("2d").drawImage(bmp, 0, 0, base.width, base.height);
+    const over = mk(base.width, base.height);
+    const W = base.width, H = base.height;
+    if (prj && prj.draw) { try { const db = await createImageBitmap(prj.draw); over.getContext("2d").drawImage(db, 0, 0, W, H); } catch {} }
+    const adj = { b: 100, c: 100, s: 100, ...((prj && prj.adj) || {}) };
+    const pc = prj && prj.crop;
+    let C = pc ? { x: pc.x * W, y: pc.y * H, w: pc.w * W, h: pc.h * H } : { x: 0, y: 0, w: W, h: H };
+    let texts = ((prj && prj.texts) || []).map(t => ({ text: t.text, color: t.color, x: t.x * W, y: t.y * H, px: t.px * W }));
     let changed = false, tool = "crop", color = "#ff3b30", size = 8, erase = false, undo = [];
-    let size0 = opts.size, sizePct = opts.size;
-    let texts = [], selText = null;   // 文字は保存するまで動かしたり消したりできる
-    let param = "b";
+    let sizePct = opts.size, selText = null, param = "b";
     const filterStr = () => `brightness(${adj.b}%) contrast(${adj.c}%) saturate(${adj.s}%)`;
-    const stage = h("div", { class: "ie-stage" });
     const holder = h("div", { class: "ie-holder" });
-    stage.append(holder);
-    // 切り取りの枠。四隅・四辺のつまみは見た目だけで、つかむ判定は広め（画面のどこからでも近い所をつかめる）
     const box = h("div", { class: "ie-crop" }, ...["nw", "ne", "sw", "se"].map(k => h("span", { class: "ie-h " + k })));
     const textLayer = h("div", { class: "ie-texts" });
-    const mount = () => {
-      base.className = "ie-base"; over.className = "ie-over";
-      base.style.filter = filterStr();
-      holder.replaceChildren(base, over, textLayer, box);
-      requestAnimationFrame(fit);
-    };
-    // 画面の大きさに合わせて表示する（四隅をつかめるよう、周りに余白を残す）
-    const fit = () => {
+    const sizePrev = h("div", { class: "ie-sizeprev", hidden: true });
+    base.className = "ie-base"; over.className = "ie-over";
+    // 写真は枠の中だけに見せ、文字（と大きさを変える丸）は写真の端でも隠れないよう枠の外にはみ出せるようにする
+    const clip = h("div", { class: "ie-clip" }, base, over);
+    holder.append(clip, textLayer, box);
+    stage.replaceChildren(holder, sizePrev);
+    /* 表示: 切り取りの道具では写真全体と枠、それ以外は切り取った範囲だけを、画面に合わせて出す */
+    let V = { x: 0, y: 0, w: W, h: H }, sc = 1;
+    function fit() {
       const sw = stage.clientWidth - 48, sh = stage.clientHeight - 48;
       if (sw <= 0 || sh <= 0) { requestAnimationFrame(fit); return; }
-      const sc = Math.min(sw / base.width, sh / base.height, 2);
-      holder.style.width = Math.round(base.width * sc) + "px"; holder.style.height = Math.round(base.height * sc) + "px";
-      if (tool === "crop") resetCrop(); else drawCrop();
-      placeTexts();
-    };
+      V = tool === "crop" ? { x: 0, y: 0, w: W, h: H } : { ...C };
+      sc = Math.min(sw / V.w, sh / V.h, 2);
+      holder.style.width = Math.round(V.w * sc) + "px"; holder.style.height = Math.round(V.h * sc) + "px";
+      for (const cv of [base, over]) Object.assign(cv.style, { width: W * sc + "px", height: H * sc + "px", left: -V.x * sc + "px", top: -V.y * sc + "px" });
+      drawCrop(); placeTexts();
+    }
     const disp = () => holder.getBoundingClientRect();
-    const toBase = (e) => { const r = disp(); return { x: (e.clientX - r.left) * base.width / r.width, y: (e.clientY - r.top) * base.height / r.height }; };
-    /* ---- 切り取り ---- */
-    let cr = null;
-    const resetCrop = () => { const r = disp(); cr = { x: 0, y: 0, w: r.width, h: r.height }; drawCrop(); };
-    const drawCrop = () => { if (!cr) return; Object.assign(box.style, { left: cr.x + "px", top: cr.y + "px", width: cr.w + "px", height: cr.h + "px" }); };
+    const toBase = (e) => { const r = disp(); return { x: V.x + (e.clientX - r.left) / sc, y: V.y + (e.clientY - r.top) / sc }; };
+    /* ---- 切り取り（枠は写真の座標で持つ。四隅・四辺は印の少し外からでもつかめる） ---- */
+    const drawCrop = () => Object.assign(box.style, { left: (C.x - V.x) * sc + "px", top: (C.y - V.y) * sc + "px", width: C.w * sc + "px", height: C.h * sc + "px" });
     let drag = null;
     const pickCrop = (e) => {
       const r = disp(), px = e.clientX - r.left, py = e.clientY - r.top, R = 44, E = 26;
-      const L = cr.x, T = cr.y, Rt = cr.x + cr.w, B = cr.y + cr.h;
+      const L = C.x * sc, T = C.y * sc, Rt = (C.x + C.w) * sc, B = (C.y + C.h) * sc;
       const corners = { nw: [L, T], ne: [Rt, T], sw: [L, B], se: [Rt, B] };
       let best = null, bd = R;
       for (const [k, [cx, cy]] of Object.entries(corners)) { const d = Math.hypot(px - cx, py - cy); if (d < bd) { bd = d; best = k; } }
@@ -3366,13 +3471,9 @@ function editImage(file, opts = {}) {
       if (px > L && px < Rt && py > T && py < B) return "move";
       return null;
     };
-    const cropDown = (e) => {
-      const k = pickCrop(e); if (!k) return false;
-      stage.setPointerCapture(e.pointerId); drag = { k, sx: e.clientX, sy: e.clientY, r0: { ...cr } }; box.classList.add("active"); return true;
-    };
+    const cropDown = (e) => { const k = pickCrop(e); if (!k) return false; stage.setPointerCapture(e.pointerId); drag = { k, sx: e.clientX, sy: e.clientY, c0: { ...C } }; box.classList.add("active"); return true; };
     const cropMove = (e) => {
-      const r = disp(), W = r.width, H = r.height, MIN = 40, o = drag.r0;
-      const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+      const MIN = 40 / sc, o = drag.c0, dx = (e.clientX - drag.sx) / sc, dy = (e.clientY - drag.sy) / sc;
       let { x, y, w, h: hh } = o;
       if (drag.k === "move") { x = Math.min(Math.max(0, o.x + dx), W - o.w); y = Math.min(Math.max(0, o.y + dy), H - o.h); }
       else {
@@ -3381,56 +3482,53 @@ function editImage(file, opts = {}) {
         if (drag.k.includes("n")) { y = Math.min(Math.max(0, o.y + dy), o.y + o.h - MIN); hh = o.y + o.h - y; }
         if (drag.k.includes("s")) hh = Math.min(Math.max(MIN, o.h + dy), H - o.y);
       }
-      cr = { x, y, w, h: hh }; drawCrop();
-    };
-    const applyCrop = () => {
-      if (!cr) return;
-      const r = disp(), kx = base.width / r.width, ky = base.height / r.height;
-      const sx = Math.round(cr.x * kx), sy = Math.round(cr.y * ky), w = Math.round(cr.w * kx), hh = Math.round(cr.h * ky);
-      cr = null;
-      if (sx <= 0 && sy <= 0 && w >= base.width - 1 && hh >= base.height - 1) return;
-      const nb = mk(w, hh), no = mk(w, hh);
-      nb.getContext("2d").drawImage(base, sx, sy, w, hh, 0, 0, w, hh);
-      no.getContext("2d").drawImage(over, sx, sy, w, hh, 0, 0, w, hh);
-      texts.forEach(t => { t.x -= sx; t.y -= sy; });
-      base = nb; over = no; undo = []; changed = true; mount();
+      C = { x, y, w, h: hh }; changed = true; drawCrop();
     };
     /* ---- 描く・消しゴム ---- */
     const octx = () => over.getContext("2d");
-    const snap = () => { undo.push(octx().getImageData(0, 0, over.width, over.height)); if (undo.length > 15) undo.shift(); };
+    const snap = () => { undo.push(octx().getImageData(0, 0, W, H)); if (undo.length > 15) undo.shift(); };
     let pen = null;
     const penDown = (e) => {
       stage.setPointerCapture(e.pointerId); snap();
       const p = toBase(e), c = octx();
       c.globalCompositeOperation = erase ? "destination-out" : "source-over";
-      c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = color; c.lineWidth = (erase ? size * 2.5 : size) * base.width / disp().width;
+      c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = color; c.lineWidth = (erase ? size * 2.5 : size) / sc;
       c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x + 0.1, p.y + 0.1); c.stroke();
       pen = p; changed = true;
     };
     const penMove = (e) => { const p = toBase(e), c = octx(); c.beginPath(); c.moveTo(pen.x, pen.y); c.lineTo(p.x, p.y); c.stroke(); pen = p; };
-    /* ---- 文字: 置いた文字は保存するまで、指で動かす・押して選んで変える・消すができる ---- */
-    const textPx = () => Math.round(base.width * 0.07);
-    const placeTexts = () => {
-      const r = disp(); if (!r.width) return; const k = r.width / base.width;
-      textLayer.replaceChildren(...texts.map(t => {
-        const el = h("div", { class: "ie-text" + (t === selText ? " sel" : ""), "data-i": String(texts.indexOf(t)) }, t.text);
-        Object.assign(el.style, { left: t.x * k + "px", top: t.y * k + "px", color: t.color, fontSize: t.px * k + "px",
+    /* ---- 文字: 押して選ぶ・指で動かす・右下の丸を引っぱって大きさを変える ---- */
+    function placeTexts() {
+      textLayer.replaceChildren(...texts.map((t, i) => {
+        const el = h("div", { class: "ie-text" + (t === selText ? " sel" : ""), "data-i": String(i) }, t.text,
+          t === selText && tool === "text" ? h("span", { class: "ie-tsize", "aria-label": "大きさを変える" }) : null);
+        Object.assign(el.style, { left: (t.x - V.x) * sc + "px", top: (t.y - V.y) * sc + "px", color: t.color, fontSize: t.px * sc + "px",
           textShadow: t.color === "#ffffff" ? "0 0 3px rgba(0,0,0,.7)" : "0 0 3px rgba(255,255,255,.8)" });
         return el;
       }));
-    };
+    }
     let tdrag = null;
     const textDown = (e) => {
-      const el = e.target.closest(".ie-text"); if (!el) return false;
+      const el = e.target.closest(".ie-text");
+      if (!el) { if (selText) { selText = null; placeTexts(); drawPanel(false); } return false; }   // 何もない所を押したら選ぶのをやめる
       const t = texts[+el.dataset.i]; stage.setPointerCapture(e.pointerId);
-      tdrag = { t, sx: e.clientX, sy: e.clientY, x: t.x, y: t.y, moved: false };
-      if (selText !== t) { selText = t; drawPanel(); placeTexts(); }
+      const resize = !!e.target.closest(".ie-tsize");
+      const r = el.getBoundingClientRect();
+      tdrag = { t, resize, sx: e.clientX, sy: e.clientY, x: t.x, y: t.y, px: t.px, ox: r.left, oy: r.top };
+      if (selText !== t) { selText = t; placeTexts(); drawPanel(false); }
       return true;
     };
-    const textMove = (e) => { const k = base.width / disp().width; tdrag.t.x = tdrag.x + (e.clientX - tdrag.sx) * k; tdrag.t.y = tdrag.y + (e.clientY - tdrag.sy) * k; placeTexts(); };
+    const textMove = (e) => {
+      const d = tdrag;
+      if (d.resize) {
+        const d0 = Math.hypot(d.sx - d.ox, d.sy - d.oy) || 1, d1 = Math.hypot(e.clientX - d.ox, e.clientY - d.oy);
+        d.t.px = Math.min(W * 0.4, Math.max(W * 0.02, d.px * d1 / d0));
+      } else { d.t.x = d.x + (e.clientX - d.sx) / sc; d.t.y = d.y + (e.clientY - d.sy) / sc; }
+      changed = true; placeTexts();
+    };
     const drawTexts = (ctx) => {
       for (const t of texts) {
-        ctx.font = `bold ${t.px}px ${getComputedStyle(document.body).fontFamily}`; ctx.textBaseline = "top";
+        ctx.font = `800 ${t.px}px ${getComputedStyle(document.body).fontFamily}`; ctx.textBaseline = "top";
         ctx.lineWidth = Math.max(2, t.px / 8); ctx.lineJoin = "round"; ctx.strokeStyle = t.color === "#ffffff" ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.75)";
         t.text.split("\n").forEach((line, i) => ctx.strokeText(line, t.x, t.y + i * t.px * 1.2));
         ctx.fillStyle = t.color;
@@ -3442,7 +3540,8 @@ function editImage(file, opts = {}) {
     stage.addEventListener("pointerdown", (e) => {
       if (e.button > 0) return;
       e.preventDefault();
-      if (tool === "crop" && cr) mode = cropDown(e) ? "crop" : null;
+      if (document.activeElement && document.activeElement.classList.contains("ie-input")) document.activeElement.blur();
+      if (tool === "crop") mode = cropDown(e) ? "crop" : null;
       else if (tool === "text") mode = textDown(e) ? "text" : null;
       else if (tool === "draw" && holder.contains(e.target)) { penDown(e); mode = "draw"; }
     });
@@ -3453,13 +3552,12 @@ function editImage(file, opts = {}) {
     });
     const up = () => {
       if (mode === "draw") { pen = null; octx().globalCompositeOperation = "source-over"; drawPanel(false); }
-      if (mode === "text" && tdrag) changed = true;
       drag = null; tdrag = null; mode = null; box.classList.remove("active");
     };
     stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up);
     /* ---- 自動補正: 明るさの平均とばらつきから決める。コントラストは下げない ---- */
     const autoFix = () => {
-      const s = mk(64, 64 * base.height / base.width); const c = s.getContext("2d"); c.drawImage(base, 0, 0, s.width, s.height);
+      const s = mk(64, 64 * H / W); const c = s.getContext("2d"); c.drawImage(base, C.x, C.y, C.w, C.h, 0, 0, s.width, s.height);
       const px = c.getImageData(0, 0, s.width, s.height).data; let sum = 0, sum2 = 0, n = 0;
       for (let i = 0; i < px.length; i += 4) { const L = (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255; sum += L; sum2 += L * L; n++; }
       const mean = sum / n, sd = Math.sqrt(Math.max(0, sum2 / n - mean * mean));
@@ -3467,29 +3565,46 @@ function editImage(file, opts = {}) {
       adj.b = clamp(100 * Math.pow(0.5 / Math.max(0.05, mean), 0.6), 90, 135);
       adj.c = clamp(100 * Math.pow(0.24 / Math.max(0.04, sd), 0.5), 100, 130);
       adj.s = sd < 0.12 ? 112 : 108;
-      changed = true; base.style.filter = filterStr(); drawPanel(false);
+      changed = true; applyFilter(); drawPanel(false);
     };
-    /* ---- 下の道具の切り替え（切り替えるたびに、下からふわっと出す） ---- */
+    const applyFilter = () => { base.style.filter = filterStr(); };
+    /* できあがりの画像（切り取った範囲に、補正・線・文字を重ねる） */
+    const compose = (maxSide) => {
+      const k = maxSide ? Math.min(1, maxSide / Math.max(C.w, C.h)) : 1;
+      const out = mk(C.w * k, C.h * k), c = out.getContext("2d");
+      c.scale(k, k); c.translate(-C.x, -C.y);
+      c.filter = filterStr(); c.drawImage(base, 0, 0); c.filter = "none"; c.drawImage(over, 0, 0); drawTexts(c);
+      return out;
+    };
+    /* 大きさ: 本文の中でどのくらいの幅になるかを、メモの見本の上で見せる */
+    const showSizePrev = () => {
+      const url = compose(600).toDataURL("image/jpeg", 0.8);
+      const line = (w) => h("i", { style: `width:${w}%` });
+      sizePrev.replaceChildren(h("div", { class: "isp-page" }, line(92), line(70),
+        h("img", { class: "isp-img", src: url, alt: "", style: `width:${sizePct}%` }), line(85), line(60)));
+    };
+    /* ---- 下の道具 ---- */
     const COLORS = ["#ffffff", "#000000", "#ff3b30", "#ffcc00", "#4fd2ff", "#34c759"];
-    const panel = h("div", { class: "ie-panel" });
     const ib = (ic, label, onclick, cls = "", extra = {}) => h("button", { type: "button", class: "ie-ib " + cls, "aria-label": label, title: label, onclick, ...extra }, svgIcon(ic));
     const swatches = (onPick, cur) => h("div", { class: "ie-colors" }, COLORS.map(c => h("button", { type: "button", class: "ie-sw", style: `background:${c}`, "aria-label": "色 " + c, "aria-pressed": String(c === cur), onclick: () => { onPick(c); drawPanel(false); } })));
     const PARAMS = [["b", "明るさ", IE_ICON.bright], ["c", "コントラスト", IE_ICON.contrast], ["s", "彩度", IE_ICON.satur]];
-    const drawPanel = (anim = true) => {
+    const setSize = (v) => { sizePct = v; const im = sizePrev.querySelector(".isp-img"); if (im) im.style.width = v + "%"; };
+    function drawPanel(anim = true) {
       box.hidden = tool !== "crop"; holder.classList.toggle("drawing", tool === "draw"); holder.classList.toggle("texting", tool === "text");
+      holder.hidden = tool === "size"; sizePrev.hidden = tool !== "size";
       let kids = [];
-      if (tool === "crop") kids = [h("div", { class: "ie-row center" }, ib(IE_ICON.reset, "切り取りを元に戻す", () => resetCrop()))];
+      if (tool === "crop") kids = [h("div", { class: "ie-row center" }, ib(IE_ICON.reset, "切り取りを元に戻す", () => { C = { x: 0, y: 0, w: W, h: H }; changed = true; drawCrop(); }))];
       else if (tool === "size") {
         const presets = [["小", 25], ["中", 50], ["大", 75], ["全幅", 100]];
-        kids = [h("div", { class: "ie-row center" }, presets.map(([l, v]) => h("button", { type: "button", class: "ie-chip", "aria-pressed": String(sizePct === v), onclick: () => { sizePct = v; drawPanel(false); } }, l))),
-          ieRuler({ min: 10, max: 100, value: sizePct, onInput: (v) => { sizePct = v; panel.querySelectorAll(".ie-chip").forEach((b, i) => b.setAttribute("aria-pressed", String(presets[i][1] === v))); } })];
+        kids = [h("div", { class: "ie-row center" }, presets.map(([l, v]) => h("button", { type: "button", class: "ie-chip", "aria-pressed": String(sizePct === v), onclick: () => { setSize(v); drawPanel(false); } }, l))),
+          ieRuler({ min: 10, max: 100, value: sizePct, onInput: (v) => { setSize(v); panel.querySelectorAll(".ie-chip").forEach((b, i) => b.setAttribute("aria-pressed", String(presets[i][1] === v))); } })];
       } else if (tool === "adjust") {
-        const ruler = ieRuler({ min: 50, max: 150, value: adj[param], snap: 100, onInput: (v) => { adj[param] = v; base.style.filter = filterStr(); changed = true; panel.querySelector(`.ie-param[data-p="${param}"] small`).textContent = v; } });
+        const ruler = ieRuler({ min: 50, max: 150, value: adj[param], snap: 100, onInput: (v) => { adj[param] = v; applyFilter(); changed = true; panel.querySelector(`.ie-param[data-p="${param}"] small`).textContent = v; } });
         kids = [h("div", { class: "ie-row center params" },
           h("button", { type: "button", class: "ie-param auto", "aria-label": "自動補正", title: "自動補正", onclick: autoFix }, h("span", { class: "pc" }, svgIcon(IE_ICON.auto)), h("small", {}, "自動")),
           PARAMS.map(([k, l, ic]) => h("button", { type: "button", class: "ie-param", "data-p": k, "aria-label": l, title: l, "aria-pressed": String(param === k), onclick: () => { param = k; drawPanel(false); } },
             h("span", { class: "pc" }, svgIcon(ic)), h("small", {}, String(adj[k])))),
-          h("button", { type: "button", class: "ie-param", "aria-label": "すべて100%に戻す", title: "すべて100%に戻す", onclick: () => { adj.b = adj.c = adj.s = 100; base.style.filter = filterStr(); drawPanel(false); } }, h("span", { class: "pc" }, svgIcon(IE_ICON.reset)), h("small", {}, "100%"))),
+          h("button", { type: "button", class: "ie-param", "aria-label": "すべて100%に戻す", title: "すべて100%に戻す", onclick: () => { adj.b = adj.c = adj.s = 100; changed = true; applyFilter(); drawPanel(false); } }, h("span", { class: "pc" }, svgIcon(IE_ICON.reset)), h("small", {}, "100%"))),
           ruler];
       } else if (tool === "draw") {
         kids = [swatches((c) => { color = c; erase = false; }, erase ? null : color),
@@ -3501,63 +3616,53 @@ function editImage(file, opts = {}) {
             h("span", { class: "ie-sep" }),
             ib(IE_ICON.undo, "取り消し", () => { const d = undo.pop(); if (d) octx().putImageData(d, 0, 0); drawPanel(false); }, "", { disabled: !undo.length }))];
       } else if (tool === "text") {
-        const inp = h("textarea", { class: "ie-input", rows: "1", placeholder: selText ? "" : "入れる文字", "aria-label": "入れる文字" });
+        // 選んでいる文字は、打つとそのまま変わる。「✓」で決めて、次の文字を入れられる
+        const inp = h("textarea", { class: "ie-input", rows: "1", placeholder: "入れる文字", "aria-label": "入れる文字",
+          oninput: () => { if (selText && inp.value.trim()) { selText.text = inp.value; changed = true; placeTexts(); } },
+          onfocus: () => root.classList.add("typing"), onblur: () => setTimeout(() => root.classList.remove("typing"), 80) });
         inp.value = selText ? selText.text : "";
-        const commit = () => {
+        const add = () => {
           const t = inp.value.trim(); if (!t) { inp.focus(); return; }
-          if (selText) { selText.text = t; selText.color = color; }
-          else { const r = disp(); selText = { text: t, color, px: textPx(), x: base.width * 0.1, y: base.height * 0.4 - (r ? 0 : 0) }; texts.push(selText); }
-          changed = true; placeTexts(); drawPanel(false);
+          selText = { text: t, color, px: Math.round(C.w * 0.08), x: C.x + C.w * 0.1, y: C.y + C.h * 0.4 };
+          texts.push(selText); changed = true; inp.blur(); placeTexts(); drawPanel(false);
         };
+        const ok = () => { selText = null; inp.blur(); placeTexts(); drawPanel(false); };
         kids = [h("div", { class: "ie-row" }, inp,
-          ib(selText ? IE_ICON.check : IE_ICON.add, selText ? "文字を変える" : "文字を置く", commit, "primary"),
-          ib(IE_ICON.trash, "選んだ文字を消す", () => { texts = texts.filter(x => x !== selText); selText = null; placeTexts(); drawPanel(false); }, "", { disabled: !selText })),
-          swatches((c) => { color = c; if (selText) { selText.color = c; placeTexts(); } }, color)];
+          selText ? ib(IE_ICON.check, "決定（次の文字へ）", ok, "primary") : ib(IE_ICON.add, "文字を置く", add, "primary"),
+          ib(IE_ICON.trash, "選んだ文字を消す", () => { texts = texts.filter(x => x !== selText); selText = null; changed = true; placeTexts(); drawPanel(false); }, "", { disabled: !selText })),
+          swatches((c) => { color = c; if (selText) { selText.color = c; changed = true; placeTexts(); } }, selText ? selText.color : color)];
       }
       const inner = h("div", { class: "ie-pin" + (anim ? " enter" : "") }, ...kids);
       const old = panel.firstChild;
       if (anim && old) { old.classList.add("leave"); old.addEventListener("animationend", () => old.remove(), { once: true }); setTimeout(() => old.remove(), motionMs(250)); panel.append(inner); }
       else panel.replaceChildren(inner);
       tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === tool)));
-    };
+    }
     const setTool = (t) => {
       if (t === tool) return;
-      if (tool === "crop") applyCrop();
-      if (tool === "text") { selText = null; placeTexts(); }
+      if (tool === "text") selText = null;
       tool = t; drawPanel();
-      if (t === "crop") resetCrop();
+      if (t === "size") showSizePrev(); else fit();
     };
-    const TOOLS = [["crop", "切り取り"], ...(size0 != null ? [["size", "大きさ"]] : []), ["adjust", "補正"], ["draw", "描く"], ["text", "文字"]];
-    const tabs = h("div", { class: "ie-tabs", role: "tablist" }, TOOLS.map(([t, l]) =>
-      h("button", { type: "button", role: "tab", "data-t": t, onclick: () => setTool(t) }, svgIcon(IE_ICON[t]), h("span", {}, l))));
-    // 閉じるときは少しの間だけ画面を残して、指を離したときの押下がメモ画面のボタンに届かないようにする
-    let done = false;
-    const finish = (v) => {
-      if (done) return; done = true;
-      window.removeEventListener("resize", fit);
-      root.classList.add("leaving"); setTimeout(() => root.remove(), motionMs(320) || 60);
-      resolve(v);
-    };
-    const save = async () => {
-      if (tool === "crop") applyCrop();
+    const TOOLS = [["crop", "切り取り"], ...(opts.size != null ? [["size", "大きさ"]] : []), ["adjust", "補正"], ["draw", "描く"], ["text", "文字"]];
+    tabs.replaceChildren(...TOOLS.map(([t, l]) => h("button", { type: "button", role: "tab", "data-t": t, onclick: () => setTool(t) }, svgIcon(IE_ICON[t]), h("span", {}, l))));
+    async function save() {
+      if (done) return;
       const sizeOut = sizePct;
-      if (!changed && !texts.length) { finish({ file, size: sizeOut }); return; }
-      const out = mk(base.width, base.height), c = out.getContext("2d");
-      c.filter = filterStr(); c.drawImage(base, 0, 0); c.filter = "none"; c.drawImage(over, 0, 0); drawTexts(c);
-      const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+      if (!changed) { finish({ file, size: sizeOut, project: prj, changed: false }); return; }
+      const out = compose();
+      const type = (file.type === "image/png" && !(prj && prj.orig)) ? "image/png" : "image/jpeg";
       const blob = await new Promise(res => out.toBlob(res, type, 0.9));
-      finish({ file: blob ? new File([blob], (file.name || "image").replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg"), { type }) : file, size: sizeOut });
-    };
-    const root = h("div", { class: "img-editor", role: "dialog", "aria-modal": "true", "aria-label": "写真の編集" },
-      h("div", { class: "ie-top" },
-        h("button", { type: "button", class: "ie-icon", "aria-label": "やめる", title: "やめる", onclick: () => finish(null) }, svgIcon(ICONS.close)),
-        h("b", {}, "写真の編集"), h("span", { class: "ie-icon ghost" })),
-      stage, panel, tabs,
-      h("div", { class: "ie-foot" }, h("button", { type: "button", class: "ie-save", onclick: save }, "保存")));
-    root.__close = () => finish(null);   // スマホの戻る操作でも閉じる（やめる）
-    document.body.append(root);
+      // 何もしていない線の層は覚えない
+      const blank = !octx().getImageData(0, 0, W, H).data.some((v, i) => i % 4 === 3 && v);
+      const drawBlob = blank ? null : await new Promise(res => over.toBlob(res, "image/png"));
+      const project = { orig: src, crop: { x: C.x / W, y: C.y / H, w: C.w / W, h: C.h / H }, adj: { ...adj },
+        texts: texts.map(t => ({ text: t.text, color: t.color, x: t.x / W, y: t.y / H, px: t.px / W })), draw: drawBlob };
+      const name = (file.name || "image").replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg");
+      finish({ file: blob ? new File([blob], name, { type }) : file, size: sizeOut, project, changed: true });
+    }
     window.addEventListener("resize", fit);
-    mount(); drawPanel(false);
+    applyFilter(); drawPanel(false); fit();
   });
 }
 async function storeFile(file) {
@@ -3705,7 +3810,7 @@ const Sync = {
   CHUNK: 700000,
   async syncFiles(force) {
     const need = new Map();
-    for (const m of Manager.memos.values()) for (const a of m.attachments || []) if (a.fileId) need.set(a.fileId, a);
+    for (const m of Manager.memos.values()) for (const a of m.attachments || []) for (const f of attFiles(a)) need.set(f.id, f);
     if (!need.size) return 0;
     const meta = Manager.meta;
     const localIds = new Set(await Storage.allFileIds());
