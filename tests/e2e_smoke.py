@@ -43,14 +43,20 @@ def attach_image(q, choice="そのまま"):
     q.set_input_files("#file-media", ICON); q.wait_for_selector(".img-editor")
     q.click(".ie-save"); q.wait_for_selector(".editor img[data-att]")
 
+def new_screen(q, sel=".fab"):
+    """新しいメモの画面を開き、本文にカーソルが当たるまで待つ（当たる前に題名を入れると、文字が本文に入ってしまう）"""
+    q.click(sel)
+    try: q.wait_for_function("document.activeElement && document.activeElement.classList.contains('editor')", timeout=5000)
+    except Exception: pass
+
 def new_memo(pg, title, genre="体験", body=None):
-    pg.click(".fab"); pg.fill("#title", title); pg.click(f".genre-pick >> text={genre}")
+    new_screen(pg); pg.fill("#title", title); pg.click(f".genre-pick >> text={genre}")
     if body: pg.click(".editor"); pg.keyboard.insert_text(body)
     pg.click("#title"); pg.click(".save-btn"); pg.wait_for_selector(".bottom-nav"); time.sleep(0.2)
 
 with sync_playwright() as p:
     b = p.chromium.launch(executable_path=os.environ.get("PW_CHROMIUM") or None)
-    ctx = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    ctx = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce")
     pg = ctx.new_page(); pg.on("pageerror", lambda e: errors.append(str(e)))
     pg.goto(URL); pg.wait_for_selector(".fab")
 
@@ -94,7 +100,7 @@ with sync_playwright() as p:
     check("タグを押すと検索窓を開いた検索画面になる", pg.inner_text(".tab-name") == "検索" and pg.locator(".search-panel").is_visible() and pg.input_value("#q") == "#取材" and pg.locator(".memo-card", has_text="タグ付きメモ").count() == 1)
     check("パス表示はタブの形で「ホーム」から今の画面まで", pg.inner_text(".crumb.home") == "ホーム" and pg.locator(".crumbs .crumb").count() == 3 and "検索" in pg.inner_text(".crumb.current"))
     pg.go_back(); time.sleep(0.4)
-    check("戻るとタグを押す前の閲覧画面に戻る", pg.inner_text("header .view-title") == "タグ付きメモ")
+    check("戻るとタグを押す前の閲覧画面に戻る", pg.locator("header .view-title").count() == 1 and pg.inner_text("header .view-title") == "タグ付きメモ", pg.evaluate("document.querySelector('#app').innerText.slice(0,200)+' | '+JSON.stringify(history.state)"))
     pg.go_back(); time.sleep(0.3)
     check("ホームの検索はタグの検索の影響を受けない", pg.locator(".filter-chip").count() == 0 and not pg.locator(".search-panel").is_visible())
     pg.locator(".memo-card", has_text="京都取材").click(); pg.wait_for_selector(".view-title")
@@ -155,7 +161,7 @@ with sync_playwright() as p:
     check("フォルダの中も下へスクロールすると上のバーと「＋」をしまう", pg.evaluate("document.querySelector('.screen').classList.contains('chrome-hidden')"))
     pg.mouse.wheel(0, -300); time.sleep(0.5); pg.evaluate("document.getElementById('pad').remove()")
     pg.click(".fab"); time.sleep(0.3)
-    pg.click(".fab-menu >> text=新規追加"); pg.fill("#title", "フォルダ内メモ"); pg.click(".genre-pick >> text=学び"); pg.click(".save-btn"); time.sleep(0.4)
+    new_screen(pg, ".fab-menu >> text=新規追加"); pg.fill("#title", "フォルダ内メモ"); pg.click(".genre-pick >> text=学び"); pg.click(".save-btn"); time.sleep(0.4)
     check("フォルダで作ったメモは保存後フォルダ画面に戻る", pg.locator(".folder-title").count() == 1 and pg.locator(".memo-card", has_text="フォルダ内メモ").count() == 1)
 
     # 選択モードのままパンくずで戻っても、その後の「戻る」が効く
@@ -201,7 +207,7 @@ with sync_playwright() as p:
     pg.keyboard.insert_text("書きかけ"); time.sleep(0.2); pg.go_back(); time.sleep(0.5)
     check("新規メモで本文の入力中に戻る操作をすると「×」と同じく保存・破棄を選ぶ", pg.locator(".modal .btn.primary", has_text="保存").count() == 1)
     pg.click(".modal .btn.danger"); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
-    tab(pg, "最近"); pg.click(".fab"); pg.fill("#title", "書式"); pg.click(".genre-pick >> text=アイデア"); pg.click(".editor")
+    tab(pg, "最近"); new_screen(pg); pg.fill("#title", "書式"); pg.click(".genre-pick >> text=アイデア"); pg.click(".editor")
     pg.click(".more-btn")
     check("▶ を押すと書式のボタン（見出し〜リンク）に切り替わる", pg.locator(".fmt-more .head-btn").is_visible() and pg.locator(".fmt-more [aria-label=リンク]").is_visible() and not pg.locator(".fmt-media").is_visible())
     pg.click(".b-bold"); pg.click(".b-italic"); pg.keyboard.insert_text("太斜")
@@ -217,41 +223,69 @@ with sync_playwright() as p:
     check("文字色はクラスで付く", pg.locator(".editor .tc-rose").count() == 1)
     pg.set_input_files("#file-media", ICON); pg.wait_for_selector(".img-editor"); time.sleep(0.3)
     check("写真を1枚選ぶと写真の編集が画面いっぱいに出る", pg.evaluate("(()=>{const r=document.querySelector('.img-editor').getBoundingClientRect();return r.width===innerWidth&&r.height===innerHeight})()") and pg.locator(".ie-crop .ie-h").count() == 4)
-    check("切り取りの四隅はどれも指でつかめる（画面の外や隠れた所にない）", pg.evaluate("[...document.querySelectorAll('.ie-h')].every(e=>{const r=e.getBoundingClientRect();const t=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);return t===e})"))
-    hb = pg.locator(".ie-h.se").bounding_box(); pg.mouse.move(hb["x"] + 20, hb["y"] + 20); pg.mouse.down(); pg.mouse.move(hb["x"] - 60, hb["y"] - 60, steps=4); pg.mouse.up()
-    hb = pg.locator(".ie-h.nw").bounding_box(); pg.mouse.move(hb["x"] + 20, hb["y"] + 20); pg.mouse.down(); pg.mouse.move(hb["x"] + 30, hb["y"] + 30, steps=4); pg.mouse.up()
-    check("四隅を引っぱって範囲を変えられる", pg.evaluate("(()=>{const c=document.querySelector('.ie-crop').getBoundingClientRect(),h=document.querySelector('.ie-holder').getBoundingClientRect();return c.width<h.width-50&&c.left>h.left+5})()"))
+    check("四隅の周りには指でつかむための余白がある", pg.evaluate("(()=>{const h=document.querySelector('.ie-holder').getBoundingClientRect(),s=document.querySelector('.ie-stage').getBoundingClientRect();return h.left-s.left>=20&&s.right-h.right>=20&&h.top-s.top>=20})()"))
+    check("「枠を動かしたり〜」の説明文はない・元に戻すはアイコン", "枠を動かしたり" not in pg.inner_text(".img-editor") and pg.locator(".ie-panel [aria-label='切り取りを元に戻す'] svg").count() == 1)
+    hc = pg.locator(".ie-crop").bounding_box()
+    # 角の少し外側（画像の外）からでもつかめる
+    pg.mouse.move(hc["x"] + hc["width"] + 14, hc["y"] + hc["height"] + 14); pg.mouse.down(); pg.mouse.move(hc["x"] + hc["width"] - 60, hc["y"] + hc["height"] - 60, steps=4); pg.mouse.up()
+    pg.mouse.move(hc["x"] - 12, hc["y"] - 12); pg.mouse.down(); pg.mouse.move(hc["x"] + 30, hc["y"] + 30, steps=4); pg.mouse.up()
+    check("四隅を（少し外からでも）引っぱって範囲を変えられる", pg.evaluate("(()=>{const c=document.querySelector('.ie-crop').getBoundingClientRect(),h=document.querySelector('.ie-holder').getBoundingClientRect();return c.width<h.width-50&&c.left>h.left+5})()"))
+    hc = pg.locator(".ie-crop").bounding_box(); pg.mouse.move(hc["x"] + hc["width"] / 2, hc["y"] + 2); pg.mouse.down(); pg.mouse.move(hc["x"] + hc["width"] / 2, hc["y"] + 22, steps=3); pg.mouse.up()
+    check("辺をつかんで1方向だけ縮められる", pg.evaluate("document.querySelector('.ie-crop').getBoundingClientRect().top") > hc["y"] + 10)
     pg.click(".ie-tabs [data-t=adjust]"); time.sleep(0.2)
     check("切り取りは別の道具に替えると反映される", pg.evaluate("(()=>{const c=document.querySelector('.ie-base');return c.width<512})()"))
-    pg.click(".ie-auto")
-    check("自動補正で明るさなどが変わる（手動でも調整できる）", "brightness" in pg.evaluate("document.querySelector('.ie-base').style.filter") and pg.locator(".ie-slider input").count() == 3)
+    check("補正の道具に切り替えると下からふわっと出る", pg.evaluate("document.querySelector('.ie-pin:last-child').classList.contains('enter')"))
+    pg.click(".ie-param.auto")
+    check("自動補正でコントラストは下げない", pg.evaluate("parseInt(document.querySelector('.ie-param[data-p=c] small').textContent)") >= 100)
+    rb = pg.locator(".ie-ruler").bounding_box(); cx = rb["x"] + rb["width"] / 2; cy = rb["y"] + rb["height"] / 2
+    pg.click(".ie-param[data-p=b]"); pg.click("[aria-label='すべて100%に戻す']")
+    check("100%に戻すボタンで元の値に", pg.inner_text(".ier-val") == "100%" and "brightness(100%)" in pg.evaluate("document.querySelector('.ie-base').style.filter"))
+    pg.mouse.move(cx, cy); pg.mouse.down(); pg.mouse.move(cx - 60, cy, steps=5); pg.mouse.up()
+    check("目盛りを左右に滑らせて値を変えられる", pg.inner_text(".ier-val") == "112%", pg.inner_text(".ier-val"))
+    pg.mouse.move(cx, cy); pg.mouse.down(); pg.mouse.move(cx + 50, cy, steps=5); pg.mouse.up()
+    check("100%の近くでは100%に吸い付く", pg.inner_text(".ier-val") == "100%", pg.inner_text(".ier-val"))
     pg.click(".ie-tabs [data-t=draw]"); hb = pg.locator(".ie-holder").bounding_box()
     pg.mouse.move(hb["x"] + 20, hb["y"] + 20); pg.mouse.down(); pg.mouse.move(hb["x"] + 80, hb["y"] + 60, steps=5); pg.mouse.up()
-    check("指で描ける（取り消しも押せる）", pg.locator(".ie-panel button:text-is('取り消し')").is_enabled())
-    pg.click(".ie-tabs [data-t=text]"); pg.fill(".ie-input", "メモ"); pg.click(".ie-panel button:text-is('置く')")
-    check("文字を置ける", pg.locator(".ie-text").is_visible() and pg.inner_text(".ie-text") == "メモ")
+    check("指で描ける（取り消しはアイコンで押せる）", pg.locator(".ie-panel [aria-label='取り消し'] svg").count() == 1 and pg.locator(".ie-panel [aria-label='取り消し']").is_enabled())
+    pg.click(".ie-panel [aria-label='消しゴム']")
+    check("消しゴムを選べる", pg.get_attribute(".ie-panel [aria-label='消しゴム']", "aria-pressed") == "true")
+    pg.mouse.move(hb["x"] + 20, hb["y"] + 20); pg.mouse.down(); pg.mouse.move(hb["x"] + 80, hb["y"] + 60, steps=5); pg.mouse.up()
+    pg.click(".ie-tabs [data-t=text]"); pg.fill(".ie-input", "メモ"); pg.click(".ie-panel [aria-label='文字を置く']")
+    check("文字を置ける・説明文はない", pg.locator(".ie-text").is_visible() and pg.inner_text(".ie-text") == "メモ" and "指で" not in pg.inner_text(".ie-panel"))
+    pg.click(".ie-panel [aria-label='選んだ文字を消す']")
+    check("置いた文字を消せる", pg.locator(".ie-text").count() == 0)
+    pg.fill(".ie-input", "メモ"); pg.click(".ie-panel [aria-label='文字を置く']")
+    check("保存は下にある（上部バーの保存と重ならない）", pg.evaluate("document.querySelector('.ie-save').getBoundingClientRect().top > innerHeight / 2"))
     pg.click(".ie-save"); pg.wait_for_selector(".editor img[data-att]"); time.sleep(0.3)
     check("保存すると写真の編集が閉じる", pg.locator(".img-editor").count() == 0)
     check("本文に置いた画像は最初「中」の大きさ", pg.evaluate("document.querySelector('.editor img[data-att]').style.width") == "50%")
     check("写真のボタン1つで本文に画像が入る", pg.locator(".editor img[data-att]").count() == 1)
     src0 = pg.get_attribute(".editor img[data-att]", "src")
-    pg.click(".editor img[data-att]"); pg.click(".pop button:text-is('編集')"); pg.wait_for_selector(".img-editor"); time.sleep(0.3)
-    check("置いた画像も押して切り取りなどの編集ができる", pg.locator(".ie-crop .ie-h").count() == 4)
+    check("本文の画像の右上に「×」がある", pg.locator(".img-x").count() == 1)
+    pg.click(".editor img[data-att]"); pg.wait_for_selector(".img-editor"); time.sleep(0.3)
+    check("置いた画像を押すと、小窓ではなく写真の編集が開く（大きさもここで）", pg.locator(".pop").count() == 0 and pg.locator(".ie-crop .ie-h").count() == 4 and pg.locator(".ie-tabs [data-t=size]").count() == 1)
     pg.go_back(); time.sleep(0.4)
     check("写真の編集は戻る操作でやめられる（メモ画面のまま）", pg.locator(".img-editor").count() == 0 and pg.locator(".edit-screen").count() == 1 and pg.get_attribute(".editor img[data-att]", "src") == src0)
-    pg.click(".editor img[data-att]"); pg.click(".pop button:text-is('編集')"); pg.wait_for_selector(".img-editor"); time.sleep(0.3)
-    hb = pg.locator(".ie-h.se").bounding_box(); pg.mouse.move(hb["x"] + 20, hb["y"] + 20); pg.mouse.down(); pg.mouse.move(hb["x"] - 40, hb["y"] - 40, steps=4); pg.mouse.up()
+    pg.click(".editor img[data-att]"); pg.wait_for_selector(".img-editor"); time.sleep(0.3)
+    hc = pg.locator(".ie-crop").bounding_box(); pg.mouse.move(hc["x"] + hc["width"] - 4, hc["y"] + hc["height"] - 4); pg.mouse.down(); pg.mouse.move(hc["x"] + hc["width"] - 44, hc["y"] + hc["height"] - 44, steps=4); pg.mouse.up()
+    pg.click(".ie-tabs [data-t=size]"); pg.click(".ie-chip:text-is('大')")
     pg.click(".ie-save"); time.sleep(0.5)
-    check("編集した画像に置き換わる", pg.get_attribute(".editor img[data-att]", "src") != src0 and pg.locator(".editor img[data-att]").count() == 1)
+    check("編集した画像に置き換わり、大きさも変わる", pg.get_attribute(".editor img[data-att]", "src") != src0 and pg.locator(".editor img[data-att]").count() == 1 and pg.evaluate("document.querySelector('.editor img[data-att]').style.width") == "75%")
+    check("写真の編集を閉じたあと、メモ画面の保存ボタンは押されていない", pg.locator(".edit-screen").count() == 1)
     check("写真・動画のボタンは写真と動画だけを選ぶ", pg.get_attribute("#file-media", "accept") == "image/*,video/*" and pg.get_attribute("#file-cam", "capture") == "environment")
     pg.click("#title"); pg.click(".save-btn"); pg.wait_for_selector(".bottom-nav"); time.sleep(0.2)
     pg.locator(".memo-card", has_text="書式").click(); pg.wait_for_selector(".view-title")
     check("閲覧画面の本文は16px・行間は詰めめ", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.view-body'));return c.fontSize==='16px'&&parseFloat(c.lineHeight)/16<=1.65})()"))
-    pg.click("text=添付ファイル（1件）")
-    check("添付ファイルの欄はサイズまで枠内に収まる", pg.evaluate("document.querySelector('.att-size').getBoundingClientRect().right <= document.querySelector('.att-details').getBoundingClientRect().right"))
-    pg.click(".att-row"); pg.wait_for_selector(".lightbox img")
-    pg.click(".lightbox img"); time.sleep(0.2)
-    check("画像を押しても原寸表示にならず、拡大表示が閉じる", pg.locator(".lightbox").count() == 0 and "原寸" not in pg.content())
+    check("写真だけのメモは下の「添付ファイル」欄を出さない", pg.locator(".att-details").count() == 0)
+    check("所属フォルダがないメモはフォルダの欄も出さない", pg.locator(".view-folders").count() == 0)
+    pg.click(".view-body img"); pg.wait_for_selector(".lightbox img")
+    check("拡大表示は左上に「×」、右上に保存", pg.evaluate("(()=>{const c=document.querySelector('.lb-close').getBoundingClientRect(),s=document.querySelector('.lb-save').getBoundingClientRect();return c.left<60&&s.right>innerWidth-60})()") and pg.get_attribute(".lb-save", "download") is not None)
+    pg.mouse.click(195, 820); time.sleep(0.3)
+    check("画像の外（黒い所）を押しても閉じない", pg.locator(".lightbox").count() == 1)
+    pg.go_back(); time.sleep(0.4)
+    check("戻る操作で拡大表示を閉じ、閲覧画面に戻る", pg.locator(".lightbox").count() == 0 and pg.locator(".view-title").count() == 1)
+    pg.click(".view-body img"); pg.wait_for_selector(".lightbox img"); pg.click(".lb-close"); time.sleep(0.3)
+    check("「×」で拡大表示が閉じる（原寸表示はない）", pg.locator(".lightbox").count() == 0 and "原寸" not in pg.content())
     pg.go_back(); pg.wait_for_selector(".bottom-nav"); time.sleep(0.6)
     check("画像付きのメモは X の投稿のようにカードに画像を出す", pg.evaluate("(()=>{const c=[...document.querySelectorAll('.memo-card')].find(e=>e.textContent.includes('書式'));const t=c&&c.querySelector('.tw-media img');return !!t&&!!t.getAttribute('src')})()"))
     check("カードの左上に自分のアイコン", pg.locator(".memo-card .tw-ava img").count() >= 1)
@@ -262,17 +296,37 @@ with sync_playwright() as p:
     pg.evaluate("document.documentElement.dataset.theme='dark'")
     check("ダークモードで文字色が明るい色に", pg.evaluate("getComputedStyle(document.querySelector('.view-body .tc-rose')).color") == "rgb(242, 154, 172)")
     pg.evaluate("document.documentElement.dataset.theme='light'")
-    pg.click(".att-details summary")
-    check("添付ファイルが一覧に出る", pg.locator(".att-row").count() == 1)
 
     # 編集→保存で前の画面へ
     pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.fill("#title", "書式（改）")
     pg.click(".save-btn"); time.sleep(0.5)
     check("編集保存後は閲覧画面に戻る", pg.locator(".view-title").count() == 1 and pg.inner_text(".view-title") == "書式（改）")
 
+    # ジャンル2つのメモ・フォルダの表示・閲覧画面を開く／閉じる動き（動きありの画面で確かめる）
+    ac = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    ap = ac.new_page(); ap.on("pageerror", lambda e: errors.append(str(e))); ap.goto(URL); ap.wait_for_selector(".fab")
+    ap.click(".bottom-nav .bn-lists"); time.sleep(0.4); ap.click(".fab"); ap.fill("#newlist", "旅"); ap.click(".modal >> text=作成"); time.sleep(0.6)
+    if ap.locator(".modal").count(): ap.click(".modal >> text=キャンセル"); time.sleep(0.4)
+    if ap.locator(".folder-title").count() == 0: ap.click(".list-row .open"); time.sleep(0.5)
+    ap.click(".fab"); time.sleep(0.3); new_screen(ap, ".fab-menu >> text=新規追加"); ap.keyboard.insert_text("景色。#京都")
+    ap.fill("#title", "二つのジャンル"); ap.click(".genre-pick >> text=体験"); ap.click(".genre-pick >> text=アイデア"); ap.click(".save-btn"); ap.wait_for_selector(".folder-title"); time.sleep(0.6)
+    ap.locator(".memo-card").first.click(); time.sleep(0.05)
+    check("メモを開くとき、閲覧画面が右から重なって出る（X の投稿のように）", ap.locator(".nav-ghost.push").count() == 1 and ap.locator(".view-screen.nav-in").count() == 1)
+    time.sleep(0.7)
+    check("開き終わったら前の画面の写しは消える", ap.locator(".nav-ghost").count() == 0)
+    check("ジャンル2つなら上部バーを2色で塗り分ける（混ぜない）", ap.evaluate("(()=>{const t=document.querySelector('.view-screen .topbar');return t.classList.contains('multi')&&getComputedStyle(t).backgroundImage.includes('105deg')})()"))
+    check("背景のジャンル名は1つずつ行を分ける", ap.locator(".genre-mark.multi span").count() == 2 and ap.evaluate("(()=>{const w=document.querySelector('.genre-mark-wrap').getBoundingClientRect(),g=document.querySelector('.genre-mark.multi').getBoundingClientRect();return g.width<w.width*0.6})()"))
+    check("「。」のすぐ後の「#〜」もタグになる", ap.locator(".view-body .hashtag", has_text="#京都").count() == 1)
+    check("所属フォルダは読みやすい大きさで押せる形", ap.locator(".view-folder", has_text="旅").count() == 1 and ap.evaluate("parseFloat(getComputedStyle(document.querySelector('.view-folder')).fontSize)") >= 14)
+    ap.go_back(); time.sleep(0.05)
+    check("戻るときは閲覧画面が右へ滑って消える", ap.locator(".nav-ghost.pop").count() == 1 and ap.locator(".folder-title").count() == 1)
+    time.sleep(0.7)
+    check("閉じ終わったら写しは消える", ap.locator(".nav-ghost").count() == 0)
+    ac.close()
+
     # マーカー・文字色を付けて「なし」「標準」で外す（選んだ部分だけ外れる）
     pg.goto(URL); pg.wait_for_selector(".fab")
-    pg.click(".fab"); pg.fill("#title", "マーカー"); pg.click(".genre-pick >> text=学び"); pg.click(".editor"); pg.keyboard.insert_text("あいうえおかきく"); pg.click(".more-btn")
+    new_screen(pg); pg.fill("#title", "マーカー"); pg.click(".genre-pick >> text=学び"); pg.click(".editor"); pg.keyboard.insert_text("あいうえおかきく"); pg.click(".more-btn")
     SEL = """(([s,e])=>{const ed=document.querySelector('.editor');const w=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);let n,pos=0,r=document.createRange(),a=0,b=0;
 while((n=w.nextNode())){const L=n.data.length; if(!a&&s<=pos+L){r.setStart(n,s-pos);a=1} if(!b&&e<=pos+L){r.setEnd(n,e-pos);b=1} pos+=L}
 const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
@@ -468,7 +522,7 @@ fire('touchend',x1,false);}"""
     pg.click(".modal >> text=Yes"); time.sleep(0.4)
     check("まとめて削除", pg.locator(".select-bar").count() == 0)
     # 作成・更新の日時: 1時間未満は「○分前」、24時間未満は「○時間前」、それより前は日付
-    tc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    tc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce")
     tp = tc.new_page(); tp.clock.install(time=1790000000000); tp.goto(URL); tp.wait_for_selector(".fab")
     new_memo(tp, "時計のメモ")
     tp.clock.fast_forward(25 * 60 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
@@ -494,7 +548,7 @@ fire('touchend',x1,false);}"""
     # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
     gas = FakeGas()
     def device():
-        c = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+        c = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce")
         c.route(FakeGas.URL, gas.handle)
         q = c.new_page(); q.on("pageerror", lambda e: errors.append(str(e))); q.goto(URL); q.wait_for_selector(".fab"); return q
     def sync_on(q, key="aikotoba-123", url=FakeGas.URL):
@@ -503,7 +557,7 @@ fire('touchend',x1,false);}"""
         q.fill("#sync-url", url); q.fill("#sync-key", key); q.click(".sync-btn"); q.wait_for_timeout(1500)
         st = q.inner_text(".sync-status"); q.click(".modal .modal-x"); return st
     pa = device()
-    pa.click(".fab"); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); attach_image(pa)
+    new_screen(pa); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); attach_image(pa)
     pa.click(".save-btn"); pa.wait_for_timeout(5000)
     check("同期がオフの間はドライブへ送らない", gas.calls == [])
     # 複数アカウントでログイン中にコピーした「/macros/u/1/s/…」の形でも、自動で直してつながる
@@ -516,7 +570,7 @@ fire('touchend',x1,false);}"""
     check("別の端末で同期するとメモと添付が戻る", pb.locator(".memo-card", has_text="同期のメモ").count() == 1 and pb.locator(".memo-card .tw-media").count() == 1)
     pb.locator(".memo-card").first.click(); pb.click(".menu-btn"); pb.click(".menu >> text=削除"); pb.click(".modal >> text=Yes"); pb.wait_for_timeout(5500)
     # 接続先のプログラムが古い（保存前に公開した）ときは、Google のエラー画面を見分けて直し方を示す
-    pc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True)
+    pc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce")
     pc.route(FakeGas.URL, lambda r: r.fulfill(status=200, content_type="text/html", body="<html><body>スクリプト関数が見つかりません: doPost</body></html>"))
     qc = pc.new_page(); qc.goto(URL); qc.wait_for_selector(".fab")
     check("古い接続先のときは直し方を表示", "プログラムが古いまま" in sync_on(qc))
@@ -530,7 +584,7 @@ fire('touchend',x1,false);}"""
     # 大きな添付ファイルは小分けに送る・途中で通信が切れてもメモは同期され、次の同期で続きを送る
     import base64 as _b64
     big = bytes((i * 37) % 256 for i in range(1_200_000))
-    pb.click(".fab"); pb.fill("#title", "大きな添付"); pb.click(".genre-pick >> text=学び")
+    new_screen(pb); pb.fill("#title", "大きな添付"); pb.click(".genre-pick >> text=学び")
     pb.set_input_files("#file-media", files=[{"name": "big.bin", "mimeType": "application/octet-stream", "buffer": big}]); pb.wait_for_selector(".editor a[data-att]")
     gas.fail_next = 3   # 最初の送信は3回とも通信切れ（自動のやり直しも失敗）
     pb.click(".save-btn"); pb.wait_for_timeout(9000)
@@ -573,7 +627,7 @@ fire('touchend',x1,false);}"""
     check("少したつと自動でやり直して同期できる", st.startswith("オン"), st)
 
     # 古い接続先プログラム（版1）のときは更新を案内
-    old = FakeGas(version=1); pd = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True); pd.route(FakeGas.URL, old.handle)
+    old = FakeGas(version=1); pd = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce"); pd.route(FakeGas.URL, old.handle)
     qd = pd.new_page(); qd.goto(URL); qd.wait_for_selector(".fab")
     check("古い版の接続先は更新を案内", "最新の gas/Code.gs" in sync_on(qd)); pd.close()
 
