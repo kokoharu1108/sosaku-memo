@@ -354,7 +354,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .tw-genres { margin-left: auto; display: flex; gap: 3px; flex: 0 0 auto; padding-left: 4px; }
 .tw-g { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; }
 .tw-g svg { width: 14px; height: 14px; stroke-width: 2.2; }
-.tw-text { margin-top: 2px; font-size: 15.5px; line-height: 1.55; color: var(--ink); white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; overflow: hidden; }
+.tw-text { margin-top: 2px; font-size: 14.5px; line-height: 1.45; color: var(--ink); white-space: pre-line; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 8; -webkit-box-orient: vertical; overflow: hidden; }
 .tw-text mark { background: var(--accent-soft); color: var(--accent-ink); border-radius: 3px; padding: 0 1px; }
 .tw-text .tag-mini { font-size: inherit; }
 .tw-more { display: inline-block; margin-top: 2px; color: var(--accent-ink); font-size: 15px; font-weight: 600; }
@@ -406,6 +406,14 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .bottom-nav button[aria-current="page"] svg { stroke-width: 2.6; }
 .bottom-nav button[aria-current="page"]::after { content: ""; position: absolute; }
 .screen:has(.bottom-nav) .wrap { padding-bottom: 150px; }
+/* 下へスクロールすると上のバー・下のアイコンの列・「＋」をしまう（上へスクロールで戻す） */
+.home-screen .topbar, .home-screen .bottom-nav, .home-screen .fab { transition: transform .25s ease, filter .12s ease; }
+.home-screen.chrome-hidden .topbar { transform: translateY(calc(-100% - env(safe-area-inset-top, 0px))); }
+.home-screen.chrome-hidden .bottom-nav { transform: translateY(100%); }
+.home-screen.chrome-hidden .fab { transform: translateY(calc(100% + 96px)); }
+.search-tab .search-panel { padding-top: 0; }
+.search-tab .section-h { margin: 18px 0 8px; }
+.search-hint .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .brand .tab-name { display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 700; line-height: 1.1; color: color-mix(in srgb, currentColor 82%, var(--sel-bg)); }
 .brand .tab-name svg { width: 19px; height: 19px; flex: 0 0 auto; }
 /* アプリ名（ロゴ）は細い縁取りを付け、横の画面名とは見た目を分けて「タイトル」と分かるように */
@@ -417,7 +425,7 @@ html.clear-bar .topbar:not(.bar-view) .brand .tab-name { color: var(--ink-2); }
 .topbar .search-close { color: #fff; }
 html.clear-bar .topbar .search-close { color: var(--field-ink); }
 /* 横スライドでタブを切り替えるとき、隣のタブの中身をすぐ横に並べて一緒に動かす（あいだに空白を作らない） */
-.swipe-track { position: relative; will-change: transform; }
+.swipe-track { position: relative; }   /* will-change を付けると、中の固定表示（選択モードの下のバー）が一覧の一番下に付いてしまう */
 .swipe-peer { position: absolute; width: 100%; pointer-events: none; }
 .filter-row { margin-top: 8px !important; margin-bottom: 0 !important; }
 .fr-label { font-size: 14px; color: var(--ink-2); font-weight: 500; flex: 0 0 auto; }
@@ -605,6 +613,20 @@ body.editing-body .edit-actions { display: none; }
   background: var(--sel-bg); color: var(--sel-ink); margin-right: 6px; }
 .fmt-bar .more-btn svg { width: 20px; height: 20px; stroke-width: 2.6; transition: transform .2s ease; }
 .fmt-bar .more-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+/* ふだんの本文のボタン（▶・カメラ・#・写真）は同じ幅で等間隔に並べる */
+.fmt-bar.floating:not(.expanded) { display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; }
+.fmt-bar:not(.expanded) .fmt-media { display: contents; }
+.fmt-bar:not(.expanded) .more-btn { margin-right: 0; }
+/* 写真の切り取り */
+.crop-stage { position: relative; align-self: center; touch-action: none; user-select: none; overflow: hidden; border-radius: 8px; line-height: 0; }
+.crop-img { display: block; max-width: 100%; max-height: 58vh; }
+.crop-box { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.5); cursor: move; touch-action: none; }
+.crop-h { position: absolute; width: 26px; height: 26px; border: 4px solid var(--sel-bg); }
+.crop-h.nw { left: -5px; top: -5px; border-right: 0; border-bottom: 0; cursor: nwse-resize; }
+.crop-h.ne { right: -5px; top: -5px; border-left: 0; border-bottom: 0; cursor: nesw-resize; }
+.crop-h.sw { left: -5px; bottom: -5px; border-right: 0; border-top: 0; cursor: nesw-resize; }
+.crop-h.se { right: -5px; bottom: -5px; border-left: 0; border-top: 0; cursor: nwse-resize; }
+.crop-wrap { display: flex; flex-direction: column; min-height: 0; }
 /* 「#」の候補（これまでに使ったタグ）。ボタンの列のすぐ上に横に並べる */
 .tag-suggest { position: fixed; left: 0; right: 0; z-index: 61; display: flex; gap: 6px; padding: 8px 10px; overflow-x: auto; scrollbar-width: none;
   background: var(--surface); border-top: 1px solid var(--line); }
@@ -1209,7 +1231,14 @@ function go(screen) {
   if (historyOk) try { history.pushState({ depth: UI.stack.length }, ""); } catch {}
   render(); window.scrollTo(0, 0);
 }
+/* 履歴を1つ戻し、戻り終わるまで「戻る」などの操作を待たせる（続けて戻ると、戻りすぎることがあるため） */
+function popAndWait() {
+  UI.pendingPop = new Promise(res => { window.addEventListener("popstate", () => setTimeout(res, 0), { once: true }); setTimeout(res, 800); });
+  UI.pendingPop.then(() => { UI.pendingPop = null; });
+  history.back();
+}
 function back() {
+  if (UI.pendingPop) { UI.pendingPop.then(back); return; }
   if (UI.stack.length <= 1) return;
   if (atDepth()) { history.go(-(1 + selExtra())); return; } // popstate で戻る（本文の入力中などで1つ多く積んだ履歴の分も）
   UI.stack.pop(); render();
@@ -1255,7 +1284,7 @@ window.addEventListener("popstate", (e) => {
   }
   // 検索パネルが開いていれば、戻る操作でまず閉じる
   // （「最近」以外のタブや検索窓を開いていれば、戻る操作でまず「最近」に戻す）
-  if (current().name === "search" && homeAux(searchState()) && depth >= UI.stack.length && !(e.state && e.state.panel)) { resetHome(searchState()); render(); window.scrollTo(0, 0); return; }
+  if (current().name === "search" && homeAux(searchState()) && depth >= UI.stack.length && !(e.state && e.state.panel)) { const st0 = searchState(); st0.scrolls = st0.scrolls || {}; st0.scrolls[st0.tab] = window.scrollY; resetHome(st0); render(); return; }
   if (depth >= UI.stack.length) return;
   // 画像の拡大表示や確認ウィンドウが開いていれば、まずそれを閉じる
   const overlay = [...document.querySelectorAll(".lightbox, .modal-scrim")].pop();
@@ -1421,18 +1450,20 @@ function render() {
   else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
   else if (s.name === "report") app.append(renderReport(s));
-  syncThemeColor();
+  // スマホ上端の帯の色は、新しい画面が表示されてから変える（先に色だけ変わると、遅れて画面が出るように見えるため）
+  requestAnimationFrame(() => requestAnimationFrame(syncThemeColor));
 }
 
 /* ---------- メモ検索画面 ---------- */
 /* 今の検索画面の状態（ホームは UI.search、タグなどから開いた検索はその画面が持つ） */
 const searchState = () => { const s = current(); return (s && s.name === "search" && s.st) || UI.search; };
 /* 検索画面は「最近」「フォルダ」「情報まとめ」の3つ。横にスライドすると この順にぐるっと切り替わる */
-const TAB_ORDER = ["memos", "lists", "report"];
-const TAB_NAME = { memos: "最近", lists: "フォルダ", report: "情報まとめ" };
-/* 「最近」以外のタブや検索窓を開いた状態は、ブラウザの履歴を1つ積む（スマホの戻る操作で「最近」に戻れる）。
-   タグから開いた検索は、検索窓を開いた状態が元の姿（baseOpen） */
-const homeAux = (st) => st.tab !== "memos" || (!!st.open && !st.baseOpen);
+const TAB_ORDER = ["memos", "lists", "search", "report"];
+const TAB_NAME = { memos: "最近", lists: "フォルダ", search: "検索", report: "情報まとめ" };
+/* 元の画面（ホームは「最近」、タグから開いた検索は「検索」）以外のタブを開いた状態は、ブラウザの履歴を1つ積む
+   （スマホの戻る操作で元の画面に戻れる） */
+const baseTab = (st) => st.baseTab || "memos";
+const homeAux = (st) => st.tab !== baseTab(st);
 function syncAux(st) {
   if (!historyOk) return;
   const has = !!(history.state && history.state.panel);
@@ -1441,94 +1472,108 @@ function syncAux(st) {
   else if (!want && has) history.back();
 }
 const clearSearch = (st) => { st.q = ""; st.committed = ""; st.genre = ""; };
-/* 戻る操作で「最近」へ戻すとき: 検索窓を閉じたら、検索の言葉・ジャンルの絞り込みも解除する */
-function resetHome(st) { st.tab = "memos"; st.report = null; if (!st.baseOpen) { st.open = false; clearSearch(st); } }
+/* 戻る操作で元の画面へ戻すとき: 検索の言葉・ジャンルの絞り込みも解除する */
+function resetHome(st) {
+  st.tab = baseTab(st); st.report = null;
+  if (baseTab(st) === "memos") clearSearch(st);
+  const y = (st.scrolls && st.scrolls[st.tab]) || 0;
+  requestAnimationFrame(() => window.scrollTo(0, y));
+}
 function renderSearch(s) {
   const st = (s && s.st) || UI.search;
   if (!TAB_ORDER.includes(st.tab)) st.tab = "memos";
-  const input = h("input", { id: "q", class: "search-input", type: "search", enterkeyhint: "search", placeholder: "キーワードでメモを探す", value: st.q, autocomplete: "off",
-    oninput: (e) => { st.q = e.target.value; },
-    onkeydown: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } } });
-  function commit() {
-    st.committed = st.q.trim(); input.blur();
-    if (st.tab !== "memos") { st.tab = "memos"; syncAux(st); render(); return; }
+  st.scrolls = st.scrolls || {};
+  function commit(q) {
+    if (q != null) st.q = q;
+    st.committed = (st.q || "").trim();
+    const f = document.getElementById("q"); if (f) { f.value = st.q; f.blur(); }
     drawResults();
   }
-  // 検索窓を閉じると、検索の言葉とジャンルの絞り込みも解除する
-  function closeSearch() { st.open = false; clearSearch(st); syncAux(st); render(); }
-  function openSearch() {
-    if (st.tab === "report") st.tab = "memos";
-    st.open = true; syncAux(st); render();
-    setTimeout(() => { const q = document.getElementById("q"); if (q) q.focus(); }, 60);
-  }
-  function setTab(t) {
-    // 情報まとめの条件は、そのタブを離れたら空に戻す（次に開いたときに前の検索の条件が残らないように）
+  // タブを切り替える。タブごとに読んでいた位置を覚えておき、戻ったときはその位置から（X のように）
+  function setTab(t, opt = {}) {
     if (st.tab === "report" && t !== "report") st.report = null;
-    if (t === "report") {
-      // 検索・絞り込み中に「情報まとめ」へ移ったら、その条件でまとめる（検索窓は閉じる）
-      if (st.committed || st.genre) st.report = { name: "report", q: st.committed, genre: st.genre };
-      if (!st.baseOpen) { st.open = false; clearSearch(st); }
-    }
-    st.tab = t; syncAux(st); render(); window.scrollTo(0, 0);
+    if (t === "report" && (st.committed || st.genre)) st.report = { name: "report", q: st.committed, genre: st.genre };
+    st.scrolls[st.tab] = window.scrollY;
+    st.tab = t; syncAux(st); render();
+    window.scrollTo(0, st.scrolls[t] || 0);
+    if (t === "search" && opt.focus && !st.committed) setTimeout(() => { const f = document.getElementById("q"); if (f) f.focus(); }, 60);
   }
-  const switchTab = (t) => { if (UI.select.on) { exitSelectThen(() => setTab(t)); return; } setTab(t); };
+  const switchTab = (t, opt) => { if (UI.select.on) { exitSelectThen(() => setTab(t, opt)); return; } setTab(t, opt); };
 
   let fab;
   const results = h("div", { class: "swipe-track" });
-  const filterRow = h("div", { class: "toolbar-row filter-row" });
-  const panel = h("div", { class: "search-panel", hidden: !st.open });
 
   // 画面の下に、X（旧Twitter）のようにアイコンだけを並べる: 最近・フォルダ・検索・まとめ・設定
   const NAV = [["memos", "最近", ICONS.recent], ["lists", "フォルダ", ICONS.folder], ["search", "検索", ICONS.search], ["report", "まとめ", ICONS.report], ["settings", "設定", ICONS.gear]];
-  const navOn = (k) => k === "search" ? !!st.open : (k === st.tab && !(st.open && k === "memos"));
   const bottomNav = h("nav", { class: "bottom-nav", "aria-label": "画面の切り替え" }, h("div", { class: "bottom-nav-in" },
-    NAV.map(([k, label]) => h("button", { type: "button", class: "bn-" + k, "aria-label": label, title: label, "aria-current": navOn(k) ? "page" : null,
+    NAV.map(([k, label, ic]) => h("button", { type: "button", class: "bn-" + k, "aria-label": label, title: label, "aria-current": k === st.tab ? "page" : null,
       onclick: () => {
         if (k === "settings") openSettings();
-        else if (k === "search") st.open && !st.baseOpen ? closeSearch() : openSearch();
-        else if (k === st.tab && st.open && !st.baseOpen) closeSearch();
-        else if (k !== st.tab) switchTab(k);
+        else if (k !== st.tab) switchTab(k, { focus: true });
+        else if (k === "search") { const f = document.getElementById("q"); if (f) f.focus(); }
         else window.scrollTo({ top: 0, behavior: "smooth" });
-      } }, svgIcon(NAV.find(x => x[0] === k)[2])))));
+      } }, svgIcon(ic)))));
 
   /* タブの中身を作る（スライド中に隣のタブを先に見せるときにも使う） */
   function buildTab(tab) {
     if (tab === "lists") return renderLists(drawResults);
     if (tab === "report") { st.report = st.report || { name: "report" }; return h("div", { class: "rp-tab" }, ...reportBody(st.report, render)); }
+    if (tab === "search") return searchResults();
     return memoResults();
   }
+  // 最近: 全部のメモを X のタイムラインのように（先頭は最後に保存・更新したメモ、2件目からは一定時間ごとに並びが変わる）
   function memoResults() {
     const out = h("div");
     const selecting = UI.select.on && UI.select.scope === "search";
-    let items = filterByGenre(Manager.sorted, st.genre);
-    const terms = searchTerms(st.committed);
-    if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
-    items = sortMemos(items, st.sort);
-    // X のタイムラインのように: 先頭は最後に保存・更新したメモで固定し、2件目からは一定時間ごとに並びが入れ替わる
-    if (!terms.length && !st.genre && st.sort === "upd-desc" && items.length > 2) items = [items[0], ...timelineMix(items.slice(1))];
-    if (!terms.length && !st.genre && !selecting) { const rc = recallCard(drawResults); if (rc) out.append(rc); }
-    const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
-    if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
-    if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
-    if (metaRow.childNodes.length) out.append(metaRow);
-    if (!items.length) {
-      out.append(Manager.memos.size === 0
-        ? h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「＋」から、行った場所や思いついたことを書き留めましょう。")
-        : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), st.genre ? "ジャンルを「全ジャンル」に戻すか、別のキーワードで試してください。" : "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
-      return out;
-    }
+    let items = Manager.sorted;
+    if (items.length > 2) items = [items[0], ...timelineMix(items.slice(1))];
+    if (!selecting) { const rc = recallCard(drawResults); if (rc) out.append(rc); }
+    if (!items.length) { out.append(h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「＋」から、行った場所や思いついたことを書き留めましょう。")); return out; }
+    out.append(cardList(items, [], selecting));
+    return out;
+  }
+  function cardList(items, terms, selecting) {
+    const frag = document.createDocumentFragment();
     const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); drawResults(); } } : null;
     const list = h("div", { class: "memo-list" + (selecting ? " with-bar" : "") });
     items.forEach(m => list.append(memoCard(m, terms, sel, "search")));
-    out.append(list);
-    if (selecting) out.append(selectBar(items.map(m => m.id), [{ label: "まとめる", run: reportSelected }, { label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
+    frag.append(list);
+    if (selecting) frag.append(selectBar(items.map(m => m.id), [{ label: "まとめる", run: reportSelected }, { label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
+    return frag;
+  }
+  // 検索: 検索窓＋絞り込み。言葉に当てはまるフォルダとメモを出す
+  function searchResults() {
+    const out = h("div", { class: "search-tab" });
+    const input = h("input", { id: "q", class: "search-input", type: "search", enterkeyhint: "search", placeholder: "キーワードでメモ・フォルダを探す", value: st.q || "", autocomplete: "off",
+      oninput: (e) => { st.q = e.target.value; },
+      onkeydown: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } } });
+    out.append(h("form", { class: "searchbox search-panel", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); } },
+      h("div", { class: "search-row" },
+        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, (() => { const i = svgIcon(ICONS.search); i.classList.add("search-ico"); return i; })(), input),
+        st.q || st.committed || st.genre ? h("button", { class: "icon-btn ico search-close", type: "button", "aria-label": "検索を消す", title: "検索を消す", onclick: () => { clearSearch(st); drawResults(); } }, svgIcon(ICONS.close)) : null)),
+      h("div", { class: "toolbar-row filter-row" }, h("span", { class: "fr-label" }, "絞り込み"), genreSelect(st, drawResults, "genre-search"), sortSelect(st, drawResults, "sort-search")));
+    const terms = searchTerms(st.committed);
+    if (!terms.length && !st.genre) {
+      // まだ何も探していないとき: よく使うタグを出す（押すとそのタグで探す）
+      const tags = allTags().slice(0, 24);
+      out.append(tags.length ? h("div", { class: "search-hint" }, h("div", { class: "section-h" }, "タグから探す"),
+        h("div", { class: "chips" }, tags.map(t => h("button", { type: "button", class: "chip-btn tag-chip", onclick: () => commit("#" + t) }, "#" + t))))
+        : h("p", { class: "ai-hint" }, "言葉を入れて Enter で、当てはまるメモとフォルダを探します。"));
+      return out;
+    }
+    const lists = terms.length && !st.genre ? [...Manager.lists.values()].filter(l => terms.every(t => foldQ(l.name).includes(t))) : [];
+    let items = filterByGenre(Manager.sorted, st.genre);
+    if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
+    items = sortMemos(items, st.sort);
+    if (lists.length) out.append(h("div", { class: "section-h" }, "フォルダ"), renderLists(drawResults, lists));
+    if (lists.length || items.length) out.append(h("div", { class: "section-h" }, "メモ"));
+    if (!items.length) { out.append(h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), "別の言葉で試すか、ジャンルの絞り込みを外してください。")); return out; }
+    out.append(cardList(items, terms, UI.select.on && UI.select.scope === "search"));
     return out;
   }
   function drawResults() {
-    filterRow.replaceChildren(...[h("span", { class: "fr-label" }, "絞り込み"), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
-      sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
     const selecting = UI.select.on && (UI.select.scope === "search" || UI.select.scope === "lists");
-    fab.hidden = selecting || st.tab === "report";
+    fab.hidden = selecting || st.tab === "report" || st.tab === "search";
     bottomNav.hidden = selecting;
     const fabText = st.tab === "lists" ? "新規フォルダ" : "新規メモ";
     fab.setAttribute("aria-label", fabText); fab.title = fabText;
@@ -1543,28 +1588,31 @@ function renderSearch(s) {
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
     : null;
 
-  const TAB_ICON = { memos: ICONS.recent, lists: ICONS.folder, report: ICONS.report };
-  const scr = h("div", { class: "screen" },
+  const TAB_ICON = { memos: ICONS.recent, lists: ICONS.folder, search: ICONS.search, report: ICONS.report };
+  const scr = h("div", { class: "screen home-screen" },
     h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
       UI.stack.length > 1 ? h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←") : null,
       h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", { class: "tab-name" }, svgIcon(TAB_ICON[st.tab]), h("span", {}, TAB_NAME[st.tab]))),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン")),
-      h("div", { class: "search-tools" }, panel), crumbBar()),
+      crumbBar()),
     h("main", { class: "wrap swipe-area", style: "padding-top:12px" },
       storeNote,
       results),
     fab, bottomNav);
-  panel.append(
-    h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); } },
-      h("div", { class: "search-row" },
-        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon(ICONS.search), input),
-        h("button", { class: "icon-btn ico search-close", type: "button", "aria-label": "検索を閉じる", title: "検索を閉じる", onclick: closeSearch }, svgIcon(ICONS.close)))),
-    filterRow);
-  const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
-  /* 横にスライドしてタブを切り替える（最近 → フォルダ → 情報まとめ → 最近 …）。
+  /* 下にスクロールしたら、上のバーと下のアイコンの列（と「＋」）を画面の外へしまい、上にスクロールしたら出す（X のように） */
+  let lastY = window.scrollY;
+  const onScroll = () => {
+    const y = window.scrollY, dy = y - lastY;
+    if (Math.abs(dy) < 6 && y > 0) return;
+    scr.classList.toggle("chrome-hidden", dy > 0 && y > 80 && !UI.select.on);
+    lastY = y;
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  cleanupFns.push(() => window.removeEventListener("scroll", onScroll));
+  /* 横にスライドしてタブを切り替える（最近 → フォルダ → 検索 → 情報まとめ → 最近 …）。
      X（旧Twitter）のように、隣のタブの中身を すぐ横に並べて指と一緒に動かすので、あいだに空白ができない。
-     離した位置（または素早いはらい）で切り替わり、足りなければ元に戻る。
+     隣のタブは「前に読んでいた位置」で並べ、切り替えたあともその位置から表示する（一度先頭が見えてから飛ぶ、をなくす）。
      画面の端から始まる操作はスマホの「戻る」なので無視し、入力欄などの上でも反応しない */
   const area = scr.querySelector(".swipe-area");
   let sw = null;
@@ -1575,14 +1623,13 @@ function renderSearch(s) {
   function showPeer(dir) {
     if (sw.peerDir === dir) return;
     dropPeer(); sw.peerDir = dir;
-    // 切り替えたあと一覧は先頭から表示されるので、隣のタブも今見えている位置の先頭にそろえて置く
-    // 一覧の左右の余白（画面の端との間）のぶんも離して置く。滑らせ終えた位置と、切り替え後の位置がぴったり重なるように
-    sw.peer = h("div", { class: "swipe-peer", "aria-hidden": "true", style: `top:${window.scrollY}px;left:${dir < 0 ? "" : "-"}${peerGap()}px` }, buildTab(neighborOf(dir)));
+    const nb = neighborOf(dir);
+    sw.peer = h("div", { class: "swipe-peer", "aria-hidden": "true", style: `top:${window.scrollY - (st.scrolls[nb] || 0)}px;left:${dir < 0 ? "" : "-"}${peerGap()}px` }, buildTab(nb));
     results.append(sw.peer);
   }
   area.addEventListener("touchstart", (e) => {
     const t = e.touches[0];
-    sw = (e.touches.length === 1 && !UI.select.on && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".tag-sugg, input, select, textarea, .rp-range"))
+    sw = (e.touches.length === 1 && !UI.select.on && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".tag-sugg, input, select, textarea, .rp-range, .chips"))
       ? { x: t.clientX, y: t.clientY, at: Date.now(), dx: 0, lock: null, peer: null, peerDir: 0 } : null;
   }, { passive: true });
   area.addEventListener("touchmove", (e) => {
@@ -1727,7 +1774,7 @@ function memoCard(m, terms = [], sel, scope) {
   const full = (m.bodyText || "").replace(/\n{3,}/g, "\n\n").trim();
   let text = full;
   if (terms.length && full) { const at = fold(full).indexOf(terms[0]); if (at > 60) text = "…" + full.slice(at - 30); }
-  const long = text.length > 140 || text.split("\n").length > 6;
+  const long = text.length > 200 || text.split("\n").length > 8;
   const ci = cardImage(m);
   let media = null;
   if (ci) {
@@ -1782,20 +1829,29 @@ function avatarModal() {
       avatarUrl ? h("button", { class: "btn", type: "button", onclick: () => resetAvatar(() => close(null)) }, "元に戻す") : null,
       h("button", { class: "btn primary", type: "button", onclick: () => pickAvatar(() => close(null)) }, "画像を選ぶ"))) });
 }
+/* 設定の画像（アイコン・背景）は「変更」ボタン1つ。まだ選んでいなければすぐ画像を選び、選んであれば「画像を選ぶ／元に戻す」を出す */
+function changeImage(hasCustom, pick, reset) {
+  if (!hasCustom) { pick(); return; }
+  modal({ title: "画像の変更", closeX: true, body: (close) => h("div", { class: "modal-actions" },
+    h("button", { class: "btn", type: "button", onclick: () => { close(null); reset(); } }, "元に戻す"),
+    h("button", { class: "btn primary", type: "button", onclick: () => { close(null); pick(); } }, "画像を選ぶ")) });
+}
 function avatarSection() {
   return h("div", { class: "settings-sec ava-sec" },
     h("h4", {}, "アイコン"),
     h("p", { class: "ai-hint", style: "margin:0" }, "メモの左上に出す自分のアイコンを、端末内の画像から選べます"),
     h("div", { class: "row" }, h("span", { class: "tw-ava" }, avatarImg()),
-      h("button", { class: "btn", type: "button", onclick: () => pickAvatar(() => { const sc = document.querySelector(".modal-scrim"); if (sc && sc.__close) sc.__close(); openSettings(); }) }, "画像を選ぶ"),
-      avatarUrl ? h("button", { class: "btn", type: "button", onclick: () => resetAvatar(() => { const sc = document.querySelector(".modal-scrim"); if (sc && sc.__close) sc.__close(); openSettings(); }) }, "元に戻す") : null));
+      h("button", { class: "btn change-btn", type: "button", onclick: () => {
+        const reopen = () => { document.querySelectorAll(".modal-scrim").forEach(sc => sc.__close && sc.__close()); openSettings(); };
+        changeImage(!!avatarUrl, () => pickAvatar(reopen), () => resetAvatar(reopen));
+      } }, "変更")));
 }
-function renderLists(redraw) {
+function renderLists(redraw, only) {
   const st = searchState();
   const selecting = UI.select.on && UI.select.scope === "lists";
   const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); redraw(); } } : null;
   const wrap = h("div");
-  let lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
+  let lists = (only || [...Manager.lists.values()]).sort((a, b) => b.updatedAt - a.updatedAt);
   if (st.sort === "upd-asc") lists.reverse();
   if (!lists.length) { wrap.append(h("div", { class: "empty" }, h("b", {}, "フォルダはまだありません"), "右下の「新規フォルダ」から、旅行やイベントごとのフォルダを作ると、メモをフォルダにまとめられます。")); return wrap; }
   const rows = h("div", { class: "list-rows" });
@@ -2183,7 +2239,7 @@ function reportBody(s, rerender) {
     // メモを1件ずつ選んでまとめる
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "メモ"),
       h("button", { class: "genre-select rp-pick", type: "button", onclick: async () => { const ids = await pickMemos(o.ids || [], "まとめるメモを選ぶ"); if (ids) { o.ids = ids.length ? ids : null; rerender(); } } },
-        o.ids && o.ids.length ? `${o.ids.length}件を選択中` : "選ぶ…")),
+        o.ids && o.ids.length ? `${o.ids.length}件を選択中` : "未選択")),
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
     // 「関連部分／全文」はキーワードで探したときだけ出す
@@ -2324,7 +2380,7 @@ function attList(atts) {
 }
 /* タグを押したら、そのタグで探した検索画面を（検索窓を開いた状態で）上に重ねて開く。戻る操作で元の画面へ */
 function tagSearch(tag) {
-  go({ name: "search", st: { q: "#" + tag, committed: "#" + tag, tab: "memos", sort: "upd-desc", genre: "", open: true, baseOpen: true } });
+  go({ name: "search", st: { q: "#" + tag, committed: "#" + tag, tab: "search", baseTab: "search", sort: "upd-desc", genre: "" } });
 }
 function attGrid(atts, editable, onRemove) {
   return h("div", { class: "att-grid" }, atts.map(a => {
@@ -2641,7 +2697,7 @@ function renderEdit(s) {
       h("div", { class: "row" }, presetBtns),
       range,
       h("div", { class: "row" }, h("span", { class: "spacer" }),
-        h("button", { type: "button", class: "btn ghost danger", onclick: () => { img.remove(); closePop(); markDirty(); } }, "本文から外す"),
+        h("button", { type: "button", class: "btn ghost danger", onclick: () => { img.remove(); closePop(); markDirty(); } }, "削除"),
         h("button", { type: "button", class: "btn primary", onclick: () => { img.classList.remove("img-selected"); closePop(); } }, "完了"))), true);
   });
   document.addEventListener("mousedown", outside); cleanupFns.push(() => document.removeEventListener("mousedown", outside));
@@ -2681,14 +2737,20 @@ function renderEdit(s) {
   /* 写真・動画・ファイルを、ボタン1つで本文のカーソルの位置に置く（X の投稿のように）。画像は押すと大きさを変えられる */
   const escName = (t) => String(t).replace(/[<>&"]/g, "");
   async function insertFiles(files) {
-    const list = [...files]; if (!list.length) return;
+    let list = [...files]; if (!list.length) return;
+    // 写真を1枚だけ選んだときは、先に切り取り（トリミング）できるようにする
+    if (list.length === 1 && /^image\/(jpeg|png|webp|heic|heif|avif|bmp)/.test(list[0].type || "")) {
+      const cropped = await cropImage(list[0]);
+      if (!cropped) { restoreRange(); return; }
+      list = [cropped];
+    }
     toast(list.length > 1 ? `${list.length}件を追加しています…` : "追加しています…");
     let html = "";
     for (const f of list) {
       try {
         const a = await storeFile(f); d.attachments.push(a);
         const k = fileKind(a);
-        html += k === "image" ? `<img data-att="${a.id}" src="${attUrl(a)}" alt="" style="width:100%"><div><br></div>`
+        html += k === "image" ? `<img data-att="${a.id}" src="${attUrl(a)}" alt="" style="width:50%"><div><br></div>`
           : `<a data-att="${a.id}" href="${attUrl(a)}">${KIND_ICON[k]} ${escName(a.name)}</a>&nbsp;`;
       } catch (err) { toast(err.message || `${f.name} を追加できませんでした`, true); }
     }
@@ -2697,7 +2759,6 @@ function renderEdit(s) {
   const fileInput = (id, accept, capture) => h("input", { id, type: "file", hidden: true, accept: accept || null, capture: capture || null, multiple: !capture,
     onchange: (e) => { const fs = [...e.target.files]; e.target.value = ""; insertFiles(fs); } });
   const camIn = fileInput("file-cam", "image/*", "environment");
-  const fileIn = fileInput("file");
   const mediaIn = fileInput("file-media", "image/*,video/*");
   const pickWith = (inp) => () => { keepRange(); inp.click(); };
   /* ハッシュタグ: 「#」を打つと、これまでに使ったタグを候補に出す（押すと入る）。新しいタグもそのまま打てる */
@@ -2753,9 +2814,8 @@ function renderEdit(s) {
     h("div", { class: "fmt-media" },
       tb(svgIcon(ICONS.camera), "カメラで撮る", pickWith(camIn), "cam-btn"),
       hashBtn,
-      tb(svgIcon(ICONS.file), "ファイルを置く", pickWith(fileIn), "file-btn"),
       tb(svgIcon(ICONS.image), "写真・動画を置く", pickWith(mediaIn), "media-btn"),
-      camIn, fileIn, mediaIn),
+      camIn, mediaIn),
     h("div", { class: "fmt-more" },
       headBtn,
       stateBtn("bold", "B", "太字", "b-bold"),
@@ -2827,7 +2887,7 @@ function renderEdit(s) {
     const to = e.relatedTarget;
     if (to && (fmtBar.contains(to) || (openPop && openPop.contains(to)))) return;
     if (UI.backHook) UI.backHook = null;
-    if (historyOk && history.state && history.state.edfocus && current().name === "edit") history.back();
+    if (historyOk && history.state && history.state.edfocus && current().name === "edit") popAndWait();
   });
   if (window.visualViewport) {
     visualViewport.addEventListener("resize", placeBar); visualViewport.addEventListener("scroll", placeBar);
@@ -2962,6 +3022,61 @@ async function shrinkImage(file, maxSide, quality) {
     c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
     return await new Promise(res => c.toBlob(res, "image/jpeg", quality));
   } finally { URL.revokeObjectURL(url); }
+}
+/* 写真の切り取り（トリミング）: 枠の中をドラッグで動かし、四隅で大きさを変える。
+   戻り値: 切り取った（またはそのままの）ファイル。やめたら null */
+function cropImage(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = h("img", { class: "crop-img", alt: "", draggable: "false" });
+    const box = h("div", { class: "crop-box" }, ...["nw", "ne", "sw", "se"].map(k => h("span", { class: "crop-h " + k, "data-h": k })));
+    const stage = h("div", { class: "crop-stage" }, img, box);
+    let r = null, W = 0, H = 0;
+    const draw = () => { box.style.left = r.x + "px"; box.style.top = r.y + "px"; box.style.width = r.w + "px"; box.style.height = r.h + "px"; };
+    const init = () => { W = img.clientWidth; H = img.clientHeight; if (!W) { requestAnimationFrame(init); return; } r = { x: 0, y: 0, w: W, h: H }; draw(); };
+    img.onload = init;
+    img.src = url;
+    let drag = null;
+    box.addEventListener("pointerdown", (e) => {
+      e.preventDefault(); box.setPointerCapture(e.pointerId);
+      drag = { k: e.target.dataset.h || "move", sx: e.clientX, sy: e.clientY, r0: { ...r } };
+    });
+    box.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy, o = drag.r0, MIN = 40;
+      let { x, y, w, h: hh } = o;
+      if (drag.k === "move") { x = Math.min(Math.max(0, o.x + dx), W - o.w); y = Math.min(Math.max(0, o.y + dy), H - o.h); }
+      else {
+        if (drag.k.includes("w")) { x = Math.min(Math.max(0, o.x + dx), o.x + o.w - MIN); w = o.x + o.w - x; }
+        if (drag.k.includes("e")) w = Math.min(Math.max(MIN, o.w + dx), W - o.x);
+        if (drag.k.includes("n")) { y = Math.min(Math.max(0, o.y + dy), o.y + o.h - MIN); hh = o.y + o.h - y; }
+        if (drag.k.includes("s")) hh = Math.min(Math.max(MIN, o.h + dy), H - o.y);
+      }
+      r = { x, y, w, h: hh }; draw();
+    });
+    const endDrag = () => { drag = null; };
+    box.addEventListener("pointerup", endDrag); box.addEventListener("pointercancel", endDrag);
+    const finish = (v) => { URL.revokeObjectURL(url); resolve(v); };
+    modal({ wide: true, title: "写真を切り取る", body: (close) => {
+      const cut = async () => {
+        try {
+          const k = img.naturalWidth / W;
+          const c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(r.w * k)); c.height = Math.max(1, Math.round(r.h * k));
+          c.getContext("2d").drawImage(img, r.x * k, r.y * k, r.w * k, r.h * k, 0, 0, c.width, c.height);
+          const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+          const blob = await new Promise(res => c.toBlob(res, type, 0.92));
+          close(true); finish(blob ? new File([blob], file.name.replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg"), { type }) : file);
+        } catch { close(true); finish(file); }
+      };
+      return h("div", { class: "crop-wrap" }, stage,
+        h("p", { class: "ai-hint", style: "margin:8px 0 0" }, "枠を動かしたり、四隅を引っぱったりして範囲を決めます"),
+        h("div", { class: "modal-actions", style: "margin-top:10px" },
+          h("button", { class: "btn", type: "button", onclick: () => { close(true); finish(null); } }, "やめる"),
+          h("button", { class: "btn", type: "button", onclick: () => { close(true); finish(file); } }, "そのまま"),
+          h("button", { class: "btn primary", type: "button", onclick: cut }, "切り取る")));
+    } }).then((v) => { if (v == null) finish(null); });
+  });
 }
 async function storeFile(file) {
   const base = { id: uid("a"), name: file.name || "file", type: file.type || "application/octet-stream", size: file.size };
@@ -3224,12 +3339,12 @@ function bgSection() {
     try { const blob = await shrinkImage(f); await Storage.putFile({ id: BG_FILE, blob, name: "背景", type: blob.type, createdAt: Date.now() }); await applyUserBg(); draw(); toast("背景を変えました"); }
     catch { toast("この画像は背景に使えませんでした", true); }
   } });
-  const draw = () => { preview.style.backgroundImage = bgUrl ? `url("${bgUrl}")` : ""; preview.hidden = !bgUrl; resetBtn.hidden = !bgUrl; };
+  const draw = () => { preview.style.backgroundImage = bgUrl ? `url("${bgUrl}")` : ""; preview.hidden = !bgUrl; };
   draw();
   return h("div", { class: "settings-sec bg-sec" },
     h("h4", {}, "背景"),
     h("p", { class: "ai-hint", style: "margin:0" }, "端末内の画像を背景に設定できます"),
-    h("div", { class: "row" }, preview, h("button", { class: "btn", type: "button", onclick: () => inp.click() }, "画像を選ぶ"), resetBtn, inp));
+    h("div", { class: "row" }, preview, h("button", { class: "btn change-btn", type: "button", onclick: () => changeImage(!!bgUrl, () => inp.click(), () => resetBtn.click()) }, "変更"), inp));
 }
 /* 設定の「Googleドライブ同期」: 「同期」ボタンで オン／オフ（押すまで状態を保つ）。接続先と合言葉はこの端末に保存 */
 const SYNC_HELP = "https://github.com/kokoharu1108/sosaku-memo/blob/main/docs/Googleドライブ同期の設定.md";
@@ -3328,6 +3443,8 @@ async function boot() {
   applyTheme();
   document.documentElement.classList.toggle("clear-bar", clearBarOn());
   if (historyOk) try { history.replaceState({ depth: 1 }, ""); } catch {}
+  // 戻る操作のときにブラウザが勝手に前のスクロール位置へ飛ばさないようにする（位置はアプリで覚えて戻す）
+  try { history.scrollRestoration = "manual"; } catch {}
   $("#app").append(h("div", { class: "wrap" }, h("p", { class: "ai-hint" }, "メモを読み込んでいます…")));
   await Storage.init();
   applyUserBg().catch(() => {});
