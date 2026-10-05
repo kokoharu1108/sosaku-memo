@@ -108,7 +108,7 @@
 .topbar:is(.g-学び, .g-アイデア) .crumb:not(.current) { background: color-mix(in srgb, var(--bar-cur) 62%, #fff); color: #14275e; }
 .topbar:is(.g-学び, .g-アイデア) { color: #0a1a4f; --ink-2: #14275e; --ink-3: #24387a; --accent-ink: #0a1a4f; --tag: #0b3a9f; } .topbar.g-アイデア { --bar-cur: var(--bar-view-idea); }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 body { margin: 0; }
 img { max-width: 100%; }
@@ -369,15 +369,28 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .btn.danger-solid { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 700; padding-inline: 18px; border-radius: 999px; }
 .btn.sel-start { padding: 2px 10px; font-size: 13px; color: var(--accent-ink); }
 /* search panel */
-.search-toggle { position: relative; }
-.search-toggle svg { width: 27px; height: 27px; }
-.search-toggle[aria-expanded="true"] { background: var(--sel-bg); color: var(--sel-ink); }   /* タブの選択と同じ色 */
-.search-toggle .dot { position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: none; }
-.search-toggle.active .dot { display: block; }
-.search-panel { padding-top: 6px; }
+.search-panel { padding: 6px 0 10px; }
+.search-row { align-items: center; }
+.search-close { flex: 0 0 auto; }
+/* 検索画面のメニュー（三本線）: 押すと上から順に縦に開く */
+.nav-toggle[aria-expanded="true"] { background: var(--sel-bg); color: var(--sel-ink); }
+.nav-menu { min-width: 190px; padding: 6px; transform-origin: top right; }
+.nav-menu.open { animation: navOpen .2s cubic-bezier(.2,.8,.3,1) both; }
+.menu.nav-menu button { display: flex; align-items: center; gap: 12px; padding: 11px 14px; font-size: 16px; font-weight: 700; color: var(--ink); }
+.menu.nav-menu button svg { width: 24px; height: 24px; flex: 0 0 auto; color: var(--accent-ink); }
+.nav-menu.open button { animation: navItem .22s ease both; animation-delay: calc(var(--i, 0) * 35ms + 40ms); }
+@keyframes navOpen { from { opacity: 0; transform: translateY(-8px) scaleY(.6); } to { opacity: 1; transform: none; } }
+@keyframes navItem { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@media (hover: hover) { .nav-menu button:hover { background: var(--accent-soft); } }
+.nav-menu button:active { background: var(--accent-soft); }
+.brand .tab-name { font-size: 15px; font-weight: 800; color: inherit; padding-left: 10px; border-left: 2px solid currentColor; line-height: 1.1; }
+.topbar .search-close { color: #fff; }
+html.clear-bar .topbar .search-close { color: var(--field-ink); }
+/* 横スライドでタブを切り替えるとき、隣のタブの中身をすぐ横に並べて一緒に動かす（あいだに空白を作らない） */
+.swipe-track { position: relative; will-change: transform; }
+.swipe-peer { position: absolute; width: 100%; pointer-events: none; }
 .filter-row { margin-top: 8px !important; margin-bottom: 0 !important; }
 .fr-label { font-size: 14px; color: var(--ink-2); font-weight: 500; flex: 0 0 auto; }
-.search-tools .tab-row { margin: 6px 0 8px; }
 .ref-item.on { border-color: var(--accent); background: var(--accent-soft); }
 /* attachments (view) */
 .att-details { margin-top: 28px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
@@ -429,6 +442,12 @@ html.clear-bar .topbar:not(.bar-view) .folder-ico svg { fill: color-mix(in srgb,
 .fab svg { width: 26px; height: 26px; }
 .fab.round { width: 60px; height: 60px; padding: 0; justify-content: center; border-radius: 50%; }
 .fab.round svg { width: 30px; height: 30px; stroke-width: 2.6; }
+/* 押したときの表示は、ボタンやカードの形に合わせる（スマホの四角い押した色は消している） */
+.fab { transition: transform .12s ease, filter .12s ease; }
+.fab:active { transform: scale(.93); filter: brightness(.92); }
+:is(.memo-card, .list-row, .ref-item, .recall-body) { transition: background-color .12s ease; }
+.memo-card:active, .list-row:active:not(:has(.icon-btn:active)) { background-color: color-mix(in srgb, var(--surface) 82%, var(--sel-bg)); }
+.icon-btn:active { background-color: color-mix(in srgb, currentColor 16%, transparent); }
 .fab-menu { position: fixed; right: 18px; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 6px; justify-items: end; }
 .fab-menu button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 15px; padding: 11px 22px; border-radius: 999px; box-shadow: var(--shadow); }
 .fab-menu button:disabled { opacity: .45; }
@@ -613,7 +632,7 @@ body.editing-body .edit-actions { display: none; }
   .fmt-bar .head-btn { min-width: 46px; }
 }
 @media (max-width: 520px) {
-  .brand small { display: none; }
+  .brand small:not(.tab-name) { display: none; }
   .view-doc { padding-inline: 16px 22px; }
 }
 /* ---------- 情報まとめ（1つの新しいメモとして読める、すっきりした構成） ---------- */
@@ -755,6 +774,9 @@ const ICONS = {
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  menu: '<path d="M4 6.5h16M4 12h16M4 17.5h16"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  recent: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
   save: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
   print: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
@@ -780,6 +802,17 @@ const OK_TAGS = new Set(["B","STRONG","I","EM","S","STRIKE","DEL","U","SPAN","FO
 const COLOR_CLASS = /^(tc-(default|rose|orange|green|blue|purple|gray|brown)|hl-(none|yellow|pink|green|blue|purple))$/;
 /* 以前の版で保存した文字色（色コード）を、テーマ対応の色の種類に置き換える */
 const LEGACY_TC = { "#d0637a": "rose", "#d98a3d": "orange", "#4e9e78": "green", "#4f86c6": "blue", "#8e6cc4": "purple", "#8a8fa3": "gray", "#a0705a": "brown" };
+/* 検索の文字合わせ: 大文字小文字・ひらがなとカタカナを区別しない（「てすと」で「テスト」も見つかる）。
+   fold は文字数を変えない（本文の中の位置をそのまま使えるように）。foldQ は全角・半角の違いもそろえる（検索の言葉と索引用） */
+const fold = (t) => String(t || "").toLowerCase().replace(/[\u30a1-\u30f6\u30fd\u30fe]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+const foldQ = (t) => fold(String(t || "").normalize("NFKC"));
+const searchTerms = (q) => foldQ(q).split(/\s+/).filter(Boolean);
+/* 本文の中で検索の言葉を探す正規表現（ひらがな・カタカナどちらにも当たる） */
+const termsRe = (terms) => new RegExp("(" + terms.map(t => [...t].map(c => {
+  const k = c.charCodeAt(0);
+  if (k >= 0x3041 && k <= 0x3096) return "[" + c + String.fromCharCode(k + 0x60) + "]";
+  return c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}).join("")).join("|") + ")", "gi");
 const toHex = (c) => { c = (c || "").trim().toLowerCase(); if (c.startsWith("#")) return c; const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/); return m ? "#" + [m[1], m[2], m[3]].map(x => (+x).toString(16).padStart(2, "0")).join("") : c; };
 const okColor = (c) => /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\))$/i.test((c || "").trim());
 function sanitize(html) {
@@ -915,7 +948,7 @@ const Manager = {
   },
   reindex() {
     this.sorted = [...this.memos.values()].sort((a, b) => b.updatedAt - a.updatedAt);
-    for (const m of this.sorted) m._search = [m.title, m.bodyText, (m.genres || []).join(" "), listNames(m).join(" "), (m.tags || []).map(t => "#" + t).join(" "), (m.attachments || []).map(a => a.name).join(" ")].join("\n").toLowerCase();
+    for (const m of this.sorted) m._search = foldQ([m.title, m.bodyText, (m.genres || []).join(" "), listNames(m).join(" "), (m.tags || []).map(t => "#" + t).join(" "), (m.attachments || []).map(a => a.name).join(" ")].join("\n"));
     // 階層（親子）の索引
     this.kids = new Map(); this.roots = [];
     for (const m of this.sorted) {
@@ -1157,7 +1190,8 @@ window.addEventListener("popstate", (e) => {
     if (depth >= UI.stack.length) { render(); return; }
   }
   // 検索パネルが開いていれば、戻る操作でまず閉じる
-  if (current().name === "search" && searchState().open && depth >= UI.stack.length && !(e.state && e.state.panel)) { searchState().open = false; render(); return; }
+  // （「最近」以外のタブや検索窓を開いていれば、戻る操作でまず「最近」に戻す）
+  if (current().name === "search" && homeAux(searchState()) && depth >= UI.stack.length && !(e.state && e.state.panel)) { resetHome(searchState()); render(); window.scrollTo(0, 0); return; }
   if (depth >= UI.stack.length) return;
   // 画像の拡大表示や確認ウィンドウが開いていれば、まずそれを閉じる
   const overlay = [...document.querySelectorAll(".lightbox, .modal-scrim")].pop();
@@ -1329,76 +1363,124 @@ function render() {
 /* ---------- メモ検索画面 ---------- */
 /* 今の検索画面の状態（ホームは UI.search、タグなどから開いた検索はその画面が持つ） */
 const searchState = () => { const s = current(); return (s && s.name === "search" && s.st) || UI.search; };
+/* 検索画面は「最近」「フォルダ」「情報まとめ」の3つ。横にスライドすると この順にぐるっと切り替わる */
+const TAB_ORDER = ["memos", "lists", "report"];
+const TAB_NAME = { memos: "最近", lists: "フォルダ", report: "情報まとめ" };
+/* 「最近」以外のタブや検索窓を開いた状態は、ブラウザの履歴を1つ積む（スマホの戻る操作で「最近」に戻れる）。
+   タグから開いた検索は、検索窓を開いた状態が元の姿（baseOpen） */
+const homeAux = (st) => st.tab !== "memos" || (!!st.open && !st.baseOpen);
+function syncAux(st) {
+  if (!historyOk) return;
+  const has = !!(history.state && history.state.panel);
+  const want = homeAux(st);
+  if (want && !has) { try { history.pushState({ depth: UI.stack.length, panel: true }, ""); } catch {} }
+  else if (!want && has) history.back();
+}
+const clearSearch = (st) => { st.q = ""; st.committed = ""; st.genre = ""; };
+/* 戻る操作で「最近」へ戻すとき: 検索窓を閉じたら、検索の言葉・ジャンルの絞り込みも解除する */
+function resetHome(st) { st.tab = "memos"; st.report = null; if (!st.baseOpen) { st.open = false; clearSearch(st); } }
 function renderSearch(s) {
   const st = (s && s.st) || UI.search;
+  if (!TAB_ORDER.includes(st.tab)) st.tab = "memos";
   const input = h("input", { id: "q", class: "search-input", type: "search", enterkeyhint: "search", placeholder: "キーワードでメモを探す", value: st.q, autocomplete: "off",
     oninput: (e) => { st.q = e.target.value; },
-    onkeydown: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); input.blur(); } } });
-  function commit() { st.committed = st.q.trim(); if (st.tab !== "memos") st.tab = "memos"; input.blur(); drawResults(); }
+    onkeydown: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } } });
+  function commit() {
+    st.committed = st.q.trim(); input.blur();
+    if (st.tab !== "memos") { st.tab = "memos"; syncAux(st); render(); return; }
+    drawResults();
+  }
+  // 検索窓を閉じると、検索の言葉とジャンルの絞り込みも解除する
+  function closeSearch() { st.open = false; clearSearch(st); syncAux(st); render(); }
+  function openSearch() {
+    if (st.tab === "report") st.tab = "memos";
+    st.open = true; syncAux(st); render();
+    setTimeout(() => { const q = document.getElementById("q"); if (q) q.focus(); }, 60);
+  }
+  function setTab(t) {
+    // 情報まとめの条件は、そのタブを離れたら空に戻す（次に開いたときに前の検索の条件が残らないように）
+    if (st.tab === "report" && t !== "report") st.report = null;
+    if (t === "report") {
+      // 検索・絞り込み中に「情報まとめ」へ移ったら、その条件でまとめる（検索窓は閉じる）
+      if (st.committed || st.genre) st.report = { name: "report", q: st.committed, genre: st.genre };
+      if (!st.baseOpen) { st.open = false; clearSearch(st); }
+    }
+    st.tab = t; syncAux(st); render(); window.scrollTo(0, 0);
+  }
+  const switchTab = (t) => { if (UI.select.on) { exitSelectThen(() => setTab(t)); return; } setTab(t); };
 
   let fab;
-  const results = h("div");
-  const toolbar = h("div", { class: "toolbar-row tab-row" });
+  const results = h("div", { class: "swipe-track" });
   const filterRow = h("div", { class: "toolbar-row filter-row" });
   const panel = h("div", { class: "search-panel", hidden: !st.open });
-  const reportSlot = h("span", { class: "report-slot" });
-  const searchBtn = h("button", { class: "icon-btn search-toggle", type: "button", "aria-label": "検索・絞り込み", "aria-expanded": String(!!st.open), title: "検索・絞り込み",
-    onclick: () => setPanel(!st.open) },
-    svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), h("span", { class: "dot", "aria-hidden": "true" }));
-  // 検索パネルを開くと履歴を1つ積む。スマホの「戻る」操作（画面端からのスワイプ）で閉じられる
-  function setPanel(open) {
-    st.open = open; panel.hidden = !open; searchBtn.setAttribute("aria-expanded", String(open));
-    if (open) { if (historyOk) try { history.pushState({ depth: UI.stack.length, panel: true }, ""); } catch {} setTimeout(() => input.focus(), 50); }
-    else if (historyOk && history.state && history.state.panel) history.back();
+
+  // メニュー（三本線）: 最近・フォルダ・検索・まとめ・設定。今 表示しているものは出さない
+  const MENU = [["memos", "最近", ICONS.recent], ["lists", "フォルダ", ICONS.folder], ["search", "検索", ICONS.search], ["report", "まとめ", ICONS.report], ["settings", "設定", ICONS.gear]];
+  const navMenu = h("div", { class: "menu nav-menu", role: "menu", hidden: true });
+  const menuBtn = h("button", { class: "icon-btn ico nav-toggle", type: "button", "aria-label": "メニュー", title: "メニュー", "aria-haspopup": "menu", "aria-expanded": "false",
+    onclick: (e) => { e.stopPropagation(); navMenu.hidden ? openMenu() : closeMenu(); } }, svgIcon(ICONS.menu));
+  function openMenu() {
+    navMenu.replaceChildren(...MENU.filter(([k]) => k === "settings" || (k === "search" ? !st.open : k !== st.tab)).map(([k, label, ic], i) =>
+      h("button", { type: "button", role: "menuitem", style: `--i:${i}`, onclick: () => { closeMenu(); pick(k); } }, svgIcon(ic), h("span", {}, label))));
+    navMenu.hidden = false; navMenu.classList.remove("open"); void navMenu.offsetWidth; navMenu.classList.add("open");
+    menuBtn.setAttribute("aria-expanded", "true");
   }
-  const switchTab = (t) => { if (UI.select.on) { UI.select.on = false; UI.select.ids.clear(); if (historyOk && history.state && history.state.select) history.back(); } st.tab = t; drawResults(); };
-  function drawResults() {
-    toolbar.replaceChildren(); results.replaceChildren(); filterRow.replaceChildren();
-    toolbar.append(h("div", { class: "tabs", role: "tablist" },
-      [["memos", "最近"], ["lists", "フォルダ"]].map(([k, l]) => h("button", { role: "tab", "aria-selected": String(st.tab === k), onclick: () => switchTab(k) }, l))));
-    filterRow.append(...[h("span", { class: "fr-label" }, "絞り込み"), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
-      sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
-    searchBtn.classList.toggle("active", !!(st.committed || st.genre));
+  function closeMenu() { navMenu.hidden = true; navMenu.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); }
+  function pick(k) {
+    if (k === "settings") openSettings();
+    else if (k === "search") openSearch();
+    else switchTab(k);
+  }
+  const onDocClick = (e) => { if (!navMenu.hidden && !e.target.closest(".nav-menu")) closeMenu(); };
+  const onKey = (e) => { if (e.key === "Escape" && !navMenu.hidden) closeMenu(); };
+  document.addEventListener("click", onDocClick); document.addEventListener("keydown", onKey);
+  cleanupFns.push(() => { document.removeEventListener("click", onDocClick); document.removeEventListener("keydown", onKey); });
+
+  /* タブの中身を作る（スライド中に隣のタブを先に見せるときにも使う） */
+  function buildTab(tab) {
+    if (tab === "lists") return renderLists(drawResults);
+    if (tab === "report") { st.report = st.report || { name: "report" }; return h("div", { class: "rp-tab" }, ...reportBody(st.report, render)); }
+    return memoResults();
+  }
+  function memoResults() {
+    const out = h("div");
     const selecting = UI.select.on && UI.select.scope === "search";
-    fab.hidden = selecting || (UI.select.on && UI.select.scope === "lists");
-    reportSlot.replaceChildren();
-
-    const fabText = st.tab === "lists" ? "新規フォルダ" : "新規メモ";
-    fab.setAttribute("aria-label", fabText); fab.title = fabText;
-    if (st.tab === "lists") { results.append(renderLists(drawResults)); return; }
-
     let items = filterByGenre(Manager.sorted, st.genre);
-    const terms = st.committed.toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = searchTerms(st.committed);
     if (terms.length) items = items.filter(m => terms.every(t => m._search.includes(t)));
     items = sortMemos(items, st.sort);
-
-    if (!terms.length && !st.genre && !selecting) { const rc = recallCard(drawResults); if (rc) results.append(rc); }
+    if (!terms.length && !st.genre && !selecting) { const rc = recallCard(drawResults); if (rc) out.append(rc); }
     const metaRow = h("div", { class: "toolbar-row", style: "margin-top:0" });
     if (st.committed) metaRow.append(h("span", { class: "filter-chip" }, "「" + st.committed + "」", h("button", { "aria-label": "検索を解除", onclick: () => { st.q = ""; st.committed = ""; input.value = ""; drawResults(); } }, "✕")));
     if (st.genre) metaRow.append(h("span", { class: "filter-chip" }, st.genre, h("button", { "aria-label": "ジャンルの絞り込みを解除", onclick: () => { st.genre = ""; drawResults(); } }, "✕")));
-    // 検索・絞り込みの結果を1つの新しいメモにまとめるボタンは、上部バーの検索ボタンの左に置く（件数は出さない）
-    reportSlot.replaceChildren(...(items.length && !selecting ? [iconBtn("report", "まとめる", () => go({ name: "report", q: st.committed, genre: st.genre }), "report-btn")] : []));
-    if (metaRow.childNodes.length) results.append(metaRow);
-    // 「選択」は上部の固定バー（タブの行）の右端に置き、スクロールしても押せるようにする
-
+    if (metaRow.childNodes.length) out.append(metaRow);
     if (!items.length) {
-      results.append(Manager.memos.size === 0
-        ? h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「新規メモ」から、行った場所や思いついたことを書き留めましょう。")
+      out.append(Manager.memos.size === 0
+        ? h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「＋」から、行った場所や思いついたことを書き留めましょう。")
         : h("div", { class: "empty" }, h("b", {}, "一致するメモがありません"), st.genre ? "ジャンルを「全ジャンル」に戻すか、別のキーワードで試してください。" : "別のキーワードで試すか、検索窓を空にして検索すると全件を表示します。"));
-      return;
+      return out;
     }
     const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); drawResults(); } } : null;
     const list = h("div", { class: "memo-list" + (selecting ? " with-bar" : "") });
     items.forEach(m => list.append(memoCard(m, terms, sel, "search")));
-    results.append(list);
-    if (selecting) results.append(selectBar(items.map(m => m.id), [{ label: "まとめる", run: reportSelected }, { label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
+    out.append(list);
+    if (selecting) out.append(selectBar(items.map(m => m.id), [{ label: "まとめる", run: reportSelected }, { label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
+    return out;
+  }
+  function drawResults() {
+    filterRow.replaceChildren(...[h("span", { class: "fr-label" }, "絞り込み"), st.tab === "memos" ? genreSelect(st, drawResults, "genre-search") : null,
+      sortSelect(st, drawResults, "sort-search", st.tab === "lists")].filter(Boolean));
+    const selecting = UI.select.on && (UI.select.scope === "search" || UI.select.scope === "lists");
+    fab.hidden = selecting || st.tab === "report";
+    const fabText = st.tab === "lists" ? "新規フォルダ" : "新規メモ";
+    fab.setAttribute("aria-label", fabText); fab.title = fabText;
+    results.replaceChildren(buildTab(st.tab));
   }
 
-  fab = h("button", { class: "fab", onclick: () => {
+  fab = h("button", { class: "fab round", onclick: () => {
     if (st.tab === "lists") createList();
     else go({ name: "edit", id: null });
   } }, svgIcon('<path d="M12 5v14M5 12h14"/>'));
-  fab.classList.add("round");
   const storeNote = Storage.mode === "memory"
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
     : null;
@@ -1406,58 +1488,60 @@ function renderSearch(s) {
   const scr = h("div", { class: "screen" },
     h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
       UI.stack.length > 1 ? h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←") : null,
-      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", {}, "体験・学び・アイデアの記録")),
+      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", { class: "tab-name" }, TAB_NAME[st.tab])),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
-      reportSlot,
-      searchBtn,
-      iconBtn("gear", "設定", openSettings)),
-      h("div", { class: "search-tools" },
-        panel,
-        toolbar), crumbBar()),
+      h("div", { class: "menu-wrap" }, menuBtn, navMenu)),
+      h("div", { class: "search-tools" }, panel), crumbBar()),
     h("main", { class: "wrap swipe-area", style: "padding-top:12px" },
       storeNote,
       results),
     fab);
   panel.append(
-    h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); input.blur(); } },
+    h("form", { class: "searchbox", role: "search", onsubmit: (e) => { e.preventDefault(); commit(); } },
       h("div", { class: "search-row" },
-        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>'), input))),
+        h("div", { style: "position:relative;flex:1;min-width:0;display:flex" }, svgIcon(ICONS.search), input),
+        h("button", { class: "icon-btn ico search-close", type: "button", "aria-label": "検索を閉じる", title: "検索を閉じる", onclick: closeSearch }, svgIcon(ICONS.close)))),
     filterRow);
   const ico = panel.querySelector(".search-row svg"); ico.classList.add("search-ico");
   drawResults();
-  /* 画面を横にスライドして「メモ」「フォルダ」タブを切り替える。指の動きに合わせて一覧が横に動き、
-     離した位置（または素早いはらい）で次のタブへ滑らかに切り替わる。足りなければ元に戻る。
-     画面の端から始まる操作はスマホの「戻る」なので無視し、横スクロールする部分の上でも反応しない */
+  /* 横にスライドしてタブを切り替える（最近 → フォルダ → 情報まとめ → 最近 …）。
+     X（旧Twitter）のように、隣のタブの中身を すぐ横に並べて指と一緒に動かすので、あいだに空白ができない。
+     離した位置（または素早いはらい）で切り替わり、足りなければ元に戻る。
+     画面の端から始まる操作はスマホの「戻る」なので無視し、入力欄などの上でも反応しない */
   const area = scr.querySelector(".swipe-area");
-  const ORDER = ["memos", "lists"];
   let sw = null;
-  const setX = (x, op, anim) => { results.style.transition = anim ? `transform ${anim}s ease, opacity ${anim}s ease` : "none"; results.style.transform = x ? `translateX(${x}px)` : ""; results.style.opacity = op == null ? "" : String(op); };
+  const setX = (x, anim) => { results.style.transition = anim ? `transform ${anim}s cubic-bezier(.2,.7,.3,1)` : "none"; results.style.transform = x ? `translateX(${x}px)` : ""; };
+  const neighborOf = (dir) => TAB_ORDER[(TAB_ORDER.indexOf(st.tab) + (dir < 0 ? 1 : -1) + TAB_ORDER.length) % TAB_ORDER.length];
+  const dropPeer = () => { if (sw && sw.peer) { sw.peer.remove(); sw.peer = null; } };
+  function showPeer(dir) {
+    if (sw.peerDir === dir) return;
+    dropPeer(); sw.peerDir = dir;
+    // 切り替えたあと一覧は先頭から表示されるので、隣のタブも今見えている位置の先頭にそろえて置く
+    sw.peer = h("div", { class: "swipe-peer", "aria-hidden": "true", style: `top:${window.scrollY}px;left:${dir < 0 ? 100 : -100}%` }, buildTab(neighborOf(dir)));
+    results.append(sw.peer);
+  }
   area.addEventListener("touchstart", (e) => {
     const t = e.touches[0];
-    sw = (e.touches.length === 1 && !UI.select.on && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".tag-sugg, input, select, textarea"))
-      ? { x: t.clientX, y: t.clientY, at: Date.now(), dx: 0, lock: null } : null;
+    sw = (e.touches.length === 1 && !UI.select.on && t.clientX > 30 && t.clientX < window.innerWidth - 30 && !e.target.closest(".tag-sugg, input, select, textarea, .rp-range"))
+      ? { x: t.clientX, y: t.clientY, at: Date.now(), dx: 0, lock: null, peer: null, peerDir: 0 } : null;
   }, { passive: true });
   area.addEventListener("touchmove", (e) => {
     if (!sw) return;
     const t = e.touches[0], dx = t.clientX - sw.x, dy = t.clientY - sw.y;
     if (!sw.lock) { if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return; sw.lock = Math.abs(dx) > Math.abs(dy) * 1.2 ? "x" : "y"; }
-    if (sw.lock !== "x") return;
-    const i = ORDER.indexOf(st.tab), atEnd = (dx > 0 && i === 0) || (dx < 0 && i === ORDER.length - 1);
-    sw.dx = atEnd ? dx / 4 : dx;   // それ以上タブがない方向は、引っぱりを弱くして「端」と分かるようにする
-    setX(sw.dx, 1 - Math.min(Math.abs(sw.dx) / window.innerWidth, 1) * 0.5);
+    if (sw.lock !== "x" || !dx) return;
+    showPeer(dx < 0 ? -1 : 1);
+    sw.dx = dx; setX(dx);
   }, { passive: true });
   const endSwipe = () => {
-    if (!sw || sw.lock !== "x") { sw = null; return; }
-    const { dx, at } = sw; sw = null;
-    const W = window.innerWidth, i = ORDER.indexOf(st.tab), next = ORDER[i + (dx < 0 ? 1 : -1)];
-    const flick = Date.now() - at < 300 && Math.abs(dx) > 50;
-    if (!next || (Math.abs(dx) < W * 0.22 && !flick)) { setX(0, null, 0.2); return; }
-    setX(dx < 0 ? -W : W, 0, 0.18);
-    setTimeout(() => {
-      switchTab(next);
-      setX(dx < 0 ? W * 0.35 : -W * 0.35, 0);
-      requestAnimationFrame(() => requestAnimationFrame(() => setX(0, null, 0.22)));
-    }, 180);
+    if (!sw || sw.lock !== "x") { dropPeer(); sw = null; return; }
+    const cur = sw, W = window.innerWidth;
+    const flick = Date.now() - cur.at < 300 && Math.abs(cur.dx) > 50;
+    if (!cur.dx || (Math.abs(cur.dx) < W * 0.22 && !flick)) { setX(0, 0.2); setTimeout(() => { if (cur.peer) cur.peer.remove(); }, 220); sw = null; return; }
+    const next = neighborOf(cur.dx < 0 ? -1 : 1);
+    sw = null;
+    setX(cur.dx < 0 ? -W : W, 0.24);
+    setTimeout(() => switchTab(next), 240);
   };
   area.addEventListener("touchend", endSwipe, { passive: true });
   area.addEventListener("touchcancel", endSwipe, { passive: true });
@@ -1494,11 +1578,11 @@ function snippet(m, terms) {
   const text = (m.bodyText || "").replace(/\s+/g, " ").trim();
   if (!text) return document.createTextNode("（本文なし）");
   let start = 0;
-  if (terms.length) { const i = text.toLowerCase().indexOf(terms[0]); if (i > 30) start = i - 30; }
+  if (terms.length) { const i = fold(text).indexOf(terms[0]); if (i > 30) start = i - 30; }
   const piece = (start ? "…" : "") + text.slice(start, start + 110) + (text.length > start + 110 ? "…" : "");
   if (!terms.length) return document.createTextNode(piece);
   const frag = document.createDocumentFragment();
-  const re = new RegExp("(" + terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|") + ")", "gi");
+  const re = termsRe(terms);
   piece.split(re).forEach((part, i) => frag.append(i % 2 ? h("mark", {}, part) : part));
   return frag;
 }
@@ -1700,7 +1784,7 @@ async function pickMemos(initial, title) {
     const countEl = h("span", { class: "result-meta", style: "margin-right:auto" });
     const listEl = h("div", { class: "picker-list" });
     const draw = () => {
-      const t = q.value.trim().toLowerCase();
+      const t = foldQ(q.value.trim());
       const items = Manager.sorted.filter(m => !t || m._search.includes(t));
       countEl.textContent = `${picked.size}件を選択中`;
       listEl.replaceChildren(...(items.length ? items.map(m => h("button", { class: "ref-item", type: "button", "aria-pressed": String(picked.has(m.id)), onclick: () => { picked.has(m.id) ? picked.delete(m.id) : picked.add(m.id); draw(); } },
@@ -1761,7 +1845,7 @@ function reportSource(s) {
   const o = s.opts || {};
   // フォルダはまとめ画面で選び直せる（フォルダ画面から開いたときは、そのフォルダが選ばれた状態）
   const l = o.listId ? Manager.lists.get(o.listId) : null;
-  const terms = (s.q || "").toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = searchTerms(s.q);
   const base = [], listId = l ? l.id : null;
   const ids = o.ids && o.ids.length ? new Set(o.ids) : null;
   let items = filterByGenre(Manager.sorted, s.genre);
@@ -1806,7 +1890,7 @@ function pickBlocks(m, terms, excerpt) {
   const isHead = (b) => b.children.length === 1 && b.firstElementChild.tagName === "B" && b.textContent === b.firstElementChild.textContent;
   const keep = raw.map(() => !excerpt || !terms.length);
   if (excerpt && terms.length) {
-    const hit = (b) => terms.some(t => b.textContent.toLowerCase().includes(t));
+    const hit = (b) => terms.some(t => fold(b.textContent).includes(t));
     raw.forEach((b, i) => { if (hasText(b) && hit(b)) { keep[i] = true; if (i && isHead(raw[i - 1])) keep[i - 1] = true; } });
     // 題名やタグだけが一致したメモは、冒頭の数段落を載せる
     if (!keep.some(Boolean)) { let n = 0; raw.forEach((b, i) => { if (n < 3) { keep[i] = true; if (hasText(b)) n++; } }); }
@@ -1821,7 +1905,7 @@ function summarize(m, terms) {
   const text = (m.bodyText || "").replace(/​/g, "").trim();
   const sents = text.split(/(?<=[。！？!?])|\n+/).map(x => x.trim()).filter(Boolean);
   if (!sents.length) return "";
-  const hit = terms.length ? sents.filter(x => terms.some(t => x.toLowerCase().includes(t))) : [];
+  const hit = terms.length ? sents.filter(x => terms.some(t => fold(x).includes(t))) : [];
   const out = (hit.length ? hit : sents)[0];
   return out.length > SUM_LEN ? out.slice(0, SUM_LEN - 1) + "…" : out;
 }
@@ -1915,7 +1999,8 @@ document.addEventListener("click", function (e) {
 window.addEventListener("beforeprint", function () { document.querySelectorAll("details").forEach(function (d) { d.open = true; }); });
 <\/script></body></html>`;
 }
-function renderReport(s) {
+/* まとめの中身（条件の選択欄＋まとめ本体）。まとめ画面と、検索画面の「情報まとめ」タブで共通。rerender は条件を変えたときの描き直し */
+function reportBody(s, rerender) {
   s.opts = s.opts || { body: s.q ? "excerpt" : "full", images: true, period: "all", from: "", to: "", listId: s.listId || "", ids: s.ids || null };
   const o = s.opts;
   const src = reportSource(s);
@@ -1954,18 +2039,18 @@ function renderReport(s) {
   const seg = h("div", { class: "tabs rp-seg", role: "group", "aria-label": "本文" }, [["excerpt", "関連部分"], ["full", "全文"]].map(([v, l]) => h("button", { type: "button", "aria-pressed": String(o.body === v), "aria-selected": String(o.body === v),
     onclick: (e) => { o.body = v; seg.querySelectorAll("button").forEach(b => { const on = b === e.currentTarget; b.setAttribute("aria-pressed", String(on)); b.setAttribute("aria-selected", String(on)); }); draw(); } }, l)));
   // 期間（作成日時）: 変えたら画面ごと作り直す（題名・対象のメモが変わるため）
-  const periodSel = h("select", { id: "rp-period", class: "genre-select" + (o.period !== "all" ? " on" : ""), "aria-label": "期間", onchange: () => { o.period = periodSel.value; render(); } },
+  const periodSel = h("select", { id: "rp-period", class: "genre-select" + (o.period !== "all" ? " on" : ""), "aria-label": "期間", onchange: () => { o.period = periodSel.value; rerender(); } },
     PERIODS.map(([v, l]) => h("option", { value: v }, l)));
   periodSel.value = o.period;
-  const dateIn = (key, label) => h("input", { type: "date", class: "genre-select rp-date", "aria-label": label, value: o[key] || "", max: ymd(new Date()), onchange: (e) => { o[key] = e.target.value; render(); } });
-  const listSel = h("select", { id: "rp-list", class: "genre-select" + (o.listId ? " on" : ""), "aria-label": "フォルダ", onchange: () => { o.listId = listSel.value; render(); } },
+  const dateIn = (key, label) => h("input", { type: "date", class: "genre-select rp-date", "aria-label": label, value: o[key] || "", max: ymd(new Date()), onchange: (e) => { o[key] = e.target.value; rerender(); } });
+  const listSel = h("select", { id: "rp-list", class: "genre-select" + (o.listId ? " on" : ""), "aria-label": "フォルダ", onchange: () => { o.listId = listSel.value; rerender(); } },
     h("option", { value: "" }, "未選択"), [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt).map(x => h("option", { value: x.id }, x.name)));
   listSel.value = Manager.lists.has(o.listId) ? o.listId : "";
   const tools = h("div", { class: "rp-tools" },
     Manager.lists.size ? h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "フォルダ"), listSel) : null,
     // メモを1件ずつ選んでまとめる
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "メモ"),
-      h("button", { class: "genre-select rp-pick", type: "button", onclick: async () => { const ids = await pickMemos(o.ids || [], "まとめるメモを選ぶ"); if (ids) { o.ids = ids.length ? ids : null; render(); } } },
+      h("button", { class: "genre-select rp-pick", type: "button", onclick: async () => { const ids = await pickMemos(o.ids || [], "まとめるメモを選ぶ"); if (ids) { o.ids = ids.length ? ids : null; rerender(); } } },
         o.ids && o.ids.length ? `${o.ids.length}件を選択中` : "選ぶ…")),
     h("div", { class: "rp-tool-row" }, h("span", { class: "fr-label" }, "期間"), periodSel,
       o.period === "custom" ? h("span", { class: "rp-range" }, dateIn("from", "いつから"), "〜", dateIn("to", "いつまで")) : null),
@@ -1978,11 +2063,14 @@ function renderReport(s) {
       h("span", { class: "spacer" }),
       iconBtn("print", "印刷・PDF", () => window.print()),
       canShare ? iconBtn("share", "共有", (e) => share(e.currentTarget)) : null));
+  return [tools, holder];
+}
+function renderReport(s) {
   return h("div", { class: "screen report-screen" },
     h("header", { class: "topbar bar-report" }, h("div", { class: "topbar-in" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("h1", {}, "情報まとめ")), crumbBar()),
-    h("main", { class: "wrap" }, tools, holder));
+    h("main", { class: "wrap" }, ...reportBody(s, render)));
 }
 /* まとめを印刷するときは、ダークモードでも明るい配色で印刷する */
 let printTheme = null;
@@ -2072,7 +2160,7 @@ function attList(atts) {
 }
 /* タグを押したら、そのタグで探した検索画面を（検索窓を開いた状態で）上に重ねて開く。戻る操作で元の画面へ */
 function tagSearch(tag) {
-  go({ name: "search", st: { q: "#" + tag, committed: "#" + tag, tab: "memos", sort: "upd-desc", genre: "", open: true } });
+  go({ name: "search", st: { q: "#" + tag, committed: "#" + tag, tab: "memos", sort: "upd-desc", genre: "", open: true, baseOpen: true } });
 }
 function attGrid(atts, editable, onRemove) {
   return h("div", { class: "att-grid" }, atts.map(a => {
