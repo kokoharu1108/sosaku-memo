@@ -111,6 +111,10 @@ with sync_playwright() as p:
     bars["edit"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
     check("メモ画面の上下のバーは検索画面と同じ色・閲覧画面は違う色", bars["edit"] == bars["search"] and bars["view"] != bars["search"], str(bars))
 
+    # 本文にカーソルが当たるまで待つ（遅い環境では描画のあと少しかかる）
+    try: pg.wait_for_function("document.activeElement && document.activeElement.classList.contains('editor')", timeout=5000)
+    except Exception: pass
+    time.sleep(0.2)
     check("メモ画面を開くと本文にカーソル（キーボードが出る）・パス表示はない・保存は右上", pg.evaluate("document.activeElement.classList.contains('editor')") and pg.locator(".crumbs").count() == 0 and pg.locator("header .save-btn").count() == 1 and pg.locator(".edit-actions, header .btn.danger").count() == 0)
     check("本文の入力中だけ、本文のボタン（▶・カメラ・#・ファイル・写真）をキーボードの上に出す", pg.locator(".fmt-bar.floating").is_visible() and pg.locator(".fmt-bar .more-btn").count() == 1 and pg.locator(".fmt-media button").count() == 4)
     pg.go_back(); time.sleep(0.3)
