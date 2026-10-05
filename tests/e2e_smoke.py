@@ -258,6 +258,7 @@ with sync_playwright() as p:
     pg.click(".ie-panel [aria-label='選んだ文字を消す']")
     check("置いた文字を消せる", pg.locator(".ie-text").count() == 0)
     pg.fill(".ie-input", "メモ"); pg.click(".ie-panel [aria-label='文字を置く']")
+    time.sleep(0.4)   # 文字を打ち終わると下の道具が戻り、写真の位置が少し動くので待つ
     fs0 = pg.evaluate("parseFloat(document.querySelector('.ie-text').style.fontSize)")
     tb = pg.locator(".ie-tsize").bounding_box(); pg.mouse.move(tb["x"] + 13, tb["y"] + 13); pg.mouse.down(); pg.mouse.move(tb["x"] + 70, tb["y"] + 40, steps=5); pg.mouse.up()
     check("右下の丸を引っぱって文字を大きくできる", pg.evaluate("parseFloat(document.querySelector('.ie-text').style.fontSize)") > fs0 * 1.2)

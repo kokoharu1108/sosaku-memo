@@ -656,7 +656,8 @@ body.editing-body .edit-actions { display: none; }
 .ie-icon.ghost { background: none; }
 .ie-icon svg { width: 24px; height: 24px; }
 .ie-stage { flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; touch-action: none; }
-.ie-holder { position: relative; line-height: 0; overflow: hidden; }
+.ie-holder { position: relative; line-height: 0; }
+.ie-clip { position: absolute; inset: 0; overflow: hidden; }
 .ie-holder canvas { position: absolute; max-width: none; }
 .ie-loading { color: #9aa6c4; font-size: 14px; }
 /* 写真を選ぶ画面から戻ったとき、メモ画面を見せずに編集画面へつなぐための黒い下地 */
@@ -3437,7 +3438,9 @@ function editImage(file, opts = {}) {
     const textLayer = h("div", { class: "ie-texts" });
     const sizePrev = h("div", { class: "ie-sizeprev", hidden: true });
     base.className = "ie-base"; over.className = "ie-over";
-    holder.append(base, over, textLayer, box);
+    // 写真は枠の中だけに見せ、文字（と大きさを変える丸）は写真の端でも隠れないよう枠の外にはみ出せるようにする
+    const clip = h("div", { class: "ie-clip" }, base, over);
+    holder.append(clip, textLayer, box);
     stage.replaceChildren(holder, sizePrev);
     /* 表示: 切り取りの道具では写真全体と枠、それ以外は切り取った範囲だけを、画面に合わせて出す */
     let V = { x: 0, y: 0, w: W, h: H }, sc = 1;
