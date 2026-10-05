@@ -523,22 +523,36 @@ html.clear-bar .topbar:not(.bar-view) .folder-ico svg { fill: color-mix(in srgb,
 .g-体験 .genre-mark { color: #fff; opacity: .3; }
 .g-学び .genre-mark { color: #0a1a4f; opacity: .2; }
 .g-アイデア .genre-mark { color: #0a1a4f; opacity: .14; letter-spacing: -.16em; }
+/* ジャンルが2つ以上: 名前は1つずつ行を分け、それぞれの色の上で読める色に */
+.genre-mark.multi { display: flex; flex-direction: column; align-items: flex-end; font-size: 34px; line-height: 1.02; opacity: 1; letter-spacing: -.04em; right: 4px; }
+.topbar.n3 .genre-mark.multi { font-size: 25px; }
+.genre-mark.multi span { opacity: .26; color: #fff; }
+.genre-mark.multi :is(.gm-learn, .gm-idea) { color: #0a1a4f; opacity: .2; }
+/* 塗り分けたバーの文字は、最初のジャンルの文字色に縁取りを付けて、どの色の上でも読めるように */
+.topbar.multi .view-title { text-shadow: 0 0 2px var(--mh), 0 0 6px var(--mh); }
+.topbar.multi { --mh: rgba(10,20,60,.55); }
+.topbar.multi:is(.g-学び, .g-アイデア) { --mh: rgba(255,255,255,.7); }
+/* 右上の「…」は右端のジャンルの色の上に来るので、どの色でも見えるよう丸い下地を付ける */
+.topbar.multi .menu-btn { background: rgba(10,26,79,.38); color: #fff; border-radius: 50%; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .view-screen .topbar-in { align-items: flex-start; min-height: 64px; }
 /* 戻る・メニューのボタンは、題名の1行目と同じ高さにそろえる（題名は上に余白があり、2行になることもあるため） */
 .view-screen .topbar-in > .icon-btn, .view-screen .menu-wrap { margin-top: 21px; }
 .view-title.untitled { color: var(--ink-3); }
 .view-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; font-size: 13px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+/* 所属フォルダ: 本文と同じくらいの読みやすい大きさで、押せることが分かる形に */
+.view-folders { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.view-folder { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 5px 12px 5px 10px; font-size: 14px; font-weight: 700; max-width: 100%; }
+.view-folder .folder-ico { color: var(--accent); display: grid; }
+.view-folder .folder-ico svg { width: 18px; height: 18px; }
+.view-folder .vf-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.view-folder .vf-go { color: var(--ink-3); font-size: 16px; line-height: 1; }
 .view-body { margin-top: 16px; font-size: var(--read-size, 16px); line-height: 1.6; letter-spacing: .01em; overflow-wrap: anywhere; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
 .view-body img, .editor img { max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 8px 0; cursor: zoom-in; }
 .editor img { cursor: pointer; }
-.editor img.img-selected { outline: 3px solid var(--accent); outline-offset: 2px; }
-.img-size { display: grid; gap: 8px; width: min(300px, calc(100vw - 48px)); }
-.img-size .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.img-size .row .btn { padding: 4px 10px; font-size: 13px; }
-.img-size .row .btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); border-color: var(--accent); }
-.img-size input[type=range] { width: 100%; accent-color: var(--accent); }
-.img-size .cap { font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; }
+.img-x-layer { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.img-x { position: absolute; width: 28px; height: 28px; border-radius: 50%; border: 0; padding: 0; background: rgba(8,14,32,.72); color: #fff; display: grid; place-items: center; pointer-events: auto; box-shadow: 0 1px 4px rgba(0,0,0,.3); }
+.img-x svg { width: 16px; height: 16px; stroke-width: 2.6; }
 .view-body p, .editor p { margin: 0 0 .7em; }
 /* 改行で区切った行どうしにも少し間をあけ、詰まって見えないようにする */
 .view-body > div + div, .editor > div + div { margin-top: .15em; }
@@ -597,7 +611,7 @@ html.has-bg :is(.view-meta, .view-body, .view-tags, .field > .label, .field > la
 .genre-pick .gp-ico { display: inline-flex; } .genre-pick .gp-ico svg { width: 18px; height: 18px; }
 .field-err { color: var(--ng-ink); font-size: 12.5px; margin-top: 6px; }
 
-.editor-box { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.editor-box { position: relative; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .editor-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .fmt-bar { display: flex; gap: 2px; padding: 6px; border-bottom: 1px solid var(--line); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--hdr-h, 90px)); background: var(--surface); border-radius: var(--radius) var(--radius) 0 0; z-index: 5; }
 .fmt-bar button { border: 0; background: transparent; min-width: 36px; height: 34px; border-radius: 8px; color: var(--ink-2); font-size: 15px; padding: 0 8px; flex: 0 0 auto; }
@@ -627,48 +641,87 @@ body.editing-body .edit-actions { display: none; }
 .fmt-bar.floating:not(.expanded) { display: grid; grid-template-columns: repeat(4, 1fr); justify-items: center; }
 .fmt-bar:not(.expanded) .fmt-media { display: contents; }
 .fmt-bar:not(.expanded) .more-btn { margin-right: 0; }
-/* 写真の編集（画面いっぱい） */
+/* 写真の編集（画面いっぱい。開くとき・閉じるときはふわっと） */
 .img-editor { position: fixed; inset: 0; z-index: 120; background: #05070d; color: #fff; display: flex; flex-direction: column;
-  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); touch-action: none; }
+  padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px); touch-action: none; user-select: none; -webkit-user-select: none;
+  animation: ie-open .24s cubic-bezier(.2,.8,.3,1) both; }
+.img-editor.leaving { animation: ie-close .2s ease both; }
+@keyframes ie-open { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes ie-close { from { opacity: 1; } to { opacity: 0; transform: scale(.97); } }
 .ie-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; }
 .ie-top b { font-size: 16px; }
 .ie-icon { width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,.1); color: #fff; display: grid; place-items: center; }
+.ie-icon.ghost { background: none; }
 .ie-icon svg { width: 24px; height: 24px; }
-.ie-save { border: 0; border-radius: 999px; background: var(--sel-bg); color: var(--sel-ink); font-weight: 800; padding: 9px 20px; font-size: 15px; }
-.ie-stage { flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; }
+.ie-stage { flex: 1; min-height: 0; display: grid; place-items: center; overflow: hidden; touch-action: none; }
 .ie-holder { position: relative; line-height: 0; }
 .ie-holder canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ie-holder .ie-base { position: relative; }
 .ie-holder.drawing { cursor: crosshair; }
-.ie-crop { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.55); cursor: move; touch-action: none; z-index: 2; }
-.ie-crop::before, .ie-crop::after { content: ""; position: absolute; pointer-events: none; border: 1px solid rgba(255,255,255,.35); }
+.ie-crop { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.55); pointer-events: none; z-index: 2; animation: ie-fade .2s ease both; }
+.ie-crop::before, .ie-crop::after { content: ""; position: absolute; pointer-events: none; border: 1px solid rgba(255,255,255,.35); opacity: 0; transition: opacity .15s; }
+.ie-crop.active::before, .ie-crop.active::after { opacity: 1; }
 .ie-crop::before { left: 33.3%; right: 33.3%; top: 0; bottom: 0; border-top: 0; border-bottom: 0; }
 .ie-crop::after { top: 33.3%; bottom: 33.3%; left: 0; right: 0; border-left: 0; border-right: 0; }
-/* 四隅のつまみは枠の内側に、指でつかみやすい大きさで */
-.ie-h { position: absolute; width: 40px; height: 40px; z-index: 3; touch-action: none; }
-.ie-h::after { content: ""; position: absolute; width: 22px; height: 22px; border: 4px solid var(--sel-bg); }
-.ie-h.nw { left: 0; top: 0; cursor: nwse-resize; } .ie-h.nw::after { left: -3px; top: -3px; border-right: 0; border-bottom: 0; }
-.ie-h.ne { right: 0; top: 0; cursor: nesw-resize; } .ie-h.ne::after { right: -3px; top: -3px; border-left: 0; border-bottom: 0; }
-.ie-h.sw { left: 0; bottom: 0; cursor: nesw-resize; } .ie-h.sw::after { left: -3px; bottom: -3px; border-right: 0; border-top: 0; }
-.ie-h.se { right: 0; bottom: 0; cursor: nwse-resize; } .ie-h.se::after { right: -3px; bottom: -3px; border-left: 0; border-top: 0; }
-.ie-text { position: absolute; z-index: 3; font-weight: 800; line-height: 1.2; white-space: pre; cursor: move; touch-action: none; text-shadow: 0 0 3px rgba(0,0,0,.6); outline: 1px dashed rgba(255,255,255,.7); }
-.ie-panel { padding: 10px 14px 4px; display: grid; gap: 10px; min-height: 96px; align-content: start; }
-.ie-hint { margin: 0; font-size: 13px; color: #b9c3dd; }
-.ie-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.ie-btn { border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; border-radius: 999px; padding: 7px 16px; font-size: 14px; font-weight: 700; justify-self: start; }
-.ie-btn[aria-pressed="true"], .ie-btn.primary, .ie-auto { background: var(--sel-bg); color: var(--sel-ink); border-color: var(--sel-bg); }
-.ie-btn:disabled { opacity: .4; }
-.ie-slider { display: grid; grid-template-columns: 6.5em 1fr 3.2em; gap: 8px; align-items: center; font-size: 13.5px; }
-.ie-slider input { width: 100%; accent-color: var(--sel-bg); }
-.ie-val { text-align: right; color: #b9c3dd; font-variant-numeric: tabular-nums; }
-.ie-colors { display: flex; gap: 10px; }
-.ie-sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); }
+/* 四隅の印（つかむ判定は印より広い） */
+.ie-h { position: absolute; width: 24px; height: 24px; border: 4px solid var(--sel-bg); pointer-events: none; }
+.ie-h.nw { left: -4px; top: -4px; border-right: 0; border-bottom: 0; }
+.ie-h.ne { right: -4px; top: -4px; border-left: 0; border-bottom: 0; }
+.ie-h.sw { left: -4px; bottom: -4px; border-right: 0; border-top: 0; }
+.ie-h.se { right: -4px; bottom: -4px; border-left: 0; border-top: 0; }
+.ie-texts { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.ie-text { position: absolute; font-weight: 800; line-height: 1.2; white-space: pre; padding: 0; animation: ie-pop .18s ease both; }
+.ie-holder.texting .ie-text { pointer-events: auto; cursor: move; outline: 1px dashed rgba(255,255,255,.6); }
+.ie-holder.texting .ie-text.sel { outline: 2px solid var(--sel-bg); }
+@keyframes ie-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ie-pop { from { opacity: 0; transform: scale(.8); } to { opacity: 1; transform: none; } }
+.ie-panel { position: relative; min-height: 112px; overflow: hidden; }
+.ie-pin { padding: 10px 14px 6px; display: grid; gap: 10px; align-content: start; }
+.ie-pin.enter { animation: ie-in .22s cubic-bezier(.2,.8,.3,1) both; }
+.ie-pin.leave { position: absolute; inset: 0 0 auto; animation: ie-out .16s ease both; pointer-events: none; }
+@keyframes ie-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes ie-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-10px); } }
+.ie-row { display: flex; gap: 10px; align-items: center; }
+.ie-row.center { justify-content: center; }
+.ie-sep { width: 1px; height: 26px; background: rgba(255,255,255,.2); }
+.ie-ib { width: 44px; height: 44px; flex: none; border-radius: 50%; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); color: #fff; display: grid; place-items: center; padding: 0; }
+.ie-ib svg { width: 22px; height: 22px; }
+.ie-ib[aria-pressed="true"], .ie-ib.primary { background: var(--sel-bg); color: var(--sel-ink); border-color: var(--sel-bg); }
+.ie-ib:disabled { opacity: .35; }
+.ie-ib.dot i { display: block; border-radius: 50%; background: currentColor; }
+.ie-chip { border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); color: #fff; border-radius: 999px; padding: 8px 18px; font-size: 14px; font-weight: 700; }
+.ie-chip[aria-pressed="true"] { background: var(--sel-bg); color: var(--sel-ink); border-color: var(--sel-bg); }
+.ie-row.params { gap: 6px; justify-content: space-around; }
+.ie-param { border: 0; background: none; color: #c9d2ea; display: grid; justify-items: center; gap: 3px; padding: 0; min-width: 52px; }
+.ie-param .pc { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,.3); display: grid; place-items: center; }
+.ie-param .pc svg { width: 22px; height: 22px; }
+.ie-param small { font-size: 12px; font-variant-numeric: tabular-nums; }
+.ie-param[aria-pressed="true"] { color: var(--sel-bg); }
+.ie-param[aria-pressed="true"] .pc { border-color: var(--sel-bg); background: rgba(79,210,255,.16); }
+.ie-param.auto .pc { background: var(--sel-bg); color: var(--sel-ink); border-color: var(--sel-bg); }
+/* 目盛り: 左右に滑らせて値を変える。真ん中の線が今の値 */
+.ie-ruler { position: relative; display: grid; justify-items: center; gap: 4px; touch-action: none; cursor: ew-resize; outline: none; }
+.ier-val { font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; color: #fff; }
+.ie-ruler.at-snap .ier-val { color: var(--sel-bg); }
+.ier-track { position: relative; width: 100%; height: 34px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent); }
+.ier-strip { position: absolute; left: 50%; top: 6px; height: 22px; will-change: transform;
+  background-image: repeating-linear-gradient(90deg, rgba(255,255,255,.8) 0 2px, transparent 2px 50px), repeating-linear-gradient(90deg, rgba(255,255,255,.4) 0 1px, transparent 1px 10px);
+  background-size: calc(100% + 2px) 100%, calc(100% + 1px) 10px; background-position: 0 0, 0 6px; background-repeat: no-repeat; }
+.ier-snap { position: absolute; top: -6px; width: 6px; height: 6px; margin-left: -2px; border-radius: 50%; background: var(--sel-bg); }
+.ier-needle { position: absolute; left: 50%; top: 2px; bottom: 2px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--sel-bg); }
+.ie-colors { display: flex; gap: 12px; justify-content: center; }
+.ie-sw { width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,.4); padding: 0; }
 .ie-sw[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--sel-bg); }
-.ie-input { flex: 1; min-width: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); color: #fff; padding: 8px 10px; font-size: 16px; resize: none; }
-.ie-tabs { display: flex; justify-content: space-around; border-top: 1px solid rgba(255,255,255,.12); padding: 6px 4px; }
-.ie-tabs button { border: 0; background: none; color: #9aa6c4; display: grid; justify-items: center; gap: 2px; font-size: 12px; padding: 4px 10px; border-radius: 10px; }
-.ie-tabs button svg { width: 24px; height: 24px; }
+.ie-input { flex: 1; min-width: 0; border-radius: 10px; border: 1px solid rgba(255,255,255,.3); background: rgba(255,255,255,.08); color: #fff; padding: 9px 10px; font-size: 16px; resize: none; user-select: text; -webkit-user-select: text; }
+.ie-tabs { display: flex; justify-content: space-around; border-top: 1px solid rgba(255,255,255,.12); padding: 6px 4px 2px; }
+.ie-tabs button { border: 0; background: none; color: #9aa6c4; display: grid; justify-items: center; gap: 2px; font-size: 12px; padding: 4px 8px; border-radius: 10px; transition: color .15s; }
+.ie-tabs button svg { width: 24px; height: 24px; transition: transform .2s; }
 .ie-tabs button[aria-selected="true"] { color: var(--sel-bg); }
+.ie-tabs button[aria-selected="true"] svg { transform: translateY(-2px) scale(1.08); }
+/* 保存は下に（上部バーの保存ボタンと重ならないように） */
+.ie-foot { padding: 6px 14px 10px; }
+.ie-save { width: 100%; border: 0; border-radius: 999px; background: var(--sel-bg); color: var(--sel-ink); font-weight: 800; padding: 12px; font-size: 16px; }
 /* 「#」の候補（これまでに使ったタグ）。ボタンの列のすぐ上に横に並べる */
 .tag-suggest { position: fixed; left: 0; right: 0; z-index: 61; display: flex; gap: 6px; padding: 8px 10px; overflow-x: auto; scrollbar-width: none;
   background: var(--surface); border-top: 1px solid var(--line); }
@@ -728,6 +781,17 @@ body.editing-body .edit-actions { display: none; }
 @keyframes toastLife { 0% { opacity: 0; transform: translateY(-8px); } 8% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0; } }
 .modal-scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 90; display: grid; place-items: center; padding: 16px; }
 .modal { background: var(--surface); border-radius: var(--radius); border-top: 4px solid var(--accent); box-shadow: var(--shadow); width: min(380px, 100%); padding: 20px; }
+/* 確認・設定などの小窓は、ふわっと出して、閉じるときはすっと消す */
+.modal-scrim { animation: ie-fade .16s ease both; }
+.modal-scrim .modal { animation: modal-in .2s cubic-bezier(.2,.8,.3,1.15) both; }
+.modal-scrim.leaving { animation: lb-out .16s ease both; pointer-events: none; }
+.modal-scrim.leaving .modal { animation: modal-out .16s ease both; }
+@keyframes modal-in { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes modal-out { to { opacity: 0; transform: scale(.97); } }
+.menu:not([hidden]), .pop, .tag-suggest:not([hidden]) { animation: menu-in .16s cubic-bezier(.2,.8,.3,1) both; transform-origin: top right; }
+.menu.closing { animation: menu-out .14s ease both; pointer-events: none; }
+@keyframes menu-in { from { opacity: 0; transform: scale(.92) translateY(-4px); } to { opacity: 1; transform: none; } }
+@keyframes menu-out { to { opacity: 0; transform: scale(.94) translateY(-4px); } }
 .modal.wide { width: min(560px, 100%); max-height: min(80vh, 640px); display: flex; flex-direction: column; }
 .modal h3 { margin: 0 0 6px; font-size: 17px; font-weight: 700; }
 .modal-head { display: flex; align-items: center; gap: 8px; margin: -8px -10px 4px 0; }
@@ -735,11 +799,29 @@ body.editing-body .edit-actions { display: none; }
 .modal p { margin: 0 0 16px; color: var(--ink-2); font-size: 14px; }
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .picker-list { overflow: auto; display: grid; gap: 6px; margin-block: 10px; min-height: 0; flex: 1; }
-.lightbox { position: fixed; inset: 0; z-index: 95; background: rgba(10,10,14,.9); display: grid; place-items: center; padding: 16px; }
-.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; }
-.lightbox button { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); right: 12px; background: rgba(255,255,255,.15); color: #fff; border: 0; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; }
+.lightbox { position: fixed; inset: 0; z-index: 95; background: rgba(10,10,14,.92); display: grid; place-items: center; padding: 64px 12px 24px; animation: ie-fade .18s ease both; }
+.lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px; animation: lb-zoom .22s cubic-bezier(.2,.8,.3,1) both; }
+.lightbox.leaving { animation: lb-out .18s ease both; pointer-events: none; }
+@keyframes lb-zoom { from { transform: scale(.9); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes lb-out { to { opacity: 0; } }
+.lb-btn { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 10px); background: rgba(255,255,255,.15); color: #fff; border: 0; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.lb-btn svg { width: 24px; height: 24px; }
+.lb-close { left: 12px; } .lb-save { right: 12px; }
 
+/* 閲覧画面を開く・閉じる動き（X の投稿を開く・閉じるときのように） */
+.nav-ghost { position: fixed; inset: 0; overflow: hidden; pointer-events: none; transform: translateX(0); }
+.nav-ghost.push { z-index: 30; animation: nav-under .28s cubic-bezier(.2,.8,.2,1) both; }
+.nav-ghost.push::after { content: ""; position: absolute; inset: 0; background: #000; animation: nav-dim-in .28s ease both; }
+.view-screen.nav-in { background: var(--bg); z-index: 40; animation: nav-in .28s cubic-bezier(.2,.8,.2,1) both; box-shadow: -8px 0 24px rgba(0,10,40,.25); }
+.nav-ghost.pop { background: var(--bg); z-index: 60; animation: nav-out .26s cubic-bezier(.4,0,.6,1) both; box-shadow: -8px 0 24px rgba(0,10,40,.25); }
+.nav-dim { position: fixed; inset: 0; z-index: 59; background: #000; pointer-events: none; animation: nav-dim-out .26s ease both; }
+@keyframes nav-in { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes nav-under { from { transform: none; } to { transform: translateX(-22%); } }
+@keyframes nav-out { from { transform: none; } to { transform: translateX(100%); } }
+@keyframes nav-dim-in { from { opacity: 0; } to { opacity: .22; } }
+@keyframes nav-dim-out { from { opacity: .22; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
+  .img-editor, .img-editor *, .lightbox, .lightbox *, .modal-scrim, .modal, .menu, .pop { animation: none !important; }
   .toast { animation: toastFade 3s steps(1) forwards; }
   @keyframes toastFade { 0% { opacity: 1; } 100% { opacity: 0; } }
   * { transition: none !important; }
@@ -1329,7 +1411,7 @@ window.addEventListener("popstate", (e) => {
   if (current().name === "search" && homeAux(searchState()) && depth >= UI.stack.length && !(e.state && e.state.panel)) { const st0 = searchState(); st0.scrolls = st0.scrolls || {}; st0.scrolls[st0.tab] = window.scrollY; resetHome(st0); render(); return; }
   if (depth >= UI.stack.length) return;
   // 画像の拡大表示や確認ウィンドウが開いていれば、まずそれを閉じる
-  const overlay = [...document.querySelectorAll(".lightbox, .modal-scrim, .img-editor")].pop();
+  const overlay = [...document.querySelectorAll(".lightbox:not(.leaving), .modal-scrim:not(.leaving), .img-editor:not(.leaving)")].pop();
   if (overlay) { try { history.pushState({ depth: UI.stack.length }, ""); } catch {} overlay.__close ? overlay.__close() : overlay.remove(); return; }
   // 編集中の未保存の変更があれば確認
   if (UI.leaveGuard && UI.leaveGuard()) { try { history.pushState({ depth: UI.stack.length }, ""); } catch {} return; }
@@ -1411,7 +1493,13 @@ function toast(msg, ng) {
 }
 function modal({ title, message, buttons, wide, body, closeX }) {
   return new Promise(resolve => {
-    const close = (v) => { scrim.remove(); document.removeEventListener("keydown", onKey); resolve(v); };
+    let closed = false;
+    const close = (v) => {
+      if (closed) return; closed = true;
+      document.removeEventListener("keydown", onKey);
+      scrim.classList.add("leaving"); setTimeout(() => scrim.remove(), motionMs(160));
+      resolve(v);
+    };
     const onKey = (e) => { if (e.key === "Escape") close(null); };
     const box = h("div", { class: "modal" + (wide ? " wide" : ""), role: "dialog", "aria-modal": "true" },
       // closeX: 右上の✕で閉じる（下の「閉じる」ボタンの代わり）
@@ -1428,11 +1516,19 @@ function modal({ title, message, buttons, wide, body, closeX }) {
   });
 }
 const confirmDelete = () => modal({ title: "本当に削除しますか？", buttons: [{ label: "No", value: false }, { label: "Yes", value: true, cls: "danger-solid" }] });
-function lightbox(src) {
-  const close = () => { lb.remove(); document.removeEventListener("keydown", k); };
+/* 画像の拡大表示（X のように左上に「×」、右上に保存）。画像の外の黒い所を押しても閉じない（戻る操作・「×」・画像を押すと閉じる） */
+function lightbox(src, name) {
+  let closed = false;
+  const close = () => {
+    if (closed) return; closed = true; document.removeEventListener("keydown", k);
+    lb.classList.add("leaving"); setTimeout(() => lb.remove(), motionMs(200));
+  };
   const k = (e) => { if (e.key === "Escape") close(); };
-  const img = h("img", { src, alt: "" });
-  const lb = h("div", { class: "lightbox", onclick: (e) => { if (!e.target.closest("button")) close(); } }, img, h("button", { "aria-label": "閉じる", onclick: close }, "✕"));
+  const img = h("img", { src, alt: "", onclick: close });
+  const fname = name || ("画像_" + new Date().toISOString().slice(0, 10).replace(/-/g, "") + ".jpg");
+  const lb = h("div", { class: "lightbox" }, img,
+    h("button", { class: "lb-btn lb-close", type: "button", "aria-label": "閉じる", title: "閉じる", onclick: close }, svgIcon(ICONS.close)),
+    h("a", { class: "lb-btn lb-save", href: src, download: fname, "aria-label": "画像を端末に保存", title: "画像を端末に保存" }, svgIcon('<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>')));
   lb.__close = close;
   document.body.append(lb); document.addEventListener("keydown", k);
 }
@@ -1479,23 +1575,64 @@ function dropMissing() {
   if (atDepth() && !history.state.select) { history.back(); return; }
   UI.stack.pop(); render();
 }
+/* 動きを減らす設定の端末では、画面の動きを省く */
+const reduceMotion = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
+const motionMs = (ms) => reduceMotion() ? 0 : ms;
+/* X の投稿を開く・閉じるときのように、閲覧画面を右から重ねて開き、閉じるときは右へ滑らせて下の画面を見せる。
+   前の画面は写し（クリック等は効かない）を一時的に残して動かす */
+function screenGhost(el, kind) {
+  const g = h("div", { class: "nav-ghost " + kind, "aria-hidden": "true", inert: "" });
+  const c = el.cloneNode(true);
+  c.querySelectorAll("[id]").forEach(x => x.removeAttribute("id"));
+  c.removeAttribute("id");
+  if (!el.classList.contains("view-screen")) {
+    const r = el.getBoundingClientRect();
+    Object.assign(c.style, { position: "absolute", top: r.top + "px", left: r.left + "px", width: r.width + "px", margin: "0" });
+    // 上に貼り付いているバーは、写しでも画面の上に出す
+    const tb = c.querySelector(".topbar");
+    if (tb && !el.classList.contains("chrome-hidden")) { const t2 = tb.cloneNode(true); tb.style.visibility = "hidden"; Object.assign(t2.style, { position: "absolute", top: "env(safe-area-inset-top, 0px)", left: "0", right: "0" }); g.append(c, t2); }
+    else g.append(c);
+  } else g.append(c);
+  document.body.append(g);
+  if (el.classList.contains("view-screen")) { const a = el.querySelector(".view-main"), b = c.querySelector(".view-main"); if (a && b) b.scrollTop = a.scrollTop; }
+  const done = () => g.remove();
+  g.addEventListener("animationend", (e) => { if (e.target === g) done(); });
+  setTimeout(done, 600);
+  return g;
+}
 function render() {
   const cs = current();
   const needAtts = cs.name === "view" ? (Manager.get(cs.id) || {}).attachments
     : cs.name === "edit" ? (cs.draft ? cs.draft.attachments : (Manager.get(cs.id) || {}).attachments) : null;
   if (needAtts && needAtts.some(a => a.fileId && !FileUrls.has(a.fileId))) { ensureFileUrls(needAtts).then(render); return; }
+  const app = $("#app");
+  const prev = render.last || {}, len = UI.stack.length;
+  let anim = null;
+  if (!reduceMotion() && app.firstElementChild) {
+    if (cs.name === "view" && len > prev.len && (prev.name === "search" || prev.name === "list")) anim = "push";
+    else if (prev.name === "view" && len < prev.len && cs.name !== "edit") anim = "pop";
+  }
+  if (anim) screenGhost(app.firstElementChild, anim);
+  render.last = { name: cs.name, len };
   cleanupFns.forEach(f => { try { f(); } catch {} }); cleanupFns = [];
-  const app = $("#app"); app.replaceChildren();
+  app.replaceChildren();
   const s = current();
   if (s.name === "search") app.append(renderSearch(s));
   else if (s.name === "view") { if (!Manager.get(s.id)) return dropMissing(); app.append(renderView(s)); }
   else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
   else if (s.name === "report") app.append(renderReport(s));
+  if (anim === "push" && app.firstElementChild) {
+    // 動いている間だけ下地を塗る（前の画面が透けないように）。動き終わったら元に戻す
+    const v = app.firstElementChild; v.classList.add("nav-in");
+    const end = () => v.classList.remove("nav-in");
+    v.addEventListener("animationend", (e) => { if (e.target === v) end(); }); setTimeout(end, 600);
+  }
+  if (anim === "pop") { const dim = h("div", { class: "nav-dim", "aria-hidden": "true" }); document.body.append(dim); setTimeout(() => dim.remove(), 400); }
   // スマホ上端の帯の色は、新しい画面が表示されてから変える（先に色だけ変わると、遅れて画面が出るように見えるため）
   // （描いた直後の2フレームでは、端末によってはまだ前の画面が見えているので、さらに少し待つ）
   clearTimeout(render.tc);
-  requestAnimationFrame(() => requestAnimationFrame(() => { render.tc = setTimeout(syncThemeColor, 120); }));
+  requestAnimationFrame(() => requestAnimationFrame(() => { render.tc = setTimeout(syncThemeColor, anim ? 230 : 120); }));
 }
 
 /* 下にスクロールしたら、上のバーと下のアイコンの列（と「＋」）を画面の外へしまい、上にスクロールしたら出す（X のように）。
@@ -1802,7 +1939,8 @@ function cardImage(m) {
   return inBody || imgs[0];
 }
 /* 本文の文字に、検索の言葉の強調とハッシュタグの色を付ける */
-const HASH_RE = /(^|[\s\u3000])([#＃][^\s\u3000#＃、。，．,.!！?？「」『』()（）\[\]【】]+)/g;
+// 「#」の前は、行の始め・空白・句読点やかっこ（「景色。#京都」のように文の続きでもタグになる。「C#」などはタグにしない）
+const HASH_RE = /(^|[\s\u3000、。，．,.!！?？「」『』()（）\[\]【】])([#＃][^\s\u3000#＃、。，．,.!！?？「」『』()（）\[\]【】]+)/g;
 function decorateText(text, terms) {
   const frag = document.createDocumentFragment();
   const re = terms.length ? termsRe(terms) : null;
@@ -2328,6 +2466,13 @@ window.addEventListener("beforeprint", () => { if (isDark()) { printTheme = docu
 window.addEventListener("afterprint", () => { if (printTheme != null) { if (printTheme) document.documentElement.setAttribute("data-theme", printTheme); else document.documentElement.removeAttribute("data-theme"); printTheme = null; } });
 
 /* ---------- メモ閲覧画面 ---------- */
+/* ジャンルが2つ以上のときの上部バー: 色を混ぜずに、斜めの線でくっきり塗り分ける（左が最初のジャンル） */
+function barStripes(gs) {
+  const col = (g) => `var(--bar-view-${GENRE_KEY[g]})`;
+  const cuts = gs.length === 2 ? [0, 60, 100] : [0, 52, 76, 100];
+  const stops = gs.map((g, i) => `${col(g)} ${cuts[i]}% ${cuts[i + 1]}%`).join(", ");
+  return `background-color: ${col(gs[0])}; background-image: linear-gradient(180deg, rgba(120,220,255,0) 45%, rgba(120,220,255,.18) 100%), linear-gradient(105deg, ${stops});`;
+}
 function renderView(s) {
   const m = Manager.get(s.id);
   const menu = h("div", { class: "menu", hidden: true },
@@ -2339,13 +2484,14 @@ function renderView(s) {
       try { await Manager.deleteMemo(m.id); toast("メモを削除しました"); back(); }
       catch { toast("削除できませんでした。通信状態を確認してもう一度お試しください。", true); }
     } }, "🗑 削除"));
-  const menuBtn = h("button", { class: "icon-btn ico menu-btn", type: "button", "aria-label": "編集・削除のメニュー", title: "編集・削除のメニュー", onclick: (e) => { e.stopPropagation(); menu.hidden = !menu.hidden; } }, svgIcon(ICONS.more));
-  const closeMenu = () => { menu.hidden = true; };
+  const menuBtn = h("button", { class: "icon-btn ico menu-btn", type: "button", "aria-label": "編集・削除のメニュー", title: "編集・削除のメニュー", onclick: (e) => { e.stopPropagation(); if (menu.hidden) { menu.classList.remove("closing"); menu.hidden = false; } else closeMenu(); } }, svgIcon(ICONS.more));
+  // 閉じるときも少し縮めながら消す
+  const closeMenu = () => { if (menu.hidden || menu.classList.contains("closing")) return; menu.classList.add("closing"); setTimeout(() => { menu.hidden = true; menu.classList.remove("closing"); }, motionMs(140)); };
   document.addEventListener("click", closeMenu); cleanupFns.push(() => document.removeEventListener("click", closeMenu));
 
   const body = h("div", { class: "view-body", html: resolveBodyHtml(m.bodyHtml, m.attachments) });
   body.addEventListener("click", (e) => {
-    if (e.target.tagName === "IMG") { lightbox(e.target.src); return; }
+    if (e.target.tagName === "IMG") { const a = (m.attachments || []).find(x => x.id === e.target.dataset.att); lightbox(e.target.src, a && a.name); return; }
     const ht = e.target.closest(".hashtag"); if (ht) tagSearch(normTag(ht.textContent));
   });
   // 本文の「#〜」はタグの色にして、押すとそのタグのメモを探せるようにする（X のハッシュタグのように）
@@ -2353,21 +2499,29 @@ function renderView(s) {
   const bodyTags = hashTags(m.bodyText);
   const extraTags = (m.tags || []).filter(t => !bodyTags.includes(t));
 
+  const folders = (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean);
+  // 下の「添付ファイル」は、写真・動画以外のファイルがあるときだけ（写真・動画は本文に出ている）
+  const fileAtts = (m.attachments || []).filter(a => !["image", "video"].includes(fileKind(a)));
   const doc = h("article", { class: "view-doc" },
     // 題名・ジャンルは上部バーへ。本文の上は日付と所属フォルダだけ、タグは本文の下（添付の上）
-    h("div", { class: "view-meta" }, dateLine(m), (m.listIds || []).map(id => Manager.lists.get(id)).filter(Boolean).map(l =>
-      h("button", { class: "list-tag link", title: "フォルダを開く", onclick: () => go({ name: "list", id: l.id }) }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), l.name))),
+    h("div", { class: "view-meta" }, dateLine(m)),
+    folders.length ? h("div", { class: "view-folders" }, folders.map(l =>
+      h("button", { class: "view-folder", type: "button", title: "フォルダを開く", "aria-label": "フォルダ「" + l.name + "」を開く", onclick: () => go({ name: "list", id: l.id }) },
+        h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("span", { class: "vf-name" }, l.name), h("span", { class: "vf-go", "aria-hidden": "true" }, "›")))) : null,
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
     extraTags.length ? h("div", { class: "view-tags" },
       extraTags.map(t => h("button", { class: "tag-chip", type: "button", title: "このタグのメモを探す", onclick: () => tagSearch(t) }, "#" + t))) : null,
-    m.attachments.length ? attList(m.attachments) : null);
+    fileAtts.length ? attList(fileAtts) : null);
 
   const main = h("div", { class: "view-main" }, doc);
   const gs = GENRES.filter(g => (m.genres || []).includes(g));
   return h("div", { class: "screen view-screen" },
-    h("header", { class: "topbar bar-view" + (gs.length ? " g-" + gs[0] : "") },
-      // ジャンルは、背景に大きく斜めの薄い文字で示す（ペルソナシリーズの画面のような見せ方）
-      gs.length ? h("div", { class: "genre-mark-wrap", "aria-hidden": "true" }, h("div", { class: "genre-mark" }, gs.join(" "))) : null,
+    h("header", { class: "topbar bar-view" + (gs.length ? " g-" + gs[0] : "") + (gs.length > 1 ? " multi n" + gs.length : ""), style: gs.length > 1 ? barStripes(gs) : null },
+      // ジャンルは、背景に大きく斜めの薄い文字で示す（ペルソナシリーズの画面のような見せ方）。
+      // 2つ以上なら、バーをジャンルの色で斜めに塗り分け、ジャンル名は1つずつ行を分けて小さめに重ねる
+      gs.length ? h("div", { class: "genre-mark-wrap", "aria-hidden": "true" },
+        gs.length > 1 ? h("div", { class: "genre-mark multi" }, gs.map(g => h("span", { class: "gm-" + GENRE_KEY[g] }, g)))
+          : h("div", { class: "genre-mark" }, gs[0])) : null,
       h("div", { class: "topbar-in wide" },
       h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←"),
       h("div", { class: "view-head" },
@@ -2416,7 +2570,7 @@ async function previewAttachment(a) {
   await ensureFileUrls([a]);
   const url = attUrl(a), kind = fileKind(a);
   if (!url) { toast("ファイルを読み込めませんでした", true); return; }
-  if (kind === "image") { lightbox(url); return; }
+  if (kind === "image") { lightbox(url, a.name); return; }
   const openBtn = h("a", { class: "btn", href: url, target: "_blank", rel: "noopener" }, "別の画面で開く ↗");
   const dlBtn = h("a", { class: "btn", href: url, download: a.name }, "端末に保存");
   let content;
@@ -2736,32 +2890,29 @@ function renderEdit(s) {
     if (openPop && !openPop.contains(e.target) && !e.target.closest(".fmt-bar") && !(e.target.tagName === "IMG" && editor.contains(e.target))) closePop();
     if (!(e.target.tagName === "IMG" && editor.contains(e.target)) && !(openPop && openPop.contains(e.target))) editor.querySelectorAll("img.img-selected").forEach(x => x.classList.remove("img-selected"));
   };
-  /* 本文の画像をタップ → 大きさを変える */
+  /* 本文の画像をタップ → 写真の編集（切り取り・大きさ・補正・描く・文字）を画面いっぱいで開く */
   editor.addEventListener("click", (e) => {
     const img = e.target.tagName === "IMG" ? e.target : null;
     if (!img) return;
-    editor.querySelectorAll("img.img-selected").forEach(x => x.classList.remove("img-selected"));
-    img.classList.add("img-selected");
-    const cur = () => Math.round(parseFloat(img.style.width) || 100);
-    const val = h("span", {}, cur() + "%");
-    const range = h("input", { type: "range", min: "10", max: "100", step: "5", value: String(cur()), "aria-label": "画像の大きさ" });
-    const presets = [["小", 25], ["中", 50], ["大", 75], ["全幅", 100]];
-    const presetBtns = presets.map(([n, v]) => h("button", { type: "button", class: "btn", "aria-pressed": String(cur() === v), onclick: () => apply(v) }, n));
-    const apply = (v) => {
-      img.style.width = v + "%"; range.value = String(v); val.textContent = v + "%";
-      presetBtns.forEach((b, i) => b.setAttribute("aria-pressed", String(presets[i][1] === v)));
-      markDirty();
-    };
-    range.addEventListener("input", () => apply(parseInt(range.value, 10)));
-    showPop(img, h("div", { class: "img-size" },
-      h("div", { class: "cap" }, h("b", {}, "画像の大きさ"), val),
-      h("div", { class: "row" }, presetBtns),
-      range,
-      h("div", { class: "row" }, h("span", { class: "spacer" }),
-        h("button", { type: "button", class: "btn ghost danger", onclick: () => { img.remove(); closePop(); markDirty(); } }, "削除"),
-        h("button", { type: "button", class: "btn", onclick: () => { closePop(); editPlaced(img); } }, "編集"),
-        h("button", { type: "button", class: "btn primary", onclick: () => { img.classList.remove("img-selected"); closePop(); } }, "完了"))), true);
+    e.preventDefault(); editPlaced(img);
   });
+  /* 本文の画像の右上に「×」を出し、押すとその画像を本文から消す（キーボードの削除キーでも消せる） */
+  const imgXLayer = h("div", { class: "img-x-layer", "aria-hidden": "false" });
+  const placeImgX = () => {
+    const imgs = [...editor.querySelectorAll("img[data-att]")];
+    imgXLayer.replaceChildren(...imgs.map(img => {
+      const b = h("button", { type: "button", class: "img-x", "aria-label": "この画像を消す", title: "この画像を消す",
+        onmousedown: (ev) => ev.preventDefault(),
+        onclick: () => { img.remove(); markDirty(); placeImgX(); } }, svgIcon(ICONS.close));
+      b.style.left = (img.offsetLeft + img.offsetWidth - 34) + "px"; b.style.top = (img.offsetTop + 6) + "px";
+      return b;
+    }));
+  };
+  const imgObs = new MutationObserver(() => requestAnimationFrame(placeImgX));
+  imgObs.observe(editor, { childList: true, subtree: true, attributes: true, attributeFilter: ["style", "src"] });
+  editor.addEventListener("load", () => placeImgX(), true);
+  window.addEventListener("resize", placeImgX);
+  cleanupFns.push(() => { imgObs.disconnect(); window.removeEventListener("resize", placeImgX); });
   document.addEventListener("mousedown", outside); cleanupFns.push(() => document.removeEventListener("mousedown", outside));
 
   /* 書式ツールバー */
@@ -2805,9 +2956,11 @@ function renderEdit(s) {
     if (document.activeElement === editor) editor.blur();
     else if (historyOk && history.state && history.state.edfocus) { UI.backHook = null; popAndWait(); }
     const src = new File([rec.blob], a.name, { type: a.type });
-    const f = await editImage(src);
-    img.classList.remove("img-selected");
-    if (!f || f === src) return;   // やめた・何も変えなかった
+    const res = await editImage(src, { size: Math.round(parseFloat(img.style.width) || 100) });
+    if (!res) return;   // やめた
+    if (res.size && img.style.width !== res.size + "%") { img.style.width = res.size + "%"; markDirty(); }
+    const f = res.file;
+    if (f === src) return;   // 写真は変えなかった
     try {
       const na = await storeFile(f); d.attachments.push(na);
       img.dataset.att = na.id; img.src = attUrl(na); markDirty();
@@ -2817,11 +2970,12 @@ function renderEdit(s) {
   const escName = (t) => String(t).replace(/[<>&"]/g, "");
   async function insertFiles(files) {
     let list = [...files]; if (!list.length) return;
+    let firstSize = 50;
     // 写真を1枚だけ選んだときは、先に編集（切り取り・補正・描く・文字）できるようにする
     if (list.length === 1 && /^image\/(jpeg|png|webp|heic|heif|avif|bmp)/.test(list[0].type || "")) {
-      const cropped = await editImage(list[0]);
-      if (!cropped) { restoreRange(); return; }
-      list = [cropped];
+      const res = await editImage(list[0], { size: 50 });
+      if (!res) { restoreRange(); return; }
+      list = [res.file]; firstSize = res.size || 50;
     }
     toast(list.length > 1 ? `${list.length}件を追加しています…` : "追加しています…");
     let html = "";
@@ -2829,7 +2983,7 @@ function renderEdit(s) {
       try {
         const a = await storeFile(f); d.attachments.push(a);
         const k = fileKind(a);
-        html += k === "image" ? `<img data-att="${a.id}" src="${attUrl(a)}" alt="" style="width:50%"><div><br></div>`
+        html += k === "image" ? `<img data-att="${a.id}" src="${attUrl(a)}" alt="" style="width:${firstSize}%"><div><br></div>`
           : `<a data-att="${a.id}" href="${attUrl(a)}">${KIND_ICON[k]} ${escName(a.name)}</a>&nbsp;`;
       } catch (err) { toast(err.message || `${f.name} を追加できませんでした`, true); }
     }
@@ -2848,7 +3002,7 @@ function renderEdit(s) {
     if (!sel.rangeCount || !sel.isCollapsed) return null;
     const n = sel.anchorNode; if (!n || n.nodeType !== 3 || !editor.contains(n)) return null;
     const before = n.data.slice(0, sel.anchorOffset).replace(/\u200B/g, "");
-    const m = /(^|[\s\u3000])[#＃]([^\s\u3000#＃]*)$/.exec(before);
+    const m = /(^|[\s\u3000、。，．,.!！?？「」『』()（）\[\]【】])[#＃]([^\s\u3000#＃、。，．,.!！?？「」『』()（）\[\]【】]*)$/.exec(before);
     return m ? { node: n, offset: sel.anchorOffset, part: m[2] } : null;
   };
   const hideSuggest = () => { tagSuggest.hidden = true; tagSuggest.replaceChildren(); };
@@ -2983,7 +3137,7 @@ function renderEdit(s) {
   }
   cleanupFns.push(() => { document.body.classList.remove("editing-body"); if (UI.backHook) UI.backHook = null; });
 
-  const bodyField = h("div", { class: "field body-field" }, h("div", { class: "editor-box" }, fmtBar, editor));
+  const bodyField = h("div", { class: "field body-field" }, h("div", { class: "editor-box" }, fmtBar, editor, imgXLayer));
 
   // lists
   const listBox = h("div", { class: "chips" });
@@ -3111,50 +3265,113 @@ async function shrinkImage(file, maxSide, quality) {
     return await new Promise(res => c.toBlob(res, "image/jpeg", quality));
   } finally { URL.revokeObjectURL(url); }
 }
-/* 写真の編集（X の画像編集のように画面いっぱいで）: 切り取り・補正（自動／明るさ・コントラスト・彩度）・描く・文字。
-   戻り値: 編集したファイル（何も変えなければ元のファイル）。やめたら null */
-function editImage(file) {
+/* 写真の編集（X の画像編集のように画面いっぱいで）: 切り取り・大きさ（本文での表示幅）・補正（自動／明るさ・コントラスト・彩度）・描く（消しゴム付き）・文字。
+   opts.size … 本文での表示幅（%）。渡したときだけ「大きさ」を出す。
+   戻り値: { file（何も変えなければ元のファイル）, size }。やめたら null */
+const IE_ICON = {
+  crop: '<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>',
+  size: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 12h10M7 12l2.5-2.5M7 12l2.5 2.5M17 12l-2.5-2.5M17 12l-2.5 2.5"/>',
+  adjust: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  draw: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  text: '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>',
+  reset: '<path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/>',
+  undo: '<path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>',
+  pen: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  eraser: '<path d="M7 21h10"/><path d="M5.5 14.5l8-8a2 2 0 0 1 2.8 0l2.2 2.2a2 2 0 0 1 0 2.8L12 18H8.5z"/><path d="M9.5 10.5l5 5"/>',
+  auto: '<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  bright: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  contrast: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/>',
+  satur: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  add: '<path d="M12 5v14M5 12h14"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
+};
+/* 目盛りを左右に滑らせて値を決める（X・スマホの写真編集のように）。基準値（100%）の近くでは基準値に吸い付く */
+function ieRuler({ min, max, value, snap, unit = "%", onInput }) {
+  const PPU = 5;   // 1 あたりの幅（px）。細かく合わせやすいよう広めに
+  const strip = h("div", { class: "ier-strip", style: `width:${(max - min) * PPU}px` },
+    snap != null ? h("span", { class: "ier-snap", style: `left:${(snap - min) * PPU}px` }) : null);
+  const out = h("div", { class: "ier-val" });
+  const el = h("div", { class: "ie-ruler", role: "slider", tabindex: "0", "aria-valuemin": String(min), "aria-valuemax": String(max) }, out,
+    h("div", { class: "ier-track" }, strip, h("span", { class: "ier-needle" })));
+  let v = value, drag = null, snapped = v === snap;
+  const show = () => { strip.style.transform = `translateX(${-(v - min) * PPU}px)`; out.textContent = Math.round(v) + unit; el.setAttribute("aria-valuenow", String(Math.round(v))); el.classList.toggle("at-snap", snap != null && Math.round(v) === snap); };
+  const set = (nv, fire = true) => {
+    nv = Math.min(max, Math.max(min, nv));
+    if (snap != null && Math.abs(nv - snap) <= 2.5) { if (!snapped && fire) try { navigator.vibrate && navigator.vibrate(8); } catch {} nv = snap; snapped = true; } else snapped = false;
+    v = nv; show(); if (fire) onInput(Math.round(v));
+  };
+  el.addEventListener("pointerdown", (e) => { e.preventDefault(); el.setPointerCapture(e.pointerId); drag = { x: e.clientX, v0: v }; el.classList.add("dragging"); });
+  el.addEventListener("pointermove", (e) => { if (drag) set(drag.v0 - (e.clientX - drag.x) / PPU); });
+  const end = () => { drag = null; el.classList.remove("dragging"); };
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("wheel", (e) => { e.preventDefault(); set(v + (e.deltaY > 0 ? 1 : -1)); }, { passive: false });
+  el.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft") set(v - 1); if (e.key === "ArrowRight") set(v + 1); });
+  show();
+  el.setValue = (nv) => { v = nv; snapped = nv === snap; show(); };
+  return el;
+}
+function editImage(file, opts = {}) {
   return new Promise(async (resolve) => {
     let bmp;
-    try { bmp = await createImageBitmap(file); } catch { resolve(file); return; }   // 読めない形式はそのまま使う
+    try { bmp = await createImageBitmap(file); } catch { resolve({ file, size: opts.size }); return; }   // 読めない形式はそのまま使う
     const k0 = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
     const mk = (w, hh) => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(hh)); return c; };
     let base = mk(bmp.width * k0, bmp.height * k0); base.getContext("2d").drawImage(bmp, 0, 0, base.width, base.height);
     let over = mk(base.width, base.height);
     const adj = { b: 100, c: 100, s: 100 };
-    let changed = false, tool = "crop", color = "#ff3b30", size = 8, undo = [], textObj = null;
+    let changed = false, tool = "crop", color = "#ff3b30", size = 8, erase = false, undo = [];
+    let size0 = opts.size, sizePct = opts.size;
+    let texts = [], selText = null;   // 文字は保存するまで動かしたり消したりできる
+    let param = "b";
     const filterStr = () => `brightness(${adj.b}%) contrast(${adj.c}%) saturate(${adj.s}%)`;
     const stage = h("div", { class: "ie-stage" });
     const holder = h("div", { class: "ie-holder" });
     stage.append(holder);
-    const box = h("div", { class: "ie-crop", hidden: true }, ...["nw", "ne", "sw", "se"].map(k => h("span", { class: "ie-h " + k, "data-h": k })));
-    const textEl = h("div", { class: "ie-text", hidden: true });
+    // 切り取りの枠。四隅・四辺のつまみは見た目だけで、つかむ判定は広め（画面のどこからでも近い所をつかめる）
+    const box = h("div", { class: "ie-crop" }, ...["nw", "ne", "sw", "se"].map(k => h("span", { class: "ie-h " + k })));
+    const textLayer = h("div", { class: "ie-texts" });
     const mount = () => {
       base.className = "ie-base"; over.className = "ie-over";
       base.style.filter = filterStr();
-      holder.replaceChildren(base, over, box, textEl);
+      holder.replaceChildren(base, over, textLayer, box);
       requestAnimationFrame(fit);
     };
-    // 画面の大きさに合わせて表示する（キャンバスの中身の大きさは変えない）
+    // 画面の大きさに合わせて表示する（四隅をつかめるよう、周りに余白を残す）
     const fit = () => {
-      const sw = stage.clientWidth - 24, sh = stage.clientHeight - 24;
+      const sw = stage.clientWidth - 48, sh = stage.clientHeight - 48;
       if (sw <= 0 || sh <= 0) { requestAnimationFrame(fit); return; }
-      const sc = Math.min(sw / base.width, sh / base.height, 1);
+      const sc = Math.min(sw / base.width, sh / base.height, 2);
       holder.style.width = Math.round(base.width * sc) + "px"; holder.style.height = Math.round(base.height * sc) + "px";
-      if (tool === "crop") resetCrop();
-      placeText();
+      if (tool === "crop") resetCrop(); else drawCrop();
+      placeTexts();
     };
     const disp = () => holder.getBoundingClientRect();
     const toBase = (e) => { const r = disp(); return { x: (e.clientX - r.left) * base.width / r.width, y: (e.clientY - r.top) * base.height / r.height }; };
-    /* ---- 切り取り: 枠は表示の大きさ（px）で持つ。四隅のつまみは枠の内側に大きめに置き、小さな画像でもつかめるようにする ---- */
+    /* ---- 切り取り ---- */
     let cr = null;
     const resetCrop = () => { const r = disp(); cr = { x: 0, y: 0, w: r.width, h: r.height }; drawCrop(); };
     const drawCrop = () => { if (!cr) return; Object.assign(box.style, { left: cr.x + "px", top: cr.y + "px", width: cr.w + "px", height: cr.h + "px" }); };
     let drag = null;
-    box.addEventListener("pointerdown", (e) => { e.preventDefault(); box.setPointerCapture(e.pointerId); drag = { k: e.target.dataset.h || "move", sx: e.clientX, sy: e.clientY, r0: { ...cr } }; });
-    box.addEventListener("pointermove", (e) => {
-      if (!drag) return;
-      const r = disp(), W = r.width, H = r.height, MIN = 48, o = drag.r0;
+    const pickCrop = (e) => {
+      const r = disp(), px = e.clientX - r.left, py = e.clientY - r.top, R = 44, E = 26;
+      const L = cr.x, T = cr.y, Rt = cr.x + cr.w, B = cr.y + cr.h;
+      const corners = { nw: [L, T], ne: [Rt, T], sw: [L, B], se: [Rt, B] };
+      let best = null, bd = R;
+      for (const [k, [cx, cy]] of Object.entries(corners)) { const d = Math.hypot(px - cx, py - cy); if (d < bd) { bd = d; best = k; } }
+      if (best) return best;
+      const inX = px > L - E && px < Rt + E, inY = py > T - E && py < B + E;
+      if (inX && Math.abs(py - T) < E) return "n"; if (inX && Math.abs(py - B) < E) return "s";
+      if (inY && Math.abs(px - L) < E) return "w"; if (inY && Math.abs(px - Rt) < E) return "e";
+      if (px > L && px < Rt && py > T && py < B) return "move";
+      return null;
+    };
+    const cropDown = (e) => {
+      const k = pickCrop(e); if (!k) return false;
+      stage.setPointerCapture(e.pointerId); drag = { k, sx: e.clientX, sy: e.clientY, r0: { ...cr } }; box.classList.add("active"); return true;
+    };
+    const cropMove = (e) => {
+      const r = disp(), W = r.width, H = r.height, MIN = 40, o = drag.r0;
       const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
       let { x, y, w, h: hh } = o;
       if (drag.k === "move") { x = Math.min(Math.max(0, o.x + dx), W - o.w); y = Math.min(Math.max(0, o.y + dy), H - o.h); }
@@ -3165,122 +3382,182 @@ function editImage(file) {
         if (drag.k.includes("s")) hh = Math.min(Math.max(MIN, o.h + dy), H - o.y);
       }
       cr = { x, y, w, h: hh }; drawCrop();
-    });
-    const endDrag = () => { drag = null; };
-    box.addEventListener("pointerup", endDrag); box.addEventListener("pointercancel", endDrag);
+    };
     const applyCrop = () => {
       if (!cr) return;
       const r = disp(), kx = base.width / r.width, ky = base.height / r.height;
       const sx = Math.round(cr.x * kx), sy = Math.round(cr.y * ky), w = Math.round(cr.w * kx), hh = Math.round(cr.h * ky);
+      cr = null;
       if (sx <= 0 && sy <= 0 && w >= base.width - 1 && hh >= base.height - 1) return;
       const nb = mk(w, hh), no = mk(w, hh);
       nb.getContext("2d").drawImage(base, sx, sy, w, hh, 0, 0, w, hh);
       no.getContext("2d").drawImage(over, sx, sy, w, hh, 0, 0, w, hh);
-      base = nb; over = no; undo = []; changed = true; cr = null; mount();
+      texts.forEach(t => { t.x -= sx; t.y -= sy; });
+      base = nb; over = no; undo = []; changed = true; mount();
     };
-    /* ---- 描く ---- */
+    /* ---- 描く・消しゴム ---- */
     const octx = () => over.getContext("2d");
     const snap = () => { undo.push(octx().getImageData(0, 0, over.width, over.height)); if (undo.length > 15) undo.shift(); };
     let pen = null;
-    holder.addEventListener("pointerdown", (e) => {
-      if (tool !== "draw" || e.target === box || box.contains(e.target)) return;
-      e.preventDefault(); holder.setPointerCapture(e.pointerId); snap();
+    const penDown = (e) => {
+      stage.setPointerCapture(e.pointerId); snap();
       const p = toBase(e), c = octx();
-      c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = color; c.lineWidth = size * base.width / disp().width;
+      c.globalCompositeOperation = erase ? "destination-out" : "source-over";
+      c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = color; c.lineWidth = (erase ? size * 2.5 : size) * base.width / disp().width;
       c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x + 0.1, p.y + 0.1); c.stroke();
       pen = p; changed = true;
-    });
-    holder.addEventListener("pointermove", (e) => {
-      if (!pen) return;
-      const p = toBase(e), c = octx();
-      c.beginPath(); c.moveTo(pen.x, pen.y); c.lineTo(p.x, p.y); c.stroke(); pen = p;
-    });
-    const endPen = () => { if (!pen) return; pen = null; drawPanel(); };   // 「取り消し」を押せるように
-    holder.addEventListener("pointerup", endPen); holder.addEventListener("pointercancel", endPen);
-    /* ---- 文字: 置いた文字は指で動かせる。別の道具に替えたとき・保存したときに画像に書き込む ---- */
-    const placeText = () => {
-      if (!textObj) { textEl.hidden = true; return; }
-      const r = disp(), k = r.width / base.width;
-      textEl.hidden = false; textEl.textContent = textObj.text;
-      Object.assign(textEl.style, { left: textObj.x * k + "px", top: textObj.y * k + "px", color: textObj.color, fontSize: textObj.px * k + "px" });
+    };
+    const penMove = (e) => { const p = toBase(e), c = octx(); c.beginPath(); c.moveTo(pen.x, pen.y); c.lineTo(p.x, p.y); c.stroke(); pen = p; };
+    /* ---- 文字: 置いた文字は保存するまで、指で動かす・押して選んで変える・消すができる ---- */
+    const textPx = () => Math.round(base.width * 0.07);
+    const placeTexts = () => {
+      const r = disp(); if (!r.width) return; const k = r.width / base.width;
+      textLayer.replaceChildren(...texts.map(t => {
+        const el = h("div", { class: "ie-text" + (t === selText ? " sel" : ""), "data-i": String(texts.indexOf(t)) }, t.text);
+        Object.assign(el.style, { left: t.x * k + "px", top: t.y * k + "px", color: t.color, fontSize: t.px * k + "px",
+          textShadow: t.color === "#ffffff" ? "0 0 3px rgba(0,0,0,.7)" : "0 0 3px rgba(255,255,255,.8)" });
+        return el;
+      }));
     };
     let tdrag = null;
-    textEl.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); textEl.setPointerCapture(e.pointerId); tdrag = { sx: e.clientX, sy: e.clientY, x: textObj.x, y: textObj.y }; });
-    textEl.addEventListener("pointermove", (e) => { if (!tdrag) return; const k = base.width / disp().width; textObj.x = tdrag.x + (e.clientX - tdrag.sx) * k; textObj.y = tdrag.y + (e.clientY - tdrag.sy) * k; placeText(); });
-    textEl.addEventListener("pointerup", () => { tdrag = null; });
-    const flattenText = () => {
-      if (!textObj) return;
-      snap();
-      const c = octx(); c.font = `bold ${textObj.px}px ${getComputedStyle(document.body).fontFamily}`; c.textBaseline = "top";
-      c.lineWidth = Math.max(2, textObj.px / 8); c.strokeStyle = textObj.color === "#ffffff" ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.75)"; c.lineJoin = "round";
-      textObj.text.split("\n").forEach((line, i) => c.strokeText(line, textObj.x, textObj.y + i * textObj.px * 1.2));
-      c.fillStyle = textObj.color;
-      textObj.text.split("\n").forEach((line, i) => c.fillText(line, textObj.x, textObj.y + i * textObj.px * 1.2));
-      textObj = null; placeText(); changed = true;
+    const textDown = (e) => {
+      const el = e.target.closest(".ie-text"); if (!el) return false;
+      const t = texts[+el.dataset.i]; stage.setPointerCapture(e.pointerId);
+      tdrag = { t, sx: e.clientX, sy: e.clientY, x: t.x, y: t.y, moved: false };
+      if (selText !== t) { selText = t; drawPanel(); placeTexts(); }
+      return true;
     };
-    /* ---- 自動補正: 明るさの平均とばらつきから、明るさ・コントラストを決める ---- */
+    const textMove = (e) => { const k = base.width / disp().width; tdrag.t.x = tdrag.x + (e.clientX - tdrag.sx) * k; tdrag.t.y = tdrag.y + (e.clientY - tdrag.sy) * k; placeTexts(); };
+    const drawTexts = (ctx) => {
+      for (const t of texts) {
+        ctx.font = `bold ${t.px}px ${getComputedStyle(document.body).fontFamily}`; ctx.textBaseline = "top";
+        ctx.lineWidth = Math.max(2, t.px / 8); ctx.lineJoin = "round"; ctx.strokeStyle = t.color === "#ffffff" ? "rgba(0,0,0,.55)" : "rgba(255,255,255,.75)";
+        t.text.split("\n").forEach((line, i) => ctx.strokeText(line, t.x, t.y + i * t.px * 1.2));
+        ctx.fillStyle = t.color;
+        t.text.split("\n").forEach((line, i) => ctx.fillText(line, t.x, t.y + i * t.px * 1.2));
+      }
+    };
+    /* 画像の上の指の操作は、道具ごとにここでまとめて受ける */
+    let mode = null;
+    stage.addEventListener("pointerdown", (e) => {
+      if (e.button > 0) return;
+      e.preventDefault();
+      if (tool === "crop" && cr) mode = cropDown(e) ? "crop" : null;
+      else if (tool === "text") mode = textDown(e) ? "text" : null;
+      else if (tool === "draw" && holder.contains(e.target)) { penDown(e); mode = "draw"; }
+    });
+    stage.addEventListener("pointermove", (e) => {
+      if (mode === "crop" && drag) cropMove(e);
+      else if (mode === "draw" && pen) penMove(e);
+      else if (mode === "text" && tdrag) textMove(e);
+    });
+    const up = () => {
+      if (mode === "draw") { pen = null; octx().globalCompositeOperation = "source-over"; drawPanel(false); }
+      if (mode === "text" && tdrag) changed = true;
+      drag = null; tdrag = null; mode = null; box.classList.remove("active");
+    };
+    stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up);
+    /* ---- 自動補正: 明るさの平均とばらつきから決める。コントラストは下げない ---- */
     const autoFix = () => {
       const s = mk(64, 64 * base.height / base.width); const c = s.getContext("2d"); c.drawImage(base, 0, 0, s.width, s.height);
       const px = c.getImageData(0, 0, s.width, s.height).data; let sum = 0, sum2 = 0, n = 0;
       for (let i = 0; i < px.length; i += 4) { const L = (0.2126 * px[i] + 0.7152 * px[i + 1] + 0.0722 * px[i + 2]) / 255; sum += L; sum2 += L * L; n++; }
       const mean = sum / n, sd = Math.sqrt(Math.max(0, sum2 / n - mean * mean));
-      adj.b = Math.round(Math.min(150, Math.max(75, 100 * 0.5 / Math.max(0.05, mean))));
-      adj.c = Math.round(Math.min(150, Math.max(90, 100 * 0.22 / Math.max(0.05, sd))));
-      adj.s = 115; changed = true; base.style.filter = filterStr(); drawPanel();
+      const clamp = (v, a, b) => Math.round(Math.min(b, Math.max(a, v)));
+      adj.b = clamp(100 * Math.pow(0.5 / Math.max(0.05, mean), 0.6), 90, 135);
+      adj.c = clamp(100 * Math.pow(0.24 / Math.max(0.04, sd), 0.5), 100, 130);
+      adj.s = sd < 0.12 ? 112 : 108;
+      changed = true; base.style.filter = filterStr(); drawPanel(false);
     };
-    /* ---- 下の道具の切り替え ---- */
+    /* ---- 下の道具の切り替え（切り替えるたびに、下からふわっと出す） ---- */
     const COLORS = ["#ffffff", "#000000", "#ff3b30", "#ffcc00", "#4fd2ff", "#34c759"];
     const panel = h("div", { class: "ie-panel" });
-    const slider = (label, key) => {
-      const v = h("span", { class: "ie-val" }, adj[key] + "%");
-      const inp = h("input", { type: "range", min: key === "s" ? "0" : "50", max: key === "s" ? "200" : "150", value: String(adj[key]), "aria-label": label,
-        oninput: () => { adj[key] = +inp.value; v.textContent = inp.value + "%"; base.style.filter = filterStr(); changed = true; } });
-      return h("label", { class: "ie-slider" }, h("span", {}, label), inp, v);
-    };
-    const swatches = (onPick, cur) => h("div", { class: "ie-colors" }, COLORS.map(c => h("button", { type: "button", class: "ie-sw", style: `background:${c}`, "aria-label": c, "aria-pressed": String(c === cur), onclick: () => { onPick(c); drawPanel(); } })));
-    const drawPanel = () => {
-      box.hidden = tool !== "crop"; holder.classList.toggle("drawing", tool === "draw");
-      if (tool === "crop") panel.replaceChildren(h("p", { class: "ie-hint" }, "枠を動かしたり、四隅を引っぱったりして範囲を決めます"), h("button", { type: "button", class: "ie-btn", onclick: resetCrop }, "元に戻す"));
-      else if (tool === "adjust") panel.replaceChildren(h("button", { type: "button", class: "ie-btn ie-auto", onclick: autoFix }, "✨ 自動補正"), slider("明るさ", "b"), slider("コントラスト", "c"), slider("彩度", "s"));
-      else if (tool === "draw") panel.replaceChildren(swatches((c) => { color = c; }, color),
-        h("div", { class: "ie-row" }, [["細", 4], ["中", 8], ["太", 16]].map(([l, v]) => h("button", { type: "button", class: "ie-btn", "aria-pressed": String(size === v), onclick: () => { size = v; drawPanel(); } }, l)),
-          h("button", { type: "button", class: "ie-btn", disabled: !undo.length, onclick: () => { const d = undo.pop(); if (d) octx().putImageData(d, 0, 0); drawPanel(); } }, "取り消し")));
-      else if (tool === "text") {
-        const inp = h("textarea", { class: "ie-input", rows: "1", placeholder: "入れる文字", value: textObj ? textObj.text : "" });
-        panel.replaceChildren(h("div", { class: "ie-row" }, inp, h("button", { type: "button", class: "ie-btn primary", onclick: () => {
+    const ib = (ic, label, onclick, cls = "", extra = {}) => h("button", { type: "button", class: "ie-ib " + cls, "aria-label": label, title: label, onclick, ...extra }, svgIcon(ic));
+    const swatches = (onPick, cur) => h("div", { class: "ie-colors" }, COLORS.map(c => h("button", { type: "button", class: "ie-sw", style: `background:${c}`, "aria-label": "色 " + c, "aria-pressed": String(c === cur), onclick: () => { onPick(c); drawPanel(false); } })));
+    const PARAMS = [["b", "明るさ", IE_ICON.bright], ["c", "コントラスト", IE_ICON.contrast], ["s", "彩度", IE_ICON.satur]];
+    const drawPanel = (anim = true) => {
+      box.hidden = tool !== "crop"; holder.classList.toggle("drawing", tool === "draw"); holder.classList.toggle("texting", tool === "text");
+      let kids = [];
+      if (tool === "crop") kids = [h("div", { class: "ie-row center" }, ib(IE_ICON.reset, "切り取りを元に戻す", () => resetCrop()))];
+      else if (tool === "size") {
+        const presets = [["小", 25], ["中", 50], ["大", 75], ["全幅", 100]];
+        kids = [h("div", { class: "ie-row center" }, presets.map(([l, v]) => h("button", { type: "button", class: "ie-chip", "aria-pressed": String(sizePct === v), onclick: () => { sizePct = v; drawPanel(false); } }, l))),
+          ieRuler({ min: 10, max: 100, value: sizePct, onInput: (v) => { sizePct = v; panel.querySelectorAll(".ie-chip").forEach((b, i) => b.setAttribute("aria-pressed", String(presets[i][1] === v))); } })];
+      } else if (tool === "adjust") {
+        const ruler = ieRuler({ min: 50, max: 150, value: adj[param], snap: 100, onInput: (v) => { adj[param] = v; base.style.filter = filterStr(); changed = true; panel.querySelector(`.ie-param[data-p="${param}"] small`).textContent = v; } });
+        kids = [h("div", { class: "ie-row center params" },
+          h("button", { type: "button", class: "ie-param auto", "aria-label": "自動補正", title: "自動補正", onclick: autoFix }, h("span", { class: "pc" }, svgIcon(IE_ICON.auto)), h("small", {}, "自動")),
+          PARAMS.map(([k, l, ic]) => h("button", { type: "button", class: "ie-param", "data-p": k, "aria-label": l, title: l, "aria-pressed": String(param === k), onclick: () => { param = k; drawPanel(false); } },
+            h("span", { class: "pc" }, svgIcon(ic)), h("small", {}, String(adj[k])))),
+          h("button", { type: "button", class: "ie-param", "aria-label": "すべて100%に戻す", title: "すべて100%に戻す", onclick: () => { adj.b = adj.c = adj.s = 100; base.style.filter = filterStr(); drawPanel(false); } }, h("span", { class: "pc" }, svgIcon(IE_ICON.reset)), h("small", {}, "100%"))),
+          ruler];
+      } else if (tool === "draw") {
+        kids = [swatches((c) => { color = c; erase = false; }, erase ? null : color),
+          h("div", { class: "ie-row center" },
+            ib(IE_ICON.pen, "ペン", () => { erase = false; drawPanel(false); }, "", { "aria-pressed": String(!erase) }),
+            ib(IE_ICON.eraser, "消しゴム", () => { erase = true; drawPanel(false); }, "", { "aria-pressed": String(erase) }),
+            h("span", { class: "ie-sep" }),
+            [["細", 4], ["中", 8], ["太", 16]].map(([l, v]) => h("button", { type: "button", class: "ie-ib dot", "aria-label": "太さ " + l, title: "太さ " + l, "aria-pressed": String(size === v), onclick: () => { size = v; drawPanel(false); } }, h("i", { style: `width:${v + 2}px;height:${v + 2}px` }))),
+            h("span", { class: "ie-sep" }),
+            ib(IE_ICON.undo, "取り消し", () => { const d = undo.pop(); if (d) octx().putImageData(d, 0, 0); drawPanel(false); }, "", { disabled: !undo.length }))];
+      } else if (tool === "text") {
+        const inp = h("textarea", { class: "ie-input", rows: "1", placeholder: selText ? "" : "入れる文字", "aria-label": "入れる文字" });
+        inp.value = selText ? selText.text : "";
+        const commit = () => {
           const t = inp.value.trim(); if (!t) { inp.focus(); return; }
-          if (textObj) { textObj.text = t; textObj.color = color; }
-          else textObj = { text: t, color, px: Math.round(base.width * 0.07), x: base.width * 0.1, y: base.height * 0.4 };
-          placeText(); changed = true;
-        } }, textObj ? "変える" : "置く")), swatches((c) => { color = c; if (textObj) { textObj.color = c; placeText(); } }, color),
-          h("p", { class: "ie-hint" }, "置いた文字は指で動かせます"));
+          if (selText) { selText.text = t; selText.color = color; }
+          else { const r = disp(); selText = { text: t, color, px: textPx(), x: base.width * 0.1, y: base.height * 0.4 - (r ? 0 : 0) }; texts.push(selText); }
+          changed = true; placeTexts(); drawPanel(false);
+        };
+        kids = [h("div", { class: "ie-row" }, inp,
+          ib(selText ? IE_ICON.check : IE_ICON.add, selText ? "文字を変える" : "文字を置く", commit, "primary"),
+          ib(IE_ICON.trash, "選んだ文字を消す", () => { texts = texts.filter(x => x !== selText); selText = null; placeTexts(); drawPanel(false); }, "", { disabled: !selText })),
+          swatches((c) => { color = c; if (selText) { selText.color = c; placeTexts(); } }, color)];
       }
+      const inner = h("div", { class: "ie-pin" + (anim ? " enter" : "") }, ...kids);
+      const old = panel.firstChild;
+      if (anim && old) { old.classList.add("leave"); old.addEventListener("animationend", () => old.remove(), { once: true }); setTimeout(() => old.remove(), motionMs(250)); panel.append(inner); }
+      else panel.replaceChildren(inner);
       tabs.querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", String(b.dataset.t === tool)));
     };
-    const setTool = (t) => { if (t === tool) return; if (tool === "crop") applyCrop(); if (tool === "text") flattenText(); tool = t; drawPanel(); if (t === "crop") resetCrop(); };
-    const tabs = h("div", { class: "ie-tabs", role: "tablist" }, [["crop", "切り取り", '<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>'], ["adjust", "補正", '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'],
-      ["draw", "描く", '<path d="M4 20h4L19 9l-4-4L4 16z"/>'], ["text", "文字", '<path d="M5 6V4h14v2M12 4v16M9 20h6"/>']].map(([t, l, ic]) =>
-      h("button", { type: "button", role: "tab", "data-t": t, onclick: () => setTool(t) }, svgIcon(ic), h("span", {}, l))));
-    const finish = (v) => { root.remove(); window.removeEventListener("resize", fit); resolve(v); };
+    const setTool = (t) => {
+      if (t === tool) return;
+      if (tool === "crop") applyCrop();
+      if (tool === "text") { selText = null; placeTexts(); }
+      tool = t; drawPanel();
+      if (t === "crop") resetCrop();
+    };
+    const TOOLS = [["crop", "切り取り"], ...(size0 != null ? [["size", "大きさ"]] : []), ["adjust", "補正"], ["draw", "描く"], ["text", "文字"]];
+    const tabs = h("div", { class: "ie-tabs", role: "tablist" }, TOOLS.map(([t, l]) =>
+      h("button", { type: "button", role: "tab", "data-t": t, onclick: () => setTool(t) }, svgIcon(IE_ICON[t]), h("span", {}, l))));
+    // 閉じるときは少しの間だけ画面を残して、指を離したときの押下がメモ画面のボタンに届かないようにする
+    let done = false;
+    const finish = (v) => {
+      if (done) return; done = true;
+      window.removeEventListener("resize", fit);
+      root.classList.add("leaving"); setTimeout(() => root.remove(), motionMs(320) || 60);
+      resolve(v);
+    };
     const save = async () => {
-      if (tool === "crop") applyCrop(); flattenText();
-      if (!changed) { finish(file); return; }
+      if (tool === "crop") applyCrop();
+      const sizeOut = sizePct;
+      if (!changed && !texts.length) { finish({ file, size: sizeOut }); return; }
       const out = mk(base.width, base.height), c = out.getContext("2d");
-      c.filter = filterStr(); c.drawImage(base, 0, 0); c.filter = "none"; c.drawImage(over, 0, 0);
+      c.filter = filterStr(); c.drawImage(base, 0, 0); c.filter = "none"; c.drawImage(over, 0, 0); drawTexts(c);
       const type = file.type === "image/png" ? "image/png" : "image/jpeg";
       const blob = await new Promise(res => out.toBlob(res, type, 0.9));
-      finish(blob ? new File([blob], (file.name || "image").replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg"), { type }) : file);
+      finish({ file: blob ? new File([blob], (file.name || "image").replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg"), { type }) : file, size: sizeOut });
     };
     const root = h("div", { class: "img-editor", role: "dialog", "aria-modal": "true", "aria-label": "写真の編集" },
       h("div", { class: "ie-top" },
-        h("button", { type: "button", class: "ie-icon", "aria-label": "やめる", onclick: () => finish(null) }, svgIcon(ICONS.close)),
-        h("b", {}, "写真の編集"),
-        h("button", { type: "button", class: "ie-save", onclick: save }, "保存")),
-      stage, panel, tabs);
+        h("button", { type: "button", class: "ie-icon", "aria-label": "やめる", title: "やめる", onclick: () => finish(null) }, svgIcon(ICONS.close)),
+        h("b", {}, "写真の編集"), h("span", { class: "ie-icon ghost" })),
+      stage, panel, tabs,
+      h("div", { class: "ie-foot" }, h("button", { type: "button", class: "ie-save", onclick: save }, "保存")));
     root.__close = () => finish(null);   // スマホの戻る操作でも閉じる（やめる）
     document.body.append(root);
     window.addEventListener("resize", fit);
-    mount(); drawPanel();
+    mount(); drawPanel(false);
   });
 }
 async function storeFile(file) {
