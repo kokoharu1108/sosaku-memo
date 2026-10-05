@@ -38,6 +38,11 @@ def tab(pg, name):
 def settings(q):
     q.click(".bottom-nav .bn-settings")
 
+def attach_image(q, choice="そのまま"):
+    """写真のボタンで画像を置く（1枚なら切り取りの小窓が出る）"""
+    q.set_input_files("#file-media", ICON); q.wait_for_selector(".crop-box")
+    q.click(f".modal button:text-is('{choice}')"); q.wait_for_selector(".editor img[data-att]")
+
 def new_memo(pg, title, genre="体験", body=None):
     pg.click(".fab"); pg.fill("#title", title); pg.click(f".genre-pick >> text={genre}")
     if body: pg.click(".editor"); pg.keyboard.insert_text(body)
@@ -55,17 +60,16 @@ with sync_playwright() as p:
     check("上部のアプリ名は参考画像の文字の形のロゴ", pg.locator(".brand svg.logo[aria-label=ヒフミヨ] path").count() >= 4)
     check("メモが一覧に出る", pg.locator(".memo-card").count() == 2)
 
-    # 検索パネル・ジャンル
+    # 検索画面（下のアイコンの「検索」）: 言葉・ジャンルで探す
     menu_go(pg, "検索"); pg.fill("#q", "火祭"); pg.keyboard.press("Enter"); time.sleep(0.2)
-    check("キーワード検索", pg.locator(".memo-card").count() == 1)
+    check("検索画面でキーワード検索", pg.inner_text(".tab-name") == "検索" and pg.locator(".search-tab .memo-card").count() == 1)
     check("検索窓の下の絞り込みが隠れない", pg.evaluate("(()=>{const s=document.querySelector('#genre-search');const r=s.getBoundingClientRect();return document.elementFromPoint(r.left+5,r.top+5)===s})()"))
-    pg.click(".filter-chip button"); pg.select_option("#genre-search", "学び"); time.sleep(0.1)
-    check("ジャンル絞り込み", pg.locator(".memo-card").count() == 1)
+    pg.fill("#q", ""); pg.keyboard.press("Enter"); pg.select_option("#genre-search", "学び"); time.sleep(0.2)
+    check("ジャンル絞り込み", pg.locator(".search-tab .memo-card").count() == 1)
     pg.click(".search-close"); time.sleep(0.2)
-    check("検索窓を閉じると検索の言葉・ジャンルの絞り込みも解除される", pg.locator(".memo-card").count() == 2 and pg.locator(".filter-chip").count() == 0 and not pg.locator(".search-panel").is_visible())
-    menu_go(pg, "検索")
-    check("もう一度開くと検索窓・ジャンルは空", pg.input_value("#q") == "" and pg.input_value("#genre-search") == "")
-    pg.click(".search-close"); time.sleep(0.2)
+    check("✕で検索の言葉・ジャンルを消せる", pg.input_value("#q") == "" and pg.input_value("#genre-search") == "")
+    menu_go(pg, "最近")
+    check("最近は絞り込まずに全部のメモ", pg.inner_text(".tab-name") == "最近" and pg.locator(".memo-card").count() == 2)
 
     # ツリー（階層）は廃止: タブ・閲覧画面・編集画面に出ない
     new_memo(pg, "鞍馬の火祭")
@@ -87,7 +91,7 @@ with sync_playwright() as p:
     check("題名はタグの有無で位置が変わらず、文字は20px", pg.evaluate("(()=>{const t=document.querySelector('header .view-title');return Math.abs(t.getBoundingClientRect().top-document.querySelector('header.topbar').getBoundingClientRect().top-39)<4&&getComputedStyle(t).fontSize==='20px'})()"))
     check("パスは右（今の画面）のタブが上に重なる", pg.evaluate("(()=>{const c=[...document.querySelectorAll('.crumbs .crumb')];return c.every((e,i)=>i===0||+getComputedStyle(e).zIndex>+getComputedStyle(c[i-1]).zIndex)})()"))
     pg.click(".view-body .hashtag"); time.sleep(0.4)
-    check("タグを押すと検索窓を開いた検索画面になる", pg.locator(".search-panel").is_visible() and pg.input_value("#q") == "#取材" and pg.locator(".memo-card", has_text="タグ付きメモ").count() == 1)
+    check("タグを押すと検索窓を開いた検索画面になる", pg.inner_text(".tab-name") == "検索" and pg.locator(".search-panel").is_visible() and pg.input_value("#q") == "#取材" and pg.locator(".memo-card", has_text="タグ付きメモ").count() == 1)
     check("パス表示はタブの形で「ホーム」から今の画面まで", pg.inner_text(".crumb.home") == "ホーム" and pg.locator(".crumbs .crumb").count() == 3 and "検索" in pg.inner_text(".crumb.current"))
     pg.go_back(); time.sleep(0.4)
     check("戻るとタグを押す前の閲覧画面に戻る", pg.inner_text("header .view-title") == "タグ付きメモ")
@@ -100,11 +104,11 @@ with sync_playwright() as p:
     check("戻る操作で前の画面へ", pg.locator(".bottom-nav").count() == 1)
 
     # 上部バーの色（画面ごとに違う色・スマホ上端の帯も同じ色）
-    tab(pg, "最近")
+    tab(pg, "最近"); time.sleep(0.2)
     bars = {}
     bars["search"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
     tc_search = pg.evaluate("document.querySelector('meta[name=theme-color]').content")
-    pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title")
+    pg.locator(".memo-card").first.click(); pg.wait_for_selector(".view-title"); time.sleep(0.2)   # 帯の色は画面を描いてから変わる
     bars["view"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
     check("スマホ上端の帯が画面に合わせて変わる", tc_search != pg.evaluate("document.querySelector('meta[name=theme-color]').content"))
     pg.click(".menu-btn"); pg.click(".menu >> text=編集")
@@ -116,7 +120,7 @@ with sync_playwright() as p:
     except Exception: pass
     time.sleep(0.2)
     check("メモ画面を開くと本文にカーソル（キーボードが出る）・パス表示はない・保存は右上", pg.evaluate("document.activeElement.classList.contains('editor')") and pg.locator(".crumbs").count() == 0 and pg.locator("header .save-btn").count() == 1 and pg.locator(".edit-actions, header .btn.danger").count() == 0)
-    check("本文の入力中だけ、本文のボタン（▶・カメラ・#・ファイル・写真）をキーボードの上に出す", pg.locator(".fmt-bar.floating").is_visible() and pg.locator(".fmt-bar .more-btn").count() == 1 and pg.locator(".fmt-media button").count() == 4)
+    check("本文の入力中だけ、本文のボタン（▶・カメラ・#・写真）をキーボードの上に、等間隔で出す", pg.locator(".fmt-bar.floating").is_visible() and pg.locator(".fmt-bar .more-btn").count() == 1 and pg.locator(".fmt-media button").count() == 3 and pg.locator(".fmt-bar [aria-label='ファイルを置く']").count() == 0 and pg.evaluate("(()=>{const bs=[document.querySelector('.more-btn'),...document.querySelectorAll('.fmt-media button')].map(b=>{const r=b.getBoundingClientRect();return r.left+r.width/2});const g=bs.slice(1).map((x,i)=>x-bs[i]);return Math.max(...g)-Math.min(...g)<3})()"))
     pg.go_back(); time.sleep(0.3)
     check("本文の入力中の戻る操作は、本文の入力をやめるだけ", pg.locator(".edit-screen").count() == 1 and not pg.evaluate("document.activeElement.classList.contains('editor')") and not pg.locator(".fmt-bar").is_visible())
     # 編集中に戻る → 未保存の確認が出る
@@ -190,7 +194,11 @@ with sync_playwright() as p:
     pg.click(".pop .hp-h2")
     pg.keyboard.press("Enter"); pg.click(".color-btn"); pg.click(".pop .tc-rose"); pg.keyboard.insert_text("赤")
     check("文字色はクラスで付く", pg.locator(".editor .tc-rose").count() == 1)
-    pg.set_input_files("#file-media", ICON); pg.wait_for_selector(".editor img[data-att]"); time.sleep(0.3)
+    pg.set_input_files("#file-media", ICON); pg.wait_for_selector(".crop-box")
+    check("写真を1枚選ぶと切り取りの小窓が出る", pg.locator(".crop-box .crop-h").count() == 4)
+    hb = pg.locator(".crop-h.se").bounding_box(); pg.mouse.move(hb["x"] + 10, hb["y"] + 10); pg.mouse.down(); pg.mouse.move(hb["x"] - 80, hb["y"] - 80, steps=4); pg.mouse.up()
+    pg.click(".modal button:text-is('切り取る')"); pg.wait_for_selector(".editor img[data-att]"); time.sleep(0.3)
+    check("本文に置いた画像は最初「中」の大きさ", pg.evaluate("document.querySelector('.editor img[data-att]').style.width") == "50%")
     check("写真のボタン1つで本文に画像が入る", pg.locator(".editor img[data-att]").count() == 1)
     check("写真・動画のボタンは写真と動画だけを選ぶ", pg.get_attribute("#file-media", "accept") == "image/*,video/*" and pg.get_attribute("#file-cam", "capture") == "environment")
     pg.click("#title"); pg.click(".save-btn"); pg.wait_for_selector(".bottom-nav"); time.sleep(0.2)
@@ -265,17 +273,21 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("フォルダからもまとめを作れる", pg.inner_text(".rp-title") == "京都のまとめ")
     pg.go_back(); time.sleep(0.2); pg.go_back(); pg.wait_for_selector(".bottom-nav"); tab(pg, "最近")
 
-    # 検索窓はスマホの戻る操作で閉じる（検索も解除）・検索履歴は出さない（撤廃）
+    # 検索画面はスマホの戻る操作で「最近」に戻る（検索も解除）・検索履歴は出さない（撤廃）
     menu_go(pg, "検索")
     for q in ["一", "二", "三", "四"]: pg.fill("#q", q); pg.keyboard.press("Enter"); time.sleep(0.15)
     check("検索履歴は出さない", pg.locator(".hist-row, .hist-chips").count() == 0 and "最近" not in pg.inner_text(".search-panel"))
     pg.go_back(); time.sleep(0.3)
-    check("戻る操作で検索窓が閉じ、検索も解除（画面はそのまま）", not pg.locator(".search-panel").is_visible() and pg.locator(".bottom-nav").count() == 1 and pg.locator(".filter-chip").count() == 0 and pg.inner_text(".tab-name") == "最近")
-    menu_go(pg, "検索"); pg.fill("#q", "めも"); pg.keyboard.press("Enter"); time.sleep(0.2)
+    check("戻る操作で最近に戻る", pg.inner_text(".tab-name") == "最近" and pg.locator(".search-panel").count() == 0)
+    menu_go(pg, "検索")
+    check("戻ってから開いた検索画面は空", pg.input_value("#q") == "")
+    pg.fill("#q", "めも"); pg.keyboard.press("Enter"); time.sleep(0.2)
     check("ひらがなで探してもカタカナのメモが見つかる", pg.locator(".memo-card", has_text="単独メモ").count() == 1)
     pg.fill("#q", "ﾒﾓ"); pg.keyboard.press("Enter"); time.sleep(0.2)
     check("半角カタカナでも見つかる", pg.locator(".memo-card", has_text="単独メモ").count() == 1)
-    pg.click(".search-close"); time.sleep(0.2)
+    pg.fill("#q", "京都"); pg.keyboard.press("Enter"); time.sleep(0.2)
+    check("検索画面ではフォルダも見つかる", pg.locator(".search-tab .list-row", has_text="京都").count() == 1 and pg.locator(".search-tab .memo-card").count() >= 1)
+    pg.go_back(); time.sleep(0.3)
     nav = [b.get_attribute("aria-label") for b in pg.locator(".bottom-nav button").all()]
     check("画面の下にアイコンだけの列（最近・フォルダ・検索・まとめ・設定）", nav == ["最近", "フォルダ", "検索", "まとめ", "設定"] and pg.locator(".bottom-nav button svg").count() == 5 and pg.inner_text(".bottom-nav").strip() == "", str(nav))
     check("上部バーにタブ・検索・まとめ・設定・メニューのボタンはない", pg.locator("header .tabs, header .search-toggle, header .report-btn, header [aria-label=設定], header .nav-toggle").count() == 0)
@@ -326,7 +338,9 @@ fire('touchend',x1,false);}"""
     pg.evaluate(SWIPE, [8, 250]); time.sleep(0.6)
     check("画面の端からの操作ではタブが変わらない", pg.inner_text(".tab-name") == "フォルダ")
     pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
-    check("フォルダからさらにスライドで情報まとめ", pg.inner_text(".tab-name") == "情報まとめ" and pg.locator(".rp-tools").count() == 1)
+    check("フォルダからさらにスライドで検索", pg.inner_text(".tab-name") == "検索" and pg.locator(".search-panel").count() == 1)
+    pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
+    check("検索からさらにスライドで情報まとめ", pg.inner_text(".tab-name") == "情報まとめ" and pg.locator(".rp-tools").count() == 1)
     pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
     check("情報まとめからさらにスライドで最近に戻る", pg.inner_text(".tab-name") == "最近")
     pg.evaluate(SWIPE, [120, 300]); time.sleep(0.6)
@@ -351,20 +365,20 @@ fire('touchend',x1,false);}"""
     time.sleep(0.3)
     check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
     # 背景を端末の画像から選べる・元に戻せる
-    check("設定で自分のアイコンを選べる", pg.locator(".modal .ava-sec .tw-ava img").count() == 1 and pg.locator(".modal .ava-sec button", has_text="画像を選ぶ").count() == 1)
-    with pg.expect_file_chooser() as fc: pg.click(".modal .bg-sec button:has-text('画像を選ぶ')")
+    check("設定のアイコン・背景はそれぞれ「変更」ボタン1つ", pg.locator(".modal .ava-sec .tw-ava img").count() == 1 and pg.locator(".modal .ava-sec button").count() == 1 and pg.locator(".modal .bg-sec button").count() == 1 and pg.locator(".modal .change-btn").count() == 2)
+    with pg.expect_file_chooser() as fc: pg.click(".modal .bg-sec .change-btn")
     fc.value.set_files(ICON)
     # 画像を縮めて保存し終えるまで待つ（遅い端末でも決まった秒数で判定しない）
     try: pg.wait_for_function("document.documentElement.classList.contains('has-bg')", timeout=8000)
     except Exception: pass
     time.sleep(0.2)
     check("背景を端末の画像にできる", pg.evaluate("document.documentElement.classList.contains('has-bg')") and pg.locator(".bg-preview").is_visible())
-    pg.click(".modal .bg-sec button:has-text('元に戻す')"); time.sleep(0.4)
+    pg.click(".modal .bg-sec .change-btn"); pg.click(".modal button:text-is('元に戻す')"); time.sleep(0.4)
     check("背景を元に戻せる", not pg.evaluate("document.documentElement.classList.contains('has-bg')"))
     check("背景の画像はカメラを起動しない指定（端末内の画像だけ）", pg.evaluate("[...document.querySelectorAll('.modal input[type=file]')].every(i=>!/image\\/\\*/.test(i.accept)&&!i.hasAttribute('capture'))"))
     check("バックアップの欄に「端末内の保存の保護」は出さない", "保存の保護" not in pg.inner_text(".modal"))
     pg.click(".modal [aria-label=上部バーを透過]"); time.sleep(0.3)
-    check("上部バーを透過でき、境目に線が出る（アイコンには枠）", pg.evaluate("document.documentElement.classList.contains('clear-bar') && getComputedStyle(document.querySelector('.topbar.bar-search')).borderBottomWidth === '2px' && getComputedStyle(document.querySelector('.topbar .icon-btn.ico')).boxShadow !== 'none'"))
+    check("上部バーを透過でき、境目に線が出る（アイコンには枠）", pg.evaluate("document.documentElement.classList.contains('clear-bar') && getComputedStyle(document.querySelector('.topbar.bar-search')).borderBottomWidth === '2px' && getComputedStyle(document.querySelector('.topbar .brand .logo')).filter.includes('drop-shadow')"))
     pg.click(".modal [aria-label=上部バーを透過]"); time.sleep(0.2)
     check("透過をオフに戻せる", not pg.evaluate("document.documentElement.classList.contains('clear-bar')"))
     check("設定は右上の✕で閉じる（下の「閉じる」ボタンはない）", pg.locator(".modal .modal-head .modal-x[aria-label=閉じる]").count() == 1 and pg.locator(".modal .btn", has_text="閉じる").count() == 0 and "閲覧画面以外" not in pg.inner_text(".modal"))
@@ -389,9 +403,17 @@ fire('touchend',x1,false);}"""
 
     # まとめて削除
     n_cards = pg.locator(".memo-card").count()
+    if pg.evaluate("document.documentElement.scrollHeight > innerHeight + 300"):
+        pg.mouse.move(200, 400); pg.mouse.wheel(0, 600); time.sleep(0.6)
+        hidden = pg.evaluate("document.querySelector('.home-screen').classList.contains('chrome-hidden')")
+        pg.mouse.wheel(0, -250); time.sleep(0.6)
+        shown = not pg.evaluate("document.querySelector('.home-screen').classList.contains('chrome-hidden')")
+        check("下へスクロールで上下のバーをしまい、上へスクロールで戻す", hidden and shown)
+        pg.evaluate("scrollTo(0,0)"); time.sleep(0.3)
     long_press(pg, pg.locator(".memo-card").first)
     check("メモの長押しで選択が始まり、そのメモが選ばれる（離しても外れない）", pg.locator(".select-bar").count() == 1 and pg.locator(".memo-card.picked").count() == 1)
     pg.locator(".memo-card").nth(1).click()
+    check("選択中の下のバー（削除など）は、一番下までスクロールしなくても画面の下に出る", pg.evaluate("(()=>{const b=document.querySelector('.select-bar').getBoundingClientRect();return b.bottom<=innerHeight+1&&b.top<innerHeight})()"))
     check("選択中は押すたびに選ぶ・外す", pg.locator(".memo-card.picked").count() == 2)
     pg.locator(".memo-card").nth(1).click()
     check("選択のチェックは太い線の印", pg.evaluate("(()=>{const s=document.querySelector('.memo-card.picked .pick-box svg');return !!s&&parseFloat(s.getAttribute('stroke-width'))>=3})()"))
@@ -435,7 +457,7 @@ fire('touchend',x1,false);}"""
         q.fill("#sync-url", url); q.fill("#sync-key", key); q.click(".sync-btn"); q.wait_for_timeout(1500)
         st = q.inner_text(".sync-status"); q.click(".modal .modal-x"); return st
     pa = device()
-    pa.click(".fab"); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); pa.set_input_files("#file", ICON); pa.wait_for_selector(".editor img[data-att]")
+    pa.click(".fab"); pa.fill("#title", "同期のメモ"); pa.click(".genre-pick >> text=体験"); attach_image(pa)
     pa.click(".save-btn"); pa.wait_for_timeout(5000)
     check("同期がオフの間はドライブへ送らない", gas.calls == [])
     # 複数アカウントでログイン中にコピーした「/macros/u/1/s/…」の形でも、自動で直してつながる
@@ -463,7 +485,7 @@ fire('touchend',x1,false);}"""
     import base64 as _b64
     big = bytes((i * 37) % 256 for i in range(1_200_000))
     pb.click(".fab"); pb.fill("#title", "大きな添付"); pb.click(".genre-pick >> text=学び")
-    pb.set_input_files("#file", files=[{"name": "big.bin", "mimeType": "application/octet-stream", "buffer": big}]); pb.wait_for_selector(".editor a[data-att]")
+    pb.set_input_files("#file-media", files=[{"name": "big.bin", "mimeType": "application/octet-stream", "buffer": big}]); pb.wait_for_selector(".editor a[data-att]")
     gas.fail_next = 3   # 最初の送信は3回とも通信切れ（自動のやり直しも失敗）
     pb.click(".save-btn"); pb.wait_for_timeout(9000)
     settings(pb); st = pb.inner_text(".sync-status")
