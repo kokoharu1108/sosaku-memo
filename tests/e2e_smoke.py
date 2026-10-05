@@ -346,7 +346,11 @@ fire('touchend',x1,false);}"""
     check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
     # 背景を端末の画像から選べる・元に戻せる
     with pg.expect_file_chooser() as fc: pg.click(".modal >> text=画像を選ぶ")
-    fc.value.set_files(ICON); time.sleep(0.8)
+    fc.value.set_files(ICON)
+    # 画像を縮めて保存し終えるまで待つ（遅い端末でも決まった秒数で判定しない）
+    try: pg.wait_for_function("document.documentElement.classList.contains('has-bg')", timeout=8000)
+    except Exception: pass
+    time.sleep(0.2)
     check("背景を端末の画像にできる", pg.evaluate("document.documentElement.classList.contains('has-bg')") and pg.locator(".bg-preview").is_visible())
     pg.click(".modal >> text=元に戻す"); time.sleep(0.4)
     check("背景を元に戻せる", not pg.evaluate("document.documentElement.classList.contains('has-bg')"))
