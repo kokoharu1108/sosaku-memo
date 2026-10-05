@@ -114,6 +114,7 @@ body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 html, body { height: 100%; }
+html { overflow-x: hidden; } body { overflow-x: clip; }   /* 横から入る動きの間に、画面が横に広がって動かないように */
 /* 水の中から見上げたような背景: 上から光が差し、水面のゆらぎが細い光の筋になって映る（カードの中は無地で読みやすく） */
 body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--ray-fade, rgba(0,0,0,0)) 50%), repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water);
@@ -262,6 +263,10 @@ main .tabs button[aria-selected="true"], .modal .tabs button[aria-selected="true
 .toolbar-row { column-gap: 6px; }
 .toolbar-row > .btn.ghost { padding-inline: 6px; }
 .genre-select { height: 34px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2); padding: 0 8px; font-size: 13.5px; max-width: 100%; }
+/* プルダウンは押したときに少し縮むだけ（他のボタンと同じ）。選んだ後・やめた後に枠が残らないように */
+.genre-select { transition: transform .12s ease; }
+.genre-select:focus, .genre-select:focus-visible { outline: none; }
+.genre-select:active { transform: scale(.97); }
 .genre-select.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
 .genre-filter { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .gf-label { font-size: 12px; color: var(--ink-3); margin-right: 2px; }
@@ -417,7 +422,7 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .search-tab .search-panel { padding-top: 0; }
 .search-tab .section-h { margin: 18px 0 8px; }
 .search-hint .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-.brand .tab-name { display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 700; line-height: 1.1; color: color-mix(in srgb, currentColor 82%, var(--sel-bg)); }
+.brand .tab-name { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 700; line-height: 1.1; color: color-mix(in srgb, currentColor 82%, var(--sel-bg)); }
 .brand .tab-name svg { width: 19px; height: 19px; flex: 0 0 auto; }
 /* アプリ名（ロゴ）は細い縁取りを付け、横の画面名とは見た目を分けて「タイトル」と分かるように */
 /* 文字は白を基本に、バーの色を少し混ぜてなじませる。縁取りもバーの色を濃くした色 */
@@ -493,10 +498,9 @@ html.clear-bar .topbar:not(.bar-view) .folder-ico svg { fill: color-mix(in srgb,
 :is(.memo-card, .att-row, .ref-item, .recall-body, .menu button, details > summary, .list-row > .open):active:not(:disabled) { transform: scale(.98); }
 .list-row:has(> .open:active) { transform: scale(.98); }
 .list-row > .open:active { transform: none; }
-.fab.round.low { bottom: calc(18px + env(safe-area-inset-bottom, 0px)); }
 .fab svg { transition: transform .2s ease; }
 .fab.open svg { transform: rotate(45deg); }
-.fab-menu { position: fixed; right: 18px; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 8px; justify-items: end; }
+.fab-menu { position: fixed; right: 18px; bottom: calc(146px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 8px; justify-items: end; }
 /* 開くときは「＋」に近い下のボタンから順に、閉じるときは逆の順に */
 .fab-menu button { animation: fab-in .2s cubic-bezier(.2,.8,.3,1.2) both; transform-origin: 100% 100%; }
 .fab-menu button:nth-child(1) { animation-delay: .05s; }
@@ -682,7 +686,9 @@ body.editing-body .edit-actions { display: none; }
 .ie-h.sw { left: -4px; bottom: -4px; border-right: 0; border-top: 0; }
 .ie-h.se { right: -4px; bottom: -4px; border-left: 0; border-top: 0; }
 .ie-texts { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
-.ie-text { position: absolute; font-weight: 800; line-height: 1.2; white-space: pre; padding: 0; animation: ie-pop .18s ease both; }
+.ie-text { position: absolute; font-weight: 800; line-height: 1.2; white-space: pre; padding: 0; }
+.ie-text.born { animation: ie-pop .18s ease both; }
+.ie-text:not(.sel) .ie-tsize { display: none; }
 .ie-holder.texting .ie-text { pointer-events: auto; cursor: move; outline: 1px dashed rgba(255,255,255,.6); }
 .ie-holder.texting .ie-text.sel { outline: 2px solid var(--sel-bg); }
 /* 選んだ文字の右下の丸: 引っぱると大きさが変わる */
@@ -828,7 +834,19 @@ body.editing-body .edit-actions { display: none; }
 .nav-ghost.under { z-index: 30; }
 .nav-ghost.under::after { content: ""; position: absolute; inset: 0; background: #000; animation: nav-dim-in .34s ease both; }
 .nav-ghost.over { z-index: 60; }
-.zooming { position: relative; z-index: 40; }
+/* 下のアイコンでの切り替え: 軽く消してから、ふわっと出す */
+.swipe-area.tab-out { animation: tab-out .11s ease forwards; }
+.swipe-area.tab-in { animation: tab-in .2s ease both; }
+@keyframes tab-out { to { opacity: 0; } }
+@keyframes tab-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* 最近の「新しい並びを見る」ボタン（X の新しいポストのお知らせのように上に出す） */
+.fresh-pill { position: fixed; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 66px); transform: translateX(-50%); z-index: 22; display: inline-flex; align-items: center; gap: 6px;
+  border: 0; border-radius: 999px; padding: 9px 18px 9px 14px; background: var(--sel-bg); color: var(--sel-ink); font-weight: 800; font-size: 14.5px; box-shadow: 0 4px 14px rgba(8,16,36,.3); animation: pill-in .3s cubic-bezier(.2,.8,.3,1.2) both; }
+.fresh-pill svg { width: 18px; height: 18px; stroke-width: 2.6; }
+.fresh-pill:active:not(:disabled) { transform: translateX(-50%) scale(.95); }
+@keyframes pill-in { from { opacity: 0; transform: translate(-50%, -14px); } to { opacity: 1; transform: translateX(-50%); } }
+.nav-dim { position: fixed; inset: 0; z-index: 59; background: #000; opacity: 0; pointer-events: none; }
+.zooming { position: relative; z-index: 40; min-height: 100vh; min-height: 100dvh; }   /* 中身が短い画面でも、動いている間は画面の下まで覆う */
 .view-screen.zooming { position: fixed; }
 @keyframes nav-dim-in { from { opacity: 0; } to { opacity: .18; } }
 /* 動いている画面の下地は、アプリの背景と同じ（背景画像を選んでいればその画像） */
@@ -996,7 +1014,7 @@ const ICONS = {
   file: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
   image: '<rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><circle cx="9" cy="10" r="1.8"/><path d="m4 18 5.5-5.5 4 4 2.5-2.5 4.5 4.5"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
-  recent: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>',
+  recent: '<path d="M3.5 10.2 12 3.5l8.5 6.7V20a1 1 0 0 1-1 1H15v-6.2H9V21H4.5a1 1 0 0 1-1-1z"/>',   // 最近＝ホーム（X と同じ家の形）
   save: '<path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/>',
   print: '<path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>',
@@ -1364,6 +1382,7 @@ const atDepth = () => historyOk && history.state && history.state.depth === UI.s
 /* 選択モード中は履歴が1つ多く積まれているので、まとめて戻るときはその分も戻る */
 const selExtra = () => (historyOk && history.state && (history.state.select || history.state.edfocus) ? 1 : 0);
 function go(screen) {
+  current().scrollY = window.scrollY;   // 戻ったときにこの位置から見せる
   UI.stack.push(screen);
   if (historyOk) try { history.pushState({ depth: UI.stack.length }, ""); } catch {}
   render(); window.scrollTo(0, 0);
@@ -1615,7 +1634,7 @@ function screenGhost(el, kind) {
 const ZOOM_MS = 340, ZOOM_EASE = "cubic-bezier(.2,0,0,1)";
 const insetOf = (r, box, round) => `inset(${Math.max(0, r.top - box.top)}px ${Math.max(0, box.right - r.right)}px ${Math.max(0, box.bottom - r.bottom)}px ${Math.max(0, r.left - box.left)}px round ${round}px)`;
 /* 開く: 新しい画面を、押した場所の形から画面いっぱいまで広げる */
-function zoomIn(el, from) {
+function zoomIn(el, from, ghost) {
   const fixed = getComputedStyle(el).position === "fixed";
   const er = el.getBoundingClientRect();
   // 新しい画面は一番上から表示するので、そのときの位置で計算する
@@ -1625,8 +1644,25 @@ function zoomIn(el, from) {
     { clipPath: insetOf(from.rect, box, from.round), opacity: .55 },
     { opacity: 1, offset: .45 },
     { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 }], { duration: ZOOM_MS, easing: ZOOM_EASE });
-  const end = () => el.classList.remove("zooming", "pagebg");
+  // 終わったら、先に前の画面の写しを消してから下地を外す（逆だと、一瞬前の画面が透けて見える）
+  const end = () => { if (ghost) ghost.remove(); el.classList.remove("zooming", "pagebg"); };
   anim.onfinish = end; anim.oncancel = end;
+}
+/* 横から入る（フォルダの中・「＋」からのメモ画面）: 新しい画面が右から入り、前の画面は少し左へずれて暗くなる */
+const SLIDE_MS = 300, SLIDE_EASE = "cubic-bezier(.2,.7,.2,1)";
+function slideIn(el, ghost) {
+  el.classList.add("zooming", "pagebg");
+  if (ghost) ghost.animate([{ transform: "translateX(0)" }, { transform: "translateX(-24%)" }], { duration: SLIDE_MS, easing: SLIDE_EASE, fill: "forwards" });
+  const anim = el.animate([{ transform: "translateX(100%)" }, { transform: "translateX(0)" }], { duration: SLIDE_MS, easing: SLIDE_EASE });
+  const end = () => { if (ghost) ghost.remove(); el.classList.remove("zooming", "pagebg"); };
+  anim.onfinish = end; anim.oncancel = end;
+}
+/* 横へ出る: 前の画面の写しが右へ抜け、下の画面は暗いところから明るくなる */
+function slideOut(ghost) {
+  ghost.classList.add("pagebg");
+  const dim = h("div", { class: "nav-dim", "aria-hidden": "true" }); document.body.append(dim);
+  dim.animate([{ opacity: .2 }, { opacity: 0 }], { duration: SLIDE_MS, easing: "ease", fill: "forwards" }).onfinish = () => dim.remove();
+  ghost.animate([{ transform: "translateX(0)" }, { transform: "translateX(100%)" }], { duration: SLIDE_MS - 20, easing: SLIDE_EASE, fill: "forwards" }).onfinish = () => ghost.remove();
 }
 /* 閉じる: 前の画面の写しを、戻り先（カード・「＋」）の形まで縮めて消す */
 function zoomOut(ghost, target, round) {
@@ -1652,11 +1688,13 @@ function render() {
   const from = UI.zoomFrom; UI.zoomFrom = null;
   let anim = null, ghost = null;
   if (!reduceMotion() && app.firstElementChild) {
-    if (from && len > prev.len && (cs.name === "view" || cs.name === "edit")) anim = "in";
-    else if (len < prev.len && (prev.name === "view" || (prev.name === "edit" && prev.fab))) anim = "out";
+    if (from && len > prev.len && cs.name === "view") anim = "in";
+    else if (cs.slide && len > prev.len) anim = "slide-in";
+    else if (len < prev.len && prev.name === "view") anim = "out";
+    else if (len < prev.len && prev.slide) anim = "slide-out";
   }
-  if (anim) ghost = screenGhost(app.firstElementChild, anim === "in" ? "under" : "over");
-  render.last = { name: cs.name, len, id: cs.id, fab: !!cs.fromFab };
+  if (anim) ghost = screenGhost(app.firstElementChild, /in$/.test(anim) ? "under" : "over");
+  render.last = { name: cs.name, len, id: cs.id, slide: !!cs.slide };
   cleanupFns.forEach(f => { try { f(); } catch {} }); cleanupFns = [];
   app.replaceChildren();
   const s = current();
@@ -1665,11 +1703,12 @@ function render() {
   else if (s.name === "edit") { if (s.id && !Manager.get(s.id)) return dropMissing(); app.append(renderEdit(s)); }
   else if (s.name === "list") { if (!Manager.lists.get(s.id)) return dropMissing(); app.append(renderListScreen(s)); }
   else if (s.name === "report") app.append(renderReport(s));
-  if (anim === "in" && app.firstElementChild) zoomIn(app.firstElementChild, from);
-  if (anim === "out") {
-    const target = prev.name === "view" ? app.querySelector(`.memo-card[data-id="${prev.id}"]`) : app.querySelector(".fab");
-    zoomOut(ghost, target, prev.name === "view" ? 16 : 30);
-  }
+  // 戻ったときは、その画面で読んでいた位置から（閲覧画面などを開くと一番上に戻ってしまうため、開く前の位置を覚えておく）
+  if (len < (prev.len || 0) && cs.scrollY != null) window.scrollTo(0, cs.scrollY);
+  if (anim === "in" && app.firstElementChild) zoomIn(app.firstElementChild, from, ghost);
+  if (anim === "slide-in" && app.firstElementChild) slideIn(app.firstElementChild, ghost);
+  if (anim === "out") zoomOut(ghost, app.querySelector(`.memo-card[data-id="${prev.id}"]`), 16);
+  if (anim === "slide-out") slideOut(ghost);
   // スマホ上端の帯の色は、新しい画面が表示されてから変える（先に色だけ変わると、遅れて画面が出るように見えるため）
   // （描いた直後の2フレームでは、端末によってはまだ前の画面が見えているので、さらに少し待つ）
   clearTimeout(render.tc);
@@ -1735,6 +1774,13 @@ function renderSearch(s) {
     if (t === "search" && opt.focus && !st.committed) setTimeout(() => { const f = document.getElementById("q"); if (f) f.focus(); }, 60);
   }
   const switchTab = (t, opt) => { if (UI.select.on) { exitSelectThen(() => setTab(t, opt)); return; } setTab(t, opt); };
+  // 下のアイコンで切り替えるときは、今の中身を軽く消してから、新しい中身をふわっと出す
+  const fadeSwitch = (k) => {
+    const area = document.querySelector(".home-screen .swipe-area");
+    if (reduceMotion() || !area || UI.select.on) { switchTab(k, { focus: true }); return; }
+    area.classList.add("tab-out");
+    setTimeout(() => { switchTab(k, { focus: true }); const a2 = document.querySelector(".home-screen .swipe-area"); if (a2) a2.classList.add("tab-in"); }, 110);
+  };
 
   let fab;
   const results = h("div", { class: "swipe-track" });
@@ -1745,7 +1791,7 @@ function renderSearch(s) {
     NAV.map(([k, label, ic]) => h("button", { type: "button", class: "bn-" + k, "aria-label": label, title: label, "aria-current": k === st.tab ? "page" : null,
       onclick: () => {
         if (k === "settings") openSettings();
-        else if (k !== st.tab) switchTab(k, { focus: true });
+        else if (k !== st.tab) fadeSwitch(k);
         else if (k === "search") { const f = document.getElementById("q"); if (f) f.focus(); }
         else window.scrollTo({ top: 0, behavior: "smooth" });
       } }, svgIcon(ic)))));
@@ -1818,7 +1864,7 @@ function renderSearch(s) {
 
   fab = h("button", { class: "fab round", onclick: (e) => {
     if (st.tab === "lists") createList();
-    else { zoomFrom(e.currentTarget, 30); go({ name: "edit", id: null, fromFab: true }); }
+    else go({ name: "edit", id: null, slide: true });
   } }, svgIcon('<path d="M12 5v14M5 12h14"/>'));
   const storeNote = Storage.mode === "memory"
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
@@ -1837,6 +1883,20 @@ function renderSearch(s) {
     fab, bottomNav);
   drawResults();
   autoHide(scr);
+  /* 最近の並びが入れ替わる時間になったら、X のように上に「新しい並び」のボタンを出す（押すと先頭へ戻って並びを更新し、消える）。
+     見ている途中で勝手に並びが変わらないよう、押すまでは今の並びのまま */
+  const pillCheck = () => {
+    if (st.tab !== "memos" || UI.select.on || !UI.mix || Date.now() - UI.mix.at <= MIX_EVERY || scr.querySelector(".fresh-pill")) return;
+    scr.append(h("button", { type: "button", class: "fresh-pill", onclick: (e) => {
+      e.currentTarget.remove(); UI.mix = null;
+      window.scrollTo({ top: 0, behavior: reduceMotion() ? "auto" : "smooth" });
+      setTimeout(() => { if (current().name === "search") render(); }, reduceMotion() ? 0 : 280);
+    } }, svgIcon('<path d="M12 19V5M6 11l6-6 6 6"/>'), h("span", {}, "新しい並びを見る")));
+  };
+  pillCheck();
+  const pillTimer = setInterval(pillCheck, 20000);
+  UI.pillCheck = pillCheck;
+  cleanupFns.push(() => { clearInterval(pillTimer); if (UI.pillCheck === pillCheck) UI.pillCheck = null; });
   /* 横にスライドしてタブを切り替える（最近 → フォルダ → 検索 → 情報まとめ → 最近 …）。
      X（旧Twitter）のように、隣のタブの中身を すぐ横に並べて指と一緒に動かすので、あいだに空白ができない。
      隣のタブは「前に読んでいた位置」で並べ、切り替えたあともその位置から表示する（一度先頭が見えてから飛ぶ、をなくす）。
@@ -1891,7 +1951,7 @@ function renderSearch(s) {
 const MIX_EVERY = 10 * 60 * 1000;
 function timelineMix(list) {
   const now = Date.now();
-  if (!UI.mix || now - UI.mix.at > MIX_EVERY) UI.mix = { seed: Math.floor(Math.random() * 1e9), at: now };
+  if (!UI.mix) UI.mix = { seed: Math.floor(Math.random() * 1e9), at: now };   // 並びの入れ替えは「新しい並び」のボタンを押したときだけ
   const key = (id) => { let x = UI.mix.seed; for (const c of id) x = Math.imul(x ^ c.charCodeAt(0), 2654435761) >>> 0; return x; };
   return [...list].sort((a, b) => key(a.id) - key(b.id));
 }
@@ -2091,7 +2151,7 @@ function renderLists(redraw, only) {
     const picked = sel && sel.ids.has(l.id);
     rows.append(h("div", { class: "list-row" + (sel ? " selecting" : "") + (picked ? " picked" : "") },
       sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? checkMark() : "") : null,
-      h("button", { class: "open", "aria-pressed": sel ? String(!!picked) : null, ...pressHandlers("lists", l.id, sel, () => go({ name: "list", id: l.id })) },
+      h("button", { class: "open", "aria-pressed": sel ? String(!!picked) : null, ...pressHandlers("lists", l.id, sel, () => go({ name: "list", id: l.id, slide: true })) },
         h("div", { class: "list-name" }, h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("span", {}, l.name)),
         h("div", { class: "list-sub" }, `${count}件 ・ `, h("span", { class: "upd-ico", title: "更新", "aria-label": "更新" }, svgIcon(ICONS.updated)), relDate(l.updatedAt))),
       sel ? null : iconBtn("edit", "名前を変更", () => renameList(l, redraw))));
@@ -2166,7 +2226,7 @@ function renderListScreen(s) {
   // 開くときは下から順にふわっと出し、閉じるときは逆に引っ込める。「＋」は開いている間「×」に回る
   const addMenu = h("div", { class: "fab-menu", hidden: true },
     h("button", { type: "button", disabled: !Manager.memos.size, onclick: () => { showAdd(false); pickMemosForList(l, draw); } }, "保存済から追加"),
-    h("button", { type: "button", onclick: () => { showAdd(false); zoomFrom(fabEl, 30); go({ name: "edit", id: null, presetList: l.id, fromFab: true }); } }, "新規追加"));
+    h("button", { type: "button", onclick: () => { showAdd(false); go({ name: "edit", id: null, presetList: l.id, slide: true }); } }, "新規追加"));
   let addTimer = 0;
   const showAdd = (on) => {
     clearTimeout(addTimer);
@@ -2178,7 +2238,7 @@ function renderListScreen(s) {
   };
   const closeAdd = (e) => { if (!addMenu.hidden && !e.target.closest(".fab-menu, .fab")) showAdd(false); };
   document.addEventListener("click", closeAdd); cleanupFns.push(() => { document.removeEventListener("click", closeAdd); clearTimeout(addTimer); });
-  const fabEl = h("button", { class: "fab round low", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": "メモを追加", title: "メモを追加",
+  const fabEl = h("button", { class: "fab round", "aria-haspopup": "menu", "aria-expanded": "false", "aria-label": "メモを追加", title: "メモを追加",
     onclick: () => showAdd(addMenu.hidden || addMenu.classList.contains("closing")) }, svgIcon('<path d="M12 5v14M5 12h14"/>'));
   const headActions = h("div", { class: "head-actions" });
   draw();
@@ -3223,7 +3283,7 @@ function renderEdit(s) {
     const lists = [...Manager.lists.values()].sort((a, b) => b.updatedAt - a.updatedAt);
     const chosen = d.listIds.map(id => Manager.lists.get(id)).filter(Boolean);
     const sel = h("select", { id: "elist", class: "genre-select list-pick", "aria-label": "フォルダを選ぶ", onchange: async () => {
-      const v = sel.value; sel.value = "";
+      const v = sel.value; sel.value = ""; sel.blur();
       if (v === "__new") {
         const name = await askListName(); if (!name) return;
         try { const l = await Manager.saveList({ id: uid("l"), name }); d.listIds.push(l.id); }
@@ -3399,6 +3459,7 @@ function editImage(file, opts = {}) {
     const stage = h("div", { class: "ie-stage" }, h("div", { class: "ie-loading" }, "読み込んでいます…"));
     const panel = h("div", { class: "ie-panel" });
     const tabs = h("div", { class: "ie-tabs", role: "tablist" });
+    const saveBtn = h("button", { type: "button", class: "ie-save", onclick: () => save() }, "保存");
     let done = false;
     const finish = (v) => {
       if (done) return; done = true;
@@ -3412,7 +3473,7 @@ function editImage(file, opts = {}) {
         h("button", { type: "button", class: "ie-icon", "aria-label": "やめる", title: "やめる", onclick: () => finish(null) }, svgIcon(ICONS.close)),
         h("b", {}, "写真の編集"), h("span", { class: "ie-icon ghost" })),
       stage, panel, tabs,
-      h("div", { class: "ie-foot" }, h("button", { type: "button", class: "ie-save", onclick: () => save() }, "保存")));
+      h("div", { class: "ie-foot" }, saveBtn));
     root.__close = () => finish(null);   // スマホの戻る操作でも閉じる（やめる）
     document.body.append(root);
     document.querySelectorAll(".ie-cover").forEach(c => c.remove());
@@ -3494,18 +3555,23 @@ function editImage(file, opts = {}) {
       c.globalCompositeOperation = erase ? "destination-out" : "source-over";
       c.lineCap = "round"; c.lineJoin = "round"; c.strokeStyle = color; c.lineWidth = (erase ? size * 2.5 : size) / sc;
       c.beginPath(); c.moveTo(p.x, p.y); c.lineTo(p.x + 0.1, p.y + 0.1); c.stroke();
-      pen = p; changed = true;
+      pen = p; changed = true; drew = true;
     };
     const penMove = (e) => { const p = toBase(e), c = octx(); c.beginPath(); c.moveTo(pen.x, pen.y); c.lineTo(p.x, p.y); c.stroke(); pen = p; };
     /* ---- 文字: 押して選ぶ・指で動かす・右下の丸を引っぱって大きさを変える ---- */
+    // 文字の表示は、動かしている間も作り直さずに位置・大きさだけ変える（作り直すと出てくる動きが毎回かかり、一瞬消えて見える）
+    const textEls = new Map();
     function placeTexts() {
-      textLayer.replaceChildren(...texts.map((t, i) => {
-        const el = h("div", { class: "ie-text" + (t === selText ? " sel" : ""), "data-i": String(i) }, t.text,
-          t === selText && tool === "text" ? h("span", { class: "ie-tsize", "aria-label": "大きさを変える" }) : null);
+      for (const [t, el] of textEls) if (!texts.includes(t)) { el.remove(); textEls.delete(t); }
+      texts.forEach((t, i) => {
+        let el = textEls.get(t);
+        if (!el) { el = h("div", { class: "ie-text born" }, h("span", { class: "tx" }), h("span", { class: "ie-tsize", "aria-label": "大きさを変える" })); textEls.set(t, el); textLayer.append(el); }
+        el.dataset.i = String(i);
+        el.classList.toggle("sel", t === selText && tool === "text");
+        const tx = el.firstChild; if (tx.textContent !== t.text) tx.textContent = t.text;
         Object.assign(el.style, { left: (t.x - V.x) * sc + "px", top: (t.y - V.y) * sc + "px", color: t.color, fontSize: t.px * sc + "px",
           textShadow: t.color === "#ffffff" ? "0 0 3px rgba(0,0,0,.7)" : "0 0 3px rgba(255,255,255,.8)" });
-        return el;
-      }));
+      });
     }
     let tdrag = null;
     const textDown = (e) => {
@@ -3646,16 +3712,19 @@ function editImage(file, opts = {}) {
     };
     const TOOLS = [["crop", "切り取り"], ...(opts.size != null ? [["size", "大きさ"]] : []), ["adjust", "補正"], ["draw", "描く"], ["text", "文字"]];
     tabs.replaceChildren(...TOOLS.map(([t, l]) => h("button", { type: "button", role: "tab", "data-t": t, onclick: () => setTool(t) }, svgIcon(IE_ICON[t]), h("span", {}, l))));
+    let saving = false, drew = !!(prj && prj.draw);
     async function save() {
-      if (done) return;
+      if (done || saving) return;
       const sizeOut = sizePct;
       if (!changed) { finish({ file, size: sizeOut, project: prj, changed: false }); return; }
+      // 大きな写真は書き出しに少し時間がかかるので、押したことがすぐ分かるようにする（何度も押さなくてよいように）
+      saving = true; saveBtn.disabled = true; saveBtn.textContent = "保存しています…";
+      await new Promise(r => requestAnimationFrame(() => setTimeout(r, 0)));
       const out = compose();
       const type = (file.type === "image/png" && !(prj && prj.orig)) ? "image/png" : "image/jpeg";
       const blob = await new Promise(res => out.toBlob(res, type, 0.9));
-      // 何もしていない線の層は覚えない
-      const blank = !octx().getImageData(0, 0, W, H).data.some((v, i) => i % 4 === 3 && v);
-      const drawBlob = blank ? null : await new Promise(res => over.toBlob(res, "image/png"));
+      // 線を描いていなければ、線の層は覚えない
+      const drawBlob = drew ? await new Promise(res => over.toBlob(res, "image/png")) : null;
       const project = { orig: src, crop: { x: C.x / W, y: C.y / H, w: C.w / W, h: C.h / H }, adj: { ...adj },
         texts: texts.map(t => ({ text: t.text, color: t.color, x: t.x / W, y: t.y / H, px: t.px / W })), draw: drawBlob };
       const name = (file.name || "image").replace(/\.[^.]+$/, "") + (type === "image/png" ? ".png" : ".jpg");
@@ -4016,7 +4085,7 @@ async function importBackup(file) {
 function autosaveOnLeave() { if (activeEditor && activeEditor.isDirty()) activeEditor.save({ auto: true }); }
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") autosaveOnLeave(); });
 // タイムラインの並びは一定時間ごとに変わる: アプリを画面に戻したとき、時間がたっていれば並べ直す
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && current().name === "search" && UI.mix && Date.now() - UI.mix.at > MIX_EVERY && !UI.select.on) render(); });
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && UI.pillCheck) UI.pillCheck(); });
 window.addEventListener("pagehide", autosaveOnLeave);
 window.addEventListener("online", () => { if (current().name === "search") render(); });
 window.addEventListener("offline", () => { if (current().name === "search") render(); });
