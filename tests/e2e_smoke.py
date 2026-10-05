@@ -108,7 +108,7 @@ with sync_playwright() as p:
     check("スマホ上端の帯が画面に合わせて変わる", tc_search != pg.evaluate("document.querySelector('meta[name=theme-color]').content"))
     pg.click(".menu-btn"); pg.click(".menu >> text=編集")
     bars["edit"] = pg.evaluate("getComputedStyle(document.querySelector('.topbar')).backgroundColor")
-    check("上部バーが画面ごとに違う色", len(set(bars.values())) == 3, str(bars))
+    check("メモ画面の上下のバーは検索画面と同じ色・閲覧画面は違う色", bars["edit"] == bars["search"] and bars["view"] != bars["search"], str(bars))
 
     # 編集中にパンくずで最初の画面へ → 未保存の確認が出る
     pg.fill("#title", "京都取材（仮）"); pg.click(".crumb.home"); time.sleep(0.3)
@@ -152,6 +152,8 @@ with sync_playwright() as p:
     # 本文エディタ（本文より上は題名とジャンルだけ・書式ボタンは1行）
     tab(pg, "最近"); pg.click(".fab")
     check("題名の欄は「題名」だけ", pg.get_attribute("#title", "placeholder") == "題名")
+    pg.click(".genre-pick >> text=体験"); pg.click(".edit-actions .btn.primary"); time.sleep(0.3)
+    check("題名も本文も空なら保存できない", pg.locator(".edit-actions").count() == 1 and "題名か本文を入力してください" in " ".join(pg.locator(".toast").all_inner_texts()))
     check("フォルダはプルダウンで選ぶ", pg.locator("select#elist").count() == 1)
     check("メモ画面の下部の見出しは「タグ」「フォルダ」だけ", "そのほかの設定" not in pg.inner_text("main") and "自由に付けられます" not in pg.inner_text("main") and "フォルダに入れる" not in pg.inner_text("main"))
     check("新規メモで本文が1画面目に見える", pg.evaluate("document.querySelector('.editor').getBoundingClientRect().top < 400"))
@@ -160,7 +162,9 @@ with sync_playwright() as p:
     check("ジャンルの選択はアイコン付きでチェック印なし", pg.locator(".genre-pick button svg").count() == 3 and "✓" not in pg.inner_text(".genre-pick"))
     check("書式ボタンが1行に収まる", pg.evaluate("(()=>{const f=document.querySelector('.fmt-bar');return f.scrollWidth<=f.clientWidth+1})()"))
     pg.click("#title"); check("題名を触ると直近の題名が出る", pg.locator(".recent-titles").is_visible())
-    pg.click(".topbar .back"); pg.wait_for_selector(".nav-toggle")
+    pg.click(".topbar .back"); time.sleep(0.3)
+    if pg.locator(".modal").count(): pg.click(".modal >> text=破棄して戻る")
+    pg.wait_for_selector(".nav-toggle")
     tab(pg, "最近"); pg.click(".fab"); pg.fill("#title", "書式"); pg.click(".genre-pick >> text=アイデア"); pg.click(".editor")
     pg.click(".b-bold"); pg.click(".b-italic"); pg.keyboard.insert_text("太斜")
     pg.click(".b-bold"); pg.keyboard.insert_text("斜"); pg.click(".b-italic"); pg.keyboard.insert_text("標準")
@@ -265,6 +269,13 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("上部バーの検索・まとめ・設定のボタンとタブはメニューにまとめた", pg.locator("header .tabs, header .search-toggle, header .report-btn, header [aria-label=設定]").count() == 0)
     pg.click(".nav-toggle"); time.sleep(0.2)
     check("もう一度押すとメニューが閉じる", not pg.locator(".nav-menu").is_visible())
+    pg.click(".nav-toggle"); time.sleep(0.3); pg.go_back(); time.sleep(0.4)
+    check("メニューはスマホの戻る操作で閉じる（画面はそのまま）", not pg.locator(".nav-menu").is_visible() and pg.inner_text(".tab-name") == "最近")
+    pg.click(".nav-toggle"); time.sleep(0.3)
+    box = pg.locator(".memo-card").first.bounding_box(); pg.mouse.click(box["x"] + 30, box["y"] + box["height"] / 2); time.sleep(0.4)
+    check("メニューの外を押すとメニューが閉じるだけ（下のメモは開かない）", not pg.locator(".nav-menu").is_visible() and pg.locator(".view-title").count() == 0)
+    check("上部バーの画面名の左にアイコン", pg.locator(".tab-name svg").count() == 1)
+    check("検索画面の「＋」は下端から少し上", pg.evaluate("innerHeight - document.querySelector('.fab').getBoundingClientRect().bottom") >= 50)
     check("上部バーに今の画面の名前", pg.inner_text(".tab-name") == "最近")
     check("押したときの四角い色は出さない（丸いボタン等は形に合わせた表示）", pg.evaluate("getComputedStyle(document.querySelector('.fab')).webkitTapHighlightColor") == "rgba(0, 0, 0, 0)")
     check("タグは鮮やかな水色", pg.evaluate("getComputedStyle(document.querySelector('.tag-mini')||document.body).color") == "rgb(18, 180, 245)" if pg.locator(".tag-mini").count() else True)
@@ -335,7 +346,11 @@ fire('touchend',x1,false);}"""
     check("前回の書き出し日時がすぐ更新される", "まだありません" not in pg.inner_text(".modal"))
     # 背景を端末の画像から選べる・元に戻せる
     with pg.expect_file_chooser() as fc: pg.click(".modal >> text=画像を選ぶ")
-    fc.value.set_files(ICON); time.sleep(0.8)
+    fc.value.set_files(ICON)
+    # 画像を縮めて保存し終えるまで待つ（遅い端末でも決まった秒数で判定しない）
+    try: pg.wait_for_function("document.documentElement.classList.contains('has-bg')", timeout=8000)
+    except Exception: pass
+    time.sleep(0.2)
     check("背景を端末の画像にできる", pg.evaluate("document.documentElement.classList.contains('has-bg')") and pg.locator(".bg-preview").is_visible())
     pg.click(".modal >> text=元に戻す"); time.sleep(0.4)
     check("背景を元に戻せる", not pg.evaluate("document.documentElement.classList.contains('has-bg')"))

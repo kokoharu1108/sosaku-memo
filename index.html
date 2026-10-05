@@ -42,7 +42,7 @@
   --ng: #f8dde0; --ng-ink: #a23b4b;
   --scrim: rgba(4, 12, 50, .55);
   --shadow: 0 1px 2px rgba(10,26,79,.1), 0 6px 20px rgba(10,26,79,.12);
-  --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #3a2fc4; --bar-report: #0a7fd0;
+  --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #1446d6; --bar-report: #0a7fd0;
   --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #12a88e; --bar-view-idea: #e8c62c;   /* 閲覧画面はメモのジャンルの色 */
   --tc-rose: #c2475f; --tc-orange: #b5651d; --tc-green: #2c8560; --tc-blue: #356bb0; --tc-purple: #7650b5; --tc-gray: #71768a; --tc-brown: #8a573f;
   --hl-yellow: #fff0a6; --hl-pink: #ffd9e2; --hl-green: #d2f1dc; --hl-blue: #d7e7ff; --hl-purple: #eadfff;
@@ -70,7 +70,7 @@
     --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
     --scrim: rgba(0,4,24,.7);
     --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,4,30,.45);
-    --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #3a2fc4; --bar-report: #0a7fd0; --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #12a88e; --bar-view-idea: #e8c62c; --danger: #ff4d63;
+    --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #1446d6; --bar-report: #0a7fd0; --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #12a88e; --bar-view-idea: #e8c62c; --danger: #ff4d63;
     --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
     --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
     color-scheme: dark;
@@ -93,7 +93,7 @@
   --ok: #26463a; --ok-ink: #b5e8cf; --ng: #4d2c33; --ng-ink: #f5c0c8;
   --scrim: rgba(0,4,24,.7);
   --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,4,30,.45);
-  --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #3a2fc4; --bar-report: #0a7fd0; --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #12a88e; --bar-view-idea: #e8c62c; --danger: #ff4d63;
+  --bar-search: #1446d6; --bar-list: #2446b4; --bar-edit: #1446d6; --bar-report: #0a7fd0; --bar-view: #2a4199; --bar-view-exp: #d0202a; --bar-view-learn: #12a88e; --bar-view-idea: #e8c62c; --danger: #ff4d63;
   --tc-rose: #f29aac; --tc-orange: #f2b47c; --tc-green: #86d6ad; --tc-blue: #97bdf2; --tc-purple: #c6abf4; --tc-gray: #a9aec0; --tc-brown: #d9ab93;
   --hl-yellow: #5e5222; --hl-pink: #5c2f3c; --hl-green: #2a4c39; --hl-blue: #28405f; --hl-purple: #3f3360;
   color-scheme: dark;
@@ -376,6 +376,14 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 .nav-toggle[aria-expanded="true"] { background: var(--sel-bg); color: var(--sel-ink); }
 .nav-menu { min-width: 190px; padding: 6px; transform-origin: top right; }
 .nav-menu.open { animation: navOpen .2s cubic-bezier(.2,.8,.3,1) both; }
+.nav-menu.closing { animation: navClose .16s ease-in both; pointer-events: none; }
+.nav-menu.closing button { animation: navItemOut .12s ease-in both; }
+@keyframes navClose { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-8px) scaleY(.6); } }
+@keyframes navItemOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(-6px); } }
+/* メニューを開いている間は画面全体を透明な覆いで包み、外を押したらメニューを閉じるだけにする（下のメモ等は反応しない） */
+.nav-scrim { position: fixed; inset: 0; z-index: 39; background: transparent; }
+.topbar.menu-open { z-index: 40; }
+.topbar.menu-open :is(.topbar-in > :not(.menu-wrap), .search-tools, .crumbs) { pointer-events: none; }
 .menu.nav-menu button { display: flex; align-items: center; gap: 12px; padding: 11px 14px; font-size: 16px; font-weight: 700; color: var(--ink); }
 .menu.nav-menu button svg { width: 24px; height: 24px; flex: 0 0 auto; color: var(--accent-ink); }
 .nav-menu.open button { animation: navItem .22s ease both; animation-delay: calc(var(--i, 0) * 35ms + 40ms); }
@@ -383,7 +391,11 @@ button.brand { border: 0; background: none; padding: 0; text-align: left; color:
 @keyframes navItem { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 @media (hover: hover) { .nav-menu button:hover { background: var(--accent-soft); } }
 .nav-menu button:active { background: var(--accent-soft); }
-.brand .tab-name { font-size: 15px; font-weight: 800; color: inherit; padding-left: 10px; border-left: 2px solid currentColor; line-height: 1.1; }
+.brand .tab-name { display: inline-flex; align-items: center; gap: 5px; font-size: 15px; font-weight: 700; line-height: 1.1; color: color-mix(in srgb, currentColor 82%, var(--sel-bg)); }
+.brand .tab-name svg { width: 19px; height: 19px; flex: 0 0 auto; }
+/* アプリ名（ロゴ）は細い縁取りを付け、横の画面名とは見た目を分けて「タイトル」と分かるように */
+.topbar .brand .logo { filter: drop-shadow(1px 0 0 rgba(3,12,54,.55)) drop-shadow(-1px 0 0 rgba(3,12,54,.55)) drop-shadow(0 1px 0 rgba(3,12,54,.55)) drop-shadow(0 -1px 0 rgba(3,12,54,.55)); }
+html.clear-bar .topbar:not(.bar-view) .brand .tab-name { color: var(--ink-2); }
 .topbar .search-close { color: #fff; }
 html.clear-bar .topbar .search-close { color: var(--field-ink); }
 /* 横スライドでタブを切り替えるとき、隣のタブの中身をすぐ横に並べて一緒に動かす（あいだに空白を作らない） */
@@ -443,11 +455,15 @@ html.clear-bar .topbar:not(.bar-view) .folder-ico svg { fill: color-mix(in srgb,
 .fab.round { width: 60px; height: 60px; padding: 0; justify-content: center; border-radius: 50%; }
 .fab.round svg { width: 30px; height: 30px; stroke-width: 2.6; }
 /* 押したときの表示は、ボタンやカードの形に合わせる（スマホの四角い押した色は消している） */
-.fab { transition: transform .12s ease, filter .12s ease; }
-.fab:active { transform: scale(.93); filter: brightness(.92); }
-:is(.memo-card, .list-row, .ref-item, .recall-body) { transition: background-color .12s ease; }
-.memo-card:active, .list-row:active:not(:has(.icon-btn:active)) { background-color: color-mix(in srgb, var(--surface) 82%, var(--sel-bg)); }
-.icon-btn:active { background-color: color-mix(in srgb, currentColor 16%, transparent); }
+/* 検索画面の「＋」は少し上に（画面の下端の操作と重ならないように） */
+.fab.round { bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+/* ボタンを押したときは、右下の丸いボタンのように形を保ったまま少し縮む（横長の行やカードは控えめに） */
+:is(button, label.add-file, summary, .list-row) { transition: transform .12s ease, filter .12s ease; }
+:is(button, label.add-file, summary):active:not(:disabled) { transform: scale(.93); }
+.fab:active { filter: brightness(.92); }
+:is(.memo-card, .att-row, .ref-item, .recall-body, .menu button, details > summary, .list-row > .open):active:not(:disabled) { transform: scale(.98); }
+.list-row:has(> .open:active) { transform: scale(.98); }
+.list-row > .open:active { transform: none; }
 .fab-menu { position: fixed; right: 18px; bottom: calc(82px + env(safe-area-inset-bottom, 0px)); z-index: 26; display: grid; gap: 6px; justify-items: end; }
 .fab-menu button { border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-weight: 700; font-size: 15px; padding: 11px 22px; border-radius: 999px; box-shadow: var(--shadow); }
 .fab-menu button:disabled { opacity: .45; }
@@ -1176,6 +1192,8 @@ function resetTo(screen) {
 }
 window.addEventListener("popstate", (e) => {
   const depth = (e.state && e.state.depth) || 1;
+  // 検索画面のメニューが開いていれば、戻る操作でまずメニューを閉じる
+  if (UI.navMenuClose) { const f = UI.navMenuClose; UI.navMenuClose = null; if (f()) return; }
   if (pendingReset) {
     const p = pendingReset; pendingReset = null;
     UI.select.on = false; UI.select.ids.clear();
@@ -1419,22 +1437,44 @@ function renderSearch(s) {
   const navMenu = h("div", { class: "menu nav-menu", role: "menu", hidden: true });
   const menuBtn = h("button", { class: "icon-btn ico nav-toggle", type: "button", "aria-label": "メニュー", title: "メニュー", "aria-haspopup": "menu", "aria-expanded": "false",
     onclick: (e) => { e.stopPropagation(); navMenu.hidden ? openMenu() : closeMenu(); } }, svgIcon(ICONS.menu));
+  // メニューの外を押したときは、閉じるだけ（下のメモなどは反応させない）
+  const navScrim = h("div", { class: "nav-scrim", "aria-hidden": "true", onclick: (e) => { e.preventDefault(); closeMenu(); } });
+  let header = null;
   function openMenu() {
     navMenu.replaceChildren(...MENU.filter(([k]) => k === "settings" || (k === "search" ? !st.open : k !== st.tab)).map(([k, label, ic], i) =>
-      h("button", { type: "button", role: "menuitem", style: `--i:${i}`, onclick: () => { closeMenu(); pick(k); } }, svgIcon(ic), h("span", {}, label))));
-    navMenu.hidden = false; navMenu.classList.remove("open"); void navMenu.offsetWidth; navMenu.classList.add("open");
+      h("button", { type: "button", role: "menuitem", style: `--i:${i}`, onclick: () => closeMenu(() => pick(k)) }, svgIcon(ic), h("span", {}, label))));
+    navMenu.hidden = false; navMenu.classList.remove("open", "closing"); void navMenu.offsetWidth; navMenu.classList.add("open");
     menuBtn.setAttribute("aria-expanded", "true");
+    header.classList.add("menu-open"); document.body.append(navScrim);
+    // スマホの戻る操作でメニューを閉じられるよう、履歴を1つ積む
+    if (historyOk) try { history.pushState({ depth: UI.stack.length, menu: true }, ""); } catch {}
+    UI.navMenuClose = hideMenu;
   }
-  function closeMenu() { navMenu.hidden = true; navMenu.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); }
+  // 開くときと逆の動き（上へ縮みながら消える）で閉じる。画面が描き直されていれば何もしない（false）
+  function hideMenu() {
+    if (!navMenu.isConnected) return false;
+    if (UI.navMenuClose === hideMenu) UI.navMenuClose = null;
+    navScrim.remove(); menuBtn.setAttribute("aria-expanded", "false");
+    navMenu.classList.remove("open"); navMenu.classList.add("closing");
+    setTimeout(() => { navMenu.hidden = true; navMenu.classList.remove("closing"); header.classList.remove("menu-open"); }, 170);
+    return true;
+  }
+  // after: 閉じ終わってから行うこと（積んだ履歴を戻し終えてから。先に進むと履歴がずれるため）
+  function closeMenu(after) {
+    if (navMenu.hidden || navMenu.classList.contains("closing")) { if (after) after(); return; }
+    if (historyOk && history.state && history.state.menu) {
+      if (after) window.addEventListener("popstate", () => setTimeout(after, 0), { once: true });
+      history.back();
+    } else { hideMenu(); if (after) after(); }
+  }
   function pick(k) {
     if (k === "settings") openSettings();
     else if (k === "search") openSearch();
     else switchTab(k);
   }
-  const onDocClick = (e) => { if (!navMenu.hidden && !e.target.closest(".nav-menu")) closeMenu(); };
   const onKey = (e) => { if (e.key === "Escape" && !navMenu.hidden) closeMenu(); };
-  document.addEventListener("click", onDocClick); document.addEventListener("keydown", onKey);
-  cleanupFns.push(() => { document.removeEventListener("click", onDocClick); document.removeEventListener("keydown", onKey); });
+  document.addEventListener("keydown", onKey);
+  cleanupFns.push(() => { document.removeEventListener("keydown", onKey); navScrim.remove(); });
 
   /* タブの中身を作る（スライド中に隣のタブを先に見せるときにも使う） */
   function buildTab(tab) {
@@ -1485,10 +1525,11 @@ function renderSearch(s) {
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
     : null;
 
+  const TAB_ICON = { memos: ICONS.recent, lists: ICONS.folder, report: ICONS.report };
   const scr = h("div", { class: "screen" },
-    h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
+    header = h("header", { class: "topbar bar-search" }, h("div", { class: "topbar-in" },
       UI.stack.length > 1 ? h("button", { class: "icon-btn back", "aria-label": "戻る", onclick: back }, "←") : null,
-      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", { class: "tab-name" }, TAB_NAME[st.tab])),
+      h("button", { class: "brand", type: "button", title: "最初の画面に戻る", onclick: goHome }, h("b", { html: LOGO_SVG }), h("small", { class: "tab-name" }, svgIcon(TAB_ICON[st.tab]), h("span", {}, TAB_NAME[st.tab]))),
       navigator.onLine ? null : h("span", { class: "offline-pill" }, "オフライン"),
       h("div", { class: "menu-wrap" }, menuBtn, navMenu)),
       h("div", { class: "search-tools" }, panel), crumbBar()),
@@ -1540,8 +1581,13 @@ function renderSearch(s) {
     if (!cur.dx || (Math.abs(cur.dx) < W * 0.22 && !flick)) { setX(0, 0.2); setTimeout(() => { if (cur.peer) cur.peer.remove(); }, 220); sw = null; return; }
     const next = neighborOf(cur.dx < 0 ? -1 : 1);
     sw = null;
-    setX(cur.dx < 0 ? -W : W, 0.24);
-    setTimeout(() => switchTab(next), 240);
+    // 横へ滑らせ終わってから切り替える（途中で切り替えると、止まる直前に一瞬ガクッと動くため）
+    let done = false;
+    const finish = () => { if (done) return; done = true; results.removeEventListener("transitionend", onEnd); switchTab(next); };
+    const onEnd = (e) => { if (e.target === results) finish(); };
+    results.addEventListener("transitionend", onEnd);
+    setX(cur.dx < 0 ? -W : W, 0.26);
+    setTimeout(finish, 400);
   };
   area.addEventListener("touchend", endSwipe, { passive: true });
   area.addEventListener("touchcancel", endSwipe, { passive: true });
@@ -2678,6 +2724,8 @@ function renderEdit(s) {
   async function save({ auto, stay } = {}) {
     if (saving) return false;
     const data = collect();
+    // 題名も本文も空のメモは保存しない
+    if (!auto && !data.title && !data.bodyText.trim() && !/<img/i.test(data.bodyHtml)) { toast("題名か本文を入力してください", true); titleIn.focus(); return false; }
     if (!auto && !data.genres.length) { genreErr.hidden = false; genreErr.scrollIntoView({ block: "center", behavior: "smooth" }); return false; }
     if (auto && !d.dirty) return true;
     if (auto && !data.title && !data.bodyText && !data.attachments.length) return true;
