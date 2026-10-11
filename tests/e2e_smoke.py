@@ -26,7 +26,7 @@ def long_press(pg, loc):
     box = loc.bounding_box(); x, y = box["x"] + box["width"] / 2, box["y"] + box["height"] / 2
     pg.mouse.move(x, y); pg.mouse.down(); pg.wait_for_timeout(700); pg.mouse.up(); pg.wait_for_timeout(300)
 
-NAV_KEY = {"最近": "memos", "フォルダ": "lists", "検索": "search", "まとめ": "report", "設定": "settings"}
+NAV_KEY = {"最近": "memos", "フォルダ": "lists", "検索": "search", "まとめ": "report", "シナリオ": "works", "設定": "settings"}
 def menu_go(pg, label):
     """画面の下のアイコンの列から選ぶ"""
     pg.click(f".bottom-nav .bn-{NAV_KEY[label]}"); time.sleep(0.35)
@@ -175,7 +175,7 @@ with sync_playwright() as p:
 
     tab(pg, "フォルダ")
     check("フォルダ一覧の更新日は「更新」の文字ではなくアイコン", pg.locator(".list-sub .upd-ico svg").count() >= 1 and "更新" not in pg.inner_text(".list-sub"))
-    pg.click(".list-row .open"); time.sleep(0.3)
+    pg.click(".list-row:not(.auto) .open"); time.sleep(0.3)
     # フォルダ → 閲覧 → 編集で削除すると、フォルダ画面に戻り「戻る」もずれない
     pg.locator(".memo-card", has_text="フォルダ内メモ").click(); pg.wait_for_selector(".view-title")
     pg.click(".menu-btn"); pg.click(".menu >> text=削除"); time.sleep(0.2)
@@ -330,7 +330,7 @@ with sync_playwright() as p:
     ap = ac.new_page(); ap.on("pageerror", lambda e: errors.append(str(e))); ap.clock.install(); ap.goto(URL); ap.wait_for_selector(".fab")
     ap.click(".bottom-nav .bn-lists"); time.sleep(0.4); ap.click(".fab"); ap.fill("#newlist", "旅"); ap.click(".modal >> text=作成"); time.sleep(0.6)
     if ap.locator(".modal").count(): ap.click(".modal >> text=キャンセル"); time.sleep(0.4)
-    if ap.locator(".folder-title").count() == 0: ap.click(".list-row .open"); time.sleep(0.5)
+    if ap.locator(".folder-title").count() == 0: ap.click(".list-row:not(.auto) .open"); time.sleep(0.5)
     ap.click(".fab"); time.sleep(0.3); new_screen(ap, ".fab-menu >> text=新規追加"); ap.keyboard.insert_text("景色。#京都")
     ap.fill("#title", "二つのジャンル"); ap.click(".genre-pick >> text=体験"); ap.click(".genre-pick >> text=アイデア"); ap.click(".save-btn"); ap.wait_for_selector(".folder-title"); time.sleep(0.6)
     ap.locator(".memo-card").first.click(); time.sleep(0.05)
@@ -357,7 +357,7 @@ with sync_playwright() as p:
     time.sleep(0.7)
     # フォルダ一覧 → フォルダの中も右から入る
     ap.go_back(); time.sleep(0.6)
-    ap.click(".bottom-nav .bn-lists"); time.sleep(0.5); ap.click(".list-row .open"); time.sleep(0.05)
+    ap.click(".bottom-nav .bn-lists"); time.sleep(0.5); ap.click(".list-row:not(.auto) .open"); time.sleep(0.05)
     check("フォルダを押すとフォルダの中が右から入る", ap.locator(".screen.zooming .folder-title").count() == 1)
     time.sleep(0.6); ap.go_back(); time.sleep(0.6)
     # 最近: 読んでいた位置から戻る・新しい並びのボタン
@@ -417,7 +417,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("まとめの日付は作成日時だけ（件数は出さない）", "件のメモから" not in pg.inner_text(".rp-meta") and ":" in pg.inner_text(".rp-meta"))
     pg.go_back(); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
     check("情報まとめから戻る操作で「最近」へ（絞り込みは解除）", pg.inner_text(".tab-name") == "最近" and pg.locator(".filter-chip").count() == 0)
-    tab(pg, "フォルダ"); pg.click(".list-row .open"); time.sleep(0.2)
+    tab(pg, "フォルダ"); pg.click(".list-row:not(.auto) .open"); time.sleep(0.2)
     pg.click(".fab"); pg.click(".fab-menu >> text=保存済から追加"); pg.locator(".modal .ref-item").first.click(); pg.click(".modal >> text=決定"); time.sleep(0.3)
     check("フォルダの中の上部は「まとめる」だけ（名前の変更はフォルダ一覧で）", pg.evaluate("(()=>{const b=[...document.querySelectorAll('header .head-actions > *')];return b.length===1&&b[0].classList.contains('report-btn')})()"))
     pg.click(".report-btn"); pg.wait_for_selector(".rp-doc")
@@ -443,7 +443,7 @@ const sel=getSelection();sel.removeAllRanges();sel.addRange(r);})"""
     check("検索画面ではフォルダも見つかる", pg.locator(".search-tab .list-row", has_text="京都").count() == 1 and pg.locator(".search-tab .memo-card").count() >= 1)
     pg.go_back(); time.sleep(0.3)
     nav = [b.get_attribute("aria-label") for b in pg.locator(".bottom-nav button").all()]
-    check("画面の下にアイコンだけの列（最近・フォルダ・検索・まとめ・設定）", nav == ["最近", "フォルダ", "検索", "まとめ", "設定"] and pg.locator(".bottom-nav button svg").count() == 5 and pg.inner_text(".bottom-nav").strip() == "", str(nav))
+    check("画面の下にアイコンだけの列（最近・フォルダ・検索・まとめ・シナリオ・設定）", nav == ["最近", "フォルダ", "検索", "まとめ", "シナリオ", "設定"] and pg.locator(".bottom-nav button svg").count() == 6 and pg.inner_text(".bottom-nav").strip() == "", str(nav))
     check("上部バーにタブ・検索・まとめ・設定・メニューのボタンはない", pg.locator("header .tabs, header .search-toggle, header .report-btn, header [aria-label=設定], header .nav-toggle").count() == 0)
     check("今の画面のアイコンは選んだ色", pg.get_attribute(".bn-memos", "aria-current") == "page")
     check("上部バーの画面名の左にアイコン", pg.locator(".tab-name svg").count() == 1)
@@ -496,9 +496,11 @@ fire('touchend',x1,false);}"""
     pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
     check("検索からさらにスライドで情報まとめ", pg.inner_text(".tab-name") == "情報まとめ" and pg.locator(".rp-tools").count() == 1)
     pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
-    check("情報まとめからさらにスライドで最近に戻る", pg.inner_text(".tab-name") == "最近")
+    check("情報まとめからさらにスライドでシナリオ", pg.inner_text(".tab-name") == "シナリオ")
+    pg.evaluate(SWIPE, [300, 120]); time.sleep(0.6)
+    check("シナリオからさらにスライドで最近に戻る", pg.inner_text(".tab-name") == "最近")
     pg.evaluate(SWIPE, [120, 300]); time.sleep(0.6)
-    check("逆向きのスライドで最近から情報まとめへ", pg.inner_text(".tab-name") == "情報まとめ")
+    check("逆向きのスライドで最近からシナリオへ", pg.inner_text(".tab-name") == "シナリオ")
     pg.go_back(); time.sleep(0.3)
     check("スライドで移った先から戻る操作で最近へ", pg.inner_text(".tab-name") == "最近")
 
@@ -593,10 +595,93 @@ fire('touchend',x1,false);}"""
     tab(pg, "フォルダ"); time.sleep(0.3)
     check("フォルダ一覧に削除アイコンはない", pg.locator(".list-row [aria-label=フォルダを削除]").count() == 0)
     n_lists = pg.locator(".list-row").count()
-    long_press(pg, pg.locator(".list-row .open").first)
+    long_press(pg, pg.locator(".list-row:not(.auto) .open").first)
     check("フォルダの長押しで選択が始まる", pg.locator(".select-bar").count() == 1 and pg.locator(".list-row.picked").count() == 1)
     pg.click(".select-bar >> text=削除"); pg.click(".modal >> text=Yes"); time.sleep(0.5)
     check("選んだフォルダを削除できる", pg.locator(".list-row").count() == n_lists - 1 and pg.locator(".select-bar").count() == 0)
+    tab(pg, "最近"); time.sleep(0.2)
+
+    # ジャンルのフォルダ: はじめからあり、そのジャンルのメモが自動で入る。名前の変更・追加のボタンはない
+    tab(pg, "フォルダ"); time.sleep(0.3)
+    check("フォルダ一覧の先頭にジャンルのフォルダ（体験・学び・アイデア）", [t.strip() for t in pg.locator(".list-row.auto .list-name").all_inner_texts()] == ["体験", "学び", "アイデア"])
+    check("ジャンルのフォルダには名前の変更ボタンがない", pg.locator(".list-row.auto [aria-label=名前を変更]").count() == 0)
+    long_press(pg, pg.locator(".list-row.auto .open").first)
+    check("ジャンルのフォルダは長押しで選択にならない", pg.locator(".select-bar").count() == 0)
+    if pg.locator(".folder-title").count() == 0: pg.locator(".list-row.auto .open").first.click()
+    time.sleep(0.4)
+    n_exp = pg.locator(".memo-card").count()
+    check("ジャンルのフォルダの中は追加のボタンがなく、まとめるはできる", pg.locator(".folder-title", has_text="体験").count() == 1 and pg.locator(".fab").count() == 0 and n_exp >= 1 and pg.locator(".report-btn").count() == 1)
+    pg.go_back(); time.sleep(0.4)
+    tab(pg, "最近"); new_screen(pg)
+    opts = pg.locator("#elist option").all_inner_texts()
+    check("メモ画面のフォルダにジャンルのフォルダは出ない", "体験" not in opts and "アイデア" not in opts, str(opts))
+    real = [o for o in opts if o not in ("フォルダに入れない", "＋ 新しいフォルダを作る")]
+    if real:
+        pg.select_option("#elist", label=real[0]); time.sleep(0.2)
+        check("選んだフォルダはプルダウンの枠の中に出る（外に並べない）", pg.evaluate("(()=>{const s=document.querySelector('#elist');return s.options[s.selectedIndex].text})()") == real[0] and pg.locator(".list-pick-box .chip").count() == 0)
+    pg.fill("#title", "ジャンルフォルダ確認"); pg.click(".genre-pick >> text=体験"); pg.click(".save-btn"); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
+    tab(pg, "フォルダ"); pg.locator(".list-row.auto .open").first.click(); time.sleep(0.4)
+    check("保存したメモはジャンルのフォルダに自動で入る", pg.locator(".memo-card").count() == n_exp + 1 and pg.locator(".memo-card", has_text="ジャンルフォルダ確認").count() == 1)
+    pg.go_back(); time.sleep(0.3); tab(pg, "最近"); time.sleep(0.2)
+
+    # 「最近」のランダム表示は設定で切り替えられる（オフなら作成・更新が新しい順）
+    settings(pg); time.sleep(0.3)
+    sw = pg.locator(".modal .switch[aria-label='「最近」をランダムに並べる']")
+    check("設定に「最近」をランダムに並べるの切り替えがある（はじめはオン）", sw.count() == 1 and sw.get_attribute("aria-checked") == "true")
+    sw.click(); time.sleep(0.3); pg.click(".modal .modal-x"); time.sleep(0.4)
+    order = pg.evaluate("""() => new Promise(res => { const r = indexedDB.open('sosaku-memo'); r.onsuccess = () => { const q = r.result.transaction('memos').objectStore('memos').getAll(); q.onsuccess = () => res(q.result.sort((a, b) => b.updatedAt - a.updatedAt).map(m => m.id)); }; })""")
+    shown = pg.evaluate("[...document.querySelectorAll('.memo-card')].map(c=>c.dataset.id)")
+    check("オフにすると「最近」は新しい順", shown == order[:len(shown)] and len(shown) >= 3, str((shown[:4], order[:4])))
+    settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='「最近」をランダムに並べる']"); pg.click(".modal .modal-x"); time.sleep(0.3)
+
+    # 拡大表示: 開くと戻る履歴を1つ積み、戻る操作ではそれだけ閉じる（もう1回で前の画面へ）。画像が2枚以上なら横にはらって次へ
+    new_screen(pg); pg.fill("#title", "二枚の写真"); pg.click(".genre-pick >> text=体験"); pg.click(".editor")
+    attach_image(pg); pg.click(".editor"); pg.keyboard.press("Control+End"); attach_image(pg)
+    pg.click("#title"); pg.click(".save-btn"); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
+    pg.locator(".memo-card", has_text="二枚の写真").click(); pg.wait_for_selector(".view-title")
+    n_img = pg.locator(".view-body img").count()
+    pg.locator(".view-body img").first.click(); pg.wait_for_selector(".lightbox img")
+    check("拡大表示は本文の画像を並べ、何枚目かを出す", n_img == 2 and pg.locator(".lb-slide").count() == 2 and pg.inner_text(".lb-count") == "1 / 2", str(n_img))
+    check("拡大表示を開くと戻る履歴を1つ積む", pg.evaluate("!!(history.state && history.state.ov)"))
+    pg.evaluate("(()=>{const t=document.querySelector('.lb-track');t.scrollLeft=t.clientWidth;t.dispatchEvent(new Event('scroll'))})()"); time.sleep(0.4)
+    check("横にはらうと次の画像（保存も次の画像に）", pg.inner_text(".lb-count") == "2 / 2" and pg.get_attribute(".lb-save", "href") == pg.locator(".lb-slide img").nth(1).get_attribute("src"))
+    pg.go_back(); time.sleep(0.4)
+    check("戻る操作で拡大表示だけ閉じる（履歴を積み直さない）", pg.locator(".lightbox").count() == 0 and pg.locator(".view-title").count() == 1 and not pg.evaluate("!!(history.state && history.state.ov)"))
+    pg.go_back(); time.sleep(0.5)
+    check("続けて戻る操作で最初の画面へ（アプリが閉じない）", pg.locator(".bottom-nav").count() == 1)
+
+    # メモ画面: 長い本文でも入力している位置が本文のボタンの列に隠れない・上部バーは画面の上に残る
+    new_screen(pg)
+    for i in range(30): pg.keyboard.insert_text(f"行{i}"); pg.keyboard.press("Enter")
+    time.sleep(0.3)
+    check("入力している位置が本文のボタンの列より上に見える", pg.evaluate("(()=>{const s=getSelection().getRangeAt(0);const el=s.endContainer.nodeType===1?s.endContainer:s.endContainer.parentElement;return el.getBoundingClientRect().bottom<=document.querySelector('.fmt-bar').getBoundingClientRect().top})()"))
+    check("入力中も上部バー（保存）は画面の上", pg.evaluate("(()=>{const r=document.querySelector('.topbar').getBoundingClientRect();return r.top>=0&&r.top<2&&scrollY>100})()"))
+    pg.click(".topbar .back"); time.sleep(0.3)
+    if pg.locator(".modal").count(): pg.click(".modal .btn.danger")
+    pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
+
+    # シナリオ: 作品 → 目次 → 執筆（資料を見ながら・ルビと傍点・自動で保存）
+    menu_go(pg, "シナリオ")
+    check("下のアイコンにシナリオがあり、作品がなければ案内", pg.inner_text(".tab-name") == "シナリオ" and "まだ作品がありません" in pg.inner_text("main"))
+    pg.click(".fab"); pg.fill("#work-title", "剣の道"); pg.fill("#work-syn", "高校剣道部の物語"); pg.click(".modal .btn.primary"); time.sleep(0.5)
+    check("作品の目次（タイトル・あらすじ・目次）", pg.locator(".nv-title", has_text="剣の道").count() == 1 and "高校剣道部の物語" in pg.inner_text(".nv-syn") and pg.locator(".nv-box-h", has_text="目次").count() == 1)
+    pg.click(".fab"); pg.wait_for_selector(".write-screen")
+    pg.fill("#w-title", "入部"); pg.click(".w-area:not([hidden])"); pg.keyboard.insert_text("春。｜竹刀《しない》の音が")
+    pg.click(".w-tools >> text=傍点"); pg.keyboard.insert_text("響いた"); time.sleep(1.2)
+    check("傍点のボタンで《《》》の中に書ける・文字数は記号を数えない", pg.input_value(".w-area[data-key=body]") == "春。｜竹刀《しない》の音が《《響いた》》" and pg.inner_text(".w-count") == "10字", pg.input_value(".w-area[data-key=body]") + " " + pg.inner_text(".w-count"))
+    check("入力は自動で保存される", pg.inner_text(".w-status") == "保存済み")
+    pg.click("[aria-label='資料（メモ）を見る']"); time.sleep(0.3)
+    check("資料を開くと上にメモの一覧、下で書き続けられる", pg.locator(".ref-row").count() >= 3 and pg.evaluate("document.querySelector('.ref-pane').getBoundingClientRect().bottom<=document.querySelector('.w-area:not([hidden])').getBoundingClientRect().top+1"))
+    pg.fill("#ref-q", "二枚の写真"); time.sleep(0.2); pg.locator(".ref-row").first.click(); time.sleep(0.3)
+    check("資料のメモを押すと中身を見られる", pg.locator(".ref-ttl", has_text="二枚の写真").count() == 1 and pg.locator(".ref-view img").count() == 2)
+    pg.click("[aria-label='読む画面で確かめる']"); time.sleep(0.3)
+    check("読む画面でルビと傍点が付く", pg.locator(".nv-body ruby rt", has_text="しない").count() == 1 and pg.locator(".nv-body .bouten", has_text="響いた").count() == 1)
+    pg.click(".write-screen .back"); time.sleep(0.5)
+    check("目次に第1話と文字数が出る", pg.locator(".nv-ep", has_text="入部").count() == 1 and "10字" in pg.inner_text(".nv-ep"))
+    pg.click(".fab"); pg.wait_for_selector(".write-screen"); pg.click(".write-screen .back"); time.sleep(0.5)
+    check("何も書かずに閉じた話は残らない", pg.locator(".nv-ep").count() == 1)
+    pg.go_back(); time.sleep(0.4)
+    check("作品の一覧に話数・文字数", pg.locator(".work-card", has_text="剣の道").count() == 1 and "全1話" in pg.inner_text(".work-meta"))
     tab(pg, "最近"); time.sleep(0.2)
 
     # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
