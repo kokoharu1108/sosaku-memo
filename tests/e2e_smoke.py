@@ -321,7 +321,7 @@ with sync_playwright() as p:
     pg.evaluate("document.documentElement.dataset.theme='light'")
 
     # 編集→保存で前の画面へ
-    pg.click(".menu-btn"); pg.click(".menu >> text=編集"); pg.fill("#title", "書式（改）")
+    pg.click(".menu-btn"); new_screen(pg, ".menu >> text=編集"); pg.fill("#title", "書式（改）")   # 本文にカーソルが当たってから題名を入れる
     pg.click(".save-btn"); time.sleep(0.5)
     check("編集保存後は閲覧画面に戻る", pg.locator(".view-title").count() == 1 and pg.inner_text(".view-title") == "書式（改）")
 
@@ -356,10 +356,10 @@ with sync_playwright() as p:
     ap.click(".topbar .back"); time.sleep(0.05)
     check("閉じるときは縮みながら消える（メモを閉じるときと同じ）", ap.locator(".nav-ghost.over").count() == 1 and ap.locator(".nav-dim").count() == 1)
     time.sleep(0.7)
-    # フォルダ一覧 → フォルダの中も右から入る
+    # フォルダ一覧 → フォルダの中もメモと同じ動き
     ap.go_back(); time.sleep(0.6)
     ap.click(".bottom-nav .bn-lists"); time.sleep(0.5); ap.click(".list-row:not(.auto) .open"); time.sleep(0.05)
-    check("フォルダを押すとフォルダの中が右から入る", ap.locator(".screen.zooming .folder-title").count() == 1)
+    check("フォルダを押すとフォルダの中もメモと同じくふわっと広がる", ap.locator(".screen.zooming .folder-title").count() == 1 and ap.locator(".nav-ghost.under.deep").count() == 1)
     time.sleep(0.6); ap.go_back(); time.sleep(0.6)
     # 最近: 読んでいた位置から戻る・新しい並びのボタン
     ap.evaluate("window.__fade=[];new MutationObserver(()=>{const a=document.querySelector('.home-screen .swipe-area');if(a)for(const c of ['tab-out','tab-in'])if(a.classList.contains(c)&&!__fade.includes(c))__fade.push(c)}).observe(document.body,{subtree:true,attributes:true,childList:true,attributeFilter:['class']})")
@@ -584,6 +584,9 @@ fire('touchend',x1,false);}"""
     tp = tc.new_page(); tp.clock.install(time=1790000000000); tp.goto(URL); tp.wait_for_selector(".fab")
     new_memo(tp, "時計のメモ")
     tp.clock.fast_forward(25 * 60 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
+    # 開き直した直後は時計の写し替えが間に合わないことがあるので、表示が落ち着くまで少し待って確かめる
+    try: tp.wait_for_function("(()=>{const d=document.querySelector('.memo-card .card-date');return !!d&&d.textContent==='25分前'})()", timeout=3000)
+    except Exception: pass
     check("作成25分後は「25分前」", tp.inner_text(".memo-card .card-date") == "25分前", tp.inner_text(".memo-card .card-date"))
     tp.clock.fast_forward(2 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
     check("作成2時間半後は「2時間前」", tp.inner_text(".memo-card .card-date") == "2時間前", tp.inner_text(".memo-card .card-date"))

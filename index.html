@@ -864,8 +864,12 @@ body.editing-body .edit-main { padding-bottom: 70vh; }
 .view-screen.zooming { position: fixed; }
 @keyframes nav-dim-in { from { opacity: 0; } to { opacity: .18; } }
 /* 動いている画面の下地は、アプリの背景と同じ（背景画像を選んでいればその画像） */
-.pagebg { background: linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--ray-fade, rgba(0,0,0,0)) 50%), repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water) fixed; background-attachment: fixed; }
-html.has-bg .pagebg { background: var(--bg-veil), var(--user-bg) center / cover no-repeat fixed; }
+/* 動いている画面の下地は、アプリの背景と同じ見た目に（水面の光の模様も重ねる。模様がないと、動き終わったときに背景が変わって見える） */
+.pagebg { background: var(--caustic-pg, linear-gradient(transparent, transparent)) center top / 100% 100% no-repeat, linear-gradient(180deg, rgba(0,0,0,0) 0%, var(--ray-fade, rgba(0,0,0,0)) 50%), repeating-linear-gradient(104deg, rgba(160,230,255,0) 0 90px, rgba(160,230,255,.06) 90px 130px, rgba(160,230,255,0) 130px 260px), var(--water); background-attachment: fixed; background-blend-mode: screen, normal, normal, normal; }
+:root { --caustic-pg: var(--caustic-pg-l, linear-gradient(transparent, transparent)); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --caustic-pg: var(--caustic-pg-d, linear-gradient(transparent, transparent)); } }
+:root[data-theme="dark"] { --caustic-pg: var(--caustic-pg-d, linear-gradient(transparent, transparent)); }
+html.has-bg .pagebg { background: var(--bg-veil), var(--user-bg) center / cover no-repeat fixed; background-blend-mode: normal; }
 @media (prefers-reduced-motion: reduce) {
   .img-editor, .img-editor *, .lightbox, .lightbox *, .modal-scrim, .modal, .menu, .pop { animation: none !important; }
   .toast { animation: toastFade 3s steps(1) forwards; }
@@ -2470,7 +2474,7 @@ function renderLists(redraw, only) {
   for (const l of lists) {
     const count = folderMembers(l.id).length;
     const picked = sel && sel.ids.has(l.id);
-    const open = () => go({ name: "list", id: l.id, slide: true });
+    const open = () => go({ name: "list", id: l.id, fade: true });   // メモを開くときと同じふわっと広がる動き
     rows.append(h("div", { class: "list-row" + (sel ? " selecting" : "") + (picked ? " picked" : "") + (l.auto ? " auto" : "") },
       sel ? h("span", { class: "pick-box", "aria-hidden": "true" }, picked ? checkMark() : "") : null,
       h("button", { class: "open", "aria-pressed": sel ? String(!!picked) : null, ...(l.auto ? { type: "button", onclick: open } : pressHandlers("lists", l.id, sel, open)) },
@@ -2588,7 +2592,7 @@ async function createList() {
   try { l = await Manager.saveList({ id: uid("l"), name }); }
   catch { toast("フォルダを作成できませんでした。もう一度お試しください。", true); return; }
   toast("フォルダを作成しました");
-  go({ name: "list", id: l.id });
+  go({ name: "list", id: l.id, fade: true });
   if (Manager.memos.size) pickMemosForList(l, render);
 }
 /* メモを選ぶ小窓（フォルダに入れる・まとめるメモを選ぶ）。決定で選んだ id の配列、キャンセルで null */
@@ -2934,7 +2938,7 @@ function renderView(s) {
     // 題名・ジャンルは上部バーへ。本文の上は日付と所属フォルダだけ、タグは本文の下（添付の上）
     h("div", { class: "view-meta" }, dateLine(m)),
     folders.length ? h("div", { class: "view-folders" }, folders.map(l =>
-      h("button", { class: "view-folder", type: "button", title: "フォルダを開く", "aria-label": "フォルダ「" + l.name + "」を開く", onclick: () => go({ name: "list", id: l.id }) },
+      h("button", { class: "view-folder", type: "button", title: "フォルダを開く", "aria-label": "フォルダ「" + l.name + "」を開く", onclick: () => go({ name: "list", id: l.id, fade: true }) },
         h("span", { class: "folder-ico", "aria-hidden": "true" }, svgIcon(ICONS.folder)), h("span", { class: "vf-name" }, l.name), h("span", { class: "vf-go", "aria-hidden": "true" }, "›")))) : null,
     m.bodyText || m.bodyHtml ? body : h("p", { class: "ai-hint", style: "margin-top:18px" }, "本文はありません。"),
     extraTags.length ? h("div", { class: "view-tags" },
@@ -4704,9 +4708,18 @@ function bakeCaustic() {
     const img = new Image();
     img.onload = () => {
       try {
-        const c = document.createElement("canvas"); c.width = 450; c.height = 800;
-        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-        c.toBlob(b => { if (b) document.documentElement.style.setProperty("--caustic", `url("${URL.createObjectURL(b)}")`); });
+        const make = (op, mask, name) => {
+          const c = document.createElement("canvas"); c.width = 450; c.height = 800;
+          const x = c.getContext("2d"); x.globalAlpha = op; x.drawImage(img, 0, 0, c.width, c.height);
+          if (mask) {   // ダークは画面の上だけ（body::after の mask と同じ）
+            const g = x.createLinearGradient(0, 0, 0, c.height); g.addColorStop(0, "#000"); g.addColorStop(.22, "rgba(0,0,0,.5)"); g.addColorStop(.48, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,0)");
+            x.globalAlpha = 1; x.globalCompositeOperation = "destination-in"; x.fillStyle = g; x.fillRect(0, 0, c.width, c.height);
+          }
+          c.toBlob(b => { if (b) document.documentElement.style.setProperty(name, `url("${URL.createObjectURL(b)}")`); });
+        };
+        make(1, false, "--caustic");
+        // 画面が動いている間の下地（.pagebg）用に、濃さ（--caustic-op）とダークの上だけの形を焼き込んだもの
+        make(.45, false, "--caustic-pg-l"); make(.28, true, "--caustic-pg-d");
       } catch {}
     };
     img.src = m[1];
