@@ -337,6 +337,7 @@ with sync_playwright() as p:
     check("メモを開くとき（X と同じ動き）: 前の画面は暗くなり、閲覧画面は少し小さいところからふわっと広がる・背景はアプリの背景のまま", ap.locator(".nav-ghost.under.deep").count() == 1 and ap.locator(".view-screen.zooming.pagebg").count() == 1 and ap.evaluate("(()=>{const a=document.querySelector('.view-screen').getAnimations()[0];const k=a&&a.effect.getKeyframes();return !!k&&k[0].opacity==0&&/scale\(0?\.9\)/.test(k[0].transform)})()"))
     time.sleep(0.7)
     check("開き終わったら前の画面の写しは消える", ap.locator(".nav-ghost").count() == 0)
+    check("開くと、スマホ上端の帯の色は閲覧画面のジャンルの色になる", ap.evaluate("document.querySelector('meta[name=theme-color]').content") == ap.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--bar-view-exp').trim()"))
     check("ジャンル2つなら上部バーを2色で塗り分ける（混ぜない）", ap.evaluate("(()=>{const t=document.querySelector('.view-screen .topbar');return t.classList.contains('multi')&&getComputedStyle(t).backgroundImage.includes('105deg')})()"))
     check("ジャンルの色は均等に分ける", "50%" in ap.evaluate("document.querySelector('.view-screen .topbar').style.backgroundImage"))
     check("背景のジャンル名は、それぞれの色の帯の上に（赤に体験・黄にアイデア）", ap.evaluate("(()=>{const w=document.querySelector('.genre-mark-wrap').getBoundingClientRect();const e=document.querySelector('.genre-mark.gm-exp'),i=document.querySelector('.genre-mark.gm-idea');if(!e||!i)return false;const c=x=>{const r=x.getBoundingClientRect();return (r.left+r.width/2-w.left)/w.width};return e.textContent==='体験'&&i.textContent==='アイデア'&&c(e)<0.5&&c(i)>0.5})()"))

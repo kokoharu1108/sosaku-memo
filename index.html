@@ -1921,7 +1921,10 @@ function render() {
   // スマホ上端の帯の色は、新しい画面が表示されてから変える（先に色だけ変わると、遅れて画面が出るように見えるため）
   // （描いた直後の2フレームでは、端末によってはまだ前の画面が見えているので、さらに少し待つ）
   clearTimeout(render.tc);
-  requestAnimationFrame(() => requestAnimationFrame(() => { render.tc = setTimeout(syncThemeColor, anim ? 230 : 120); }));
+  // 開く・閉じる動き（ふわっと出る・消える）では、画面がほぼ見えたところ（動きの3分の1ほど）で変える（動き終わりまで待つと、帯だけ遅れて見える）
+  const tcWait = anim === "in" || anim === "out" ? 40 : anim ? 130 : 120;
+  if (anim) requestAnimationFrame(() => { render.tc = setTimeout(syncThemeColor, tcWait); });
+  else requestAnimationFrame(() => requestAnimationFrame(() => { render.tc = setTimeout(syncThemeColor, tcWait); }));
 }
 
 /* 下にスクロールしたら、上のバーと下のアイコンの列（と「＋」）を画面の外へしまい、上にスクロールしたら出す（X のように）。
@@ -2367,6 +2370,8 @@ function memoCard(m, terms = [], sel, scope) {
   if (cardH.has(key)) card.style.containIntrinsicSize = `auto ${cardH.get(key)}px`;
   card.addEventListener("contentvisibilityautostatechange", (e) => { if (!e.skipped) requestAnimationFrame(() => measureCard(card, key)); });
   const img = card.querySelector(".tw-media img"); if (img) img.addEventListener("load", () => measureCard(card, key));
+  // 押した瞬間に、閲覧画面で使う画像を先に読み込み始める（指を離すまでの間に済ませ、開くのを待たせない）
+  if ((m.attachments || []).length) card.addEventListener("pointerdown", () => { ensureFileUrls(m.attachments).catch(() => {}); }, { passive: true });
   return card;
 }
 function memoCardBody(m, terms = [], sel, scope) {
