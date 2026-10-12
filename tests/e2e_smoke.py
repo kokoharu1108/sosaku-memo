@@ -350,11 +350,11 @@ with sync_playwright() as p:
     check("カードの題名は2行まで折り返して出す（日時は題名の後ろ）", ap.evaluate("(()=>{const l=document.querySelector('.memo-card .tw-line');return !!l&&getComputedStyle(l).webkitLineClamp==='2'&&!!l.querySelector('.card-date')})()"))
     check("フォルダの中の「＋」は他の画面と同じ位置", ap.evaluate("innerHeight - document.querySelector('.fab').getBoundingClientRect().bottom") >= 50)
     ap.click(".fab"); time.sleep(0.3); ap.click(".fab-menu >> text=新規追加"); time.sleep(0.05)
-    check("「＋」から開くメモ画面は右から入る（ムーブイン）", ap.locator(".edit-screen.zooming").count() == 1 and "matrix" in ap.evaluate("getComputedStyle(document.querySelector('.edit-screen')).transform"))
+    check("「＋」から開くメモ画面も、メモを開くときと同じく少し小さいところからふわっと広がる", ap.locator(".edit-screen.zooming").count() == 1 and ap.locator(".nav-ghost.under.deep").count() == 1 and ap.evaluate("(()=>{const a=document.querySelector('.edit-screen').getAnimations()[0];const k=a&&a.effect.getKeyframes();return !!k&&k[0].opacity==0&&/scale\\(0?\\.9\\)/.test(k[0].transform)})()"))
     time.sleep(0.6)
     check("入り終わったら前の画面の写しは残らない（ちらつかない）", ap.locator(".nav-ghost").count() == 0 and ap.locator(".zooming, .pagebg").count() == 0)
     ap.click(".topbar .back"); time.sleep(0.05)
-    check("閉じるときは右へ抜ける（ムーブアウト）", ap.locator(".nav-ghost.over").count() == 1)
+    check("閉じるときは縮みながら消える（メモを閉じるときと同じ）", ap.locator(".nav-ghost.over").count() == 1 and ap.locator(".nav-dim").count() == 1)
     time.sleep(0.7)
     # フォルダ一覧 → フォルダの中も右から入る
     ap.go_back(); time.sleep(0.6)

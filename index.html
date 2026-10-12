@@ -1893,13 +1893,14 @@ function render() {
   const from = UI.zoomFrom; UI.zoomFrom = null;
   let anim = null, ghost = null;
   if (!reduceMotion() && app.firstElementChild) {
-    if (from && len > prev.len && cs.name === "view") anim = "in";
+    // メモを開く・「＋」から新しいメモを開くときは、X と同じ「ふわっと広がる」動き（閉じるときは縮みながら消える）
+    if ((from && cs.name === "view" || cs.fade) && len > prev.len) anim = "in";
     else if (cs.slide && len > prev.len) anim = "slide-in";
-    else if (len < prev.len && prev.name === "view") anim = "out";
+    else if (len < prev.len && (prev.name === "view" || prev.fade)) anim = "out";
     else if (len < prev.len && prev.slide) anim = "slide-out";
   }
   if (anim) ghost = screenGhost(app.firstElementChild, /in$/.test(anim) ? "under" : "over");
-  render.last = { name: cs.name, len, id: cs.id, slide: !!cs.slide };
+  render.last = { name: cs.name, len, id: cs.id, slide: !!cs.slide, fade: !!cs.fade };
   if (len < (prev.len || 0) && cs.scrollY != null) UI.listY = cs.scrollY;   // 戻ったときは、読んでいた位置の付近から一覧を作る
   cleanupFns.forEach(f => { try { f(); } catch {} }); cleanupFns = [];
   app.replaceChildren();
@@ -2094,7 +2095,7 @@ function renderSearch(s) {
   fab = h("button", { class: "fab round", onclick: (e) => {
     if (st.tab === "lists") createList();
     else if (st.tab === "works") createWork();
-    else go({ name: "edit", id: null, slide: true });
+    else go({ name: "edit", id: null, fade: true });
   } }, svgIcon('<path d="M12 5v14M5 12h14"/>'));
   const storeNote = Storage.mode === "memory"
     ? h("div", { class: "notice" }, "このブラウザでは端末内に保存できないため、画面を閉じるとメモは消えます。プライベートブラウズを解除してください。")
@@ -2549,7 +2550,7 @@ function renderListScreen(s) {
   // 開くときは下から順にふわっと出し、閉じるときは逆に引っ込める。「＋」は開いている間「×」に回る
   const addMenu = h("div", { class: "fab-menu", hidden: true },
     h("button", { type: "button", disabled: !Manager.memos.size, onclick: () => { showAdd(false); pickMemosForList(l, draw); } }, "保存済から追加"),
-    h("button", { type: "button", onclick: () => { showAdd(false); go({ name: "edit", id: null, presetList: l.id, slide: true }); } }, "新規追加"));
+    h("button", { type: "button", onclick: () => { showAdd(false); go({ name: "edit", id: null, presetList: l.id, fade: true }); } }, "新規追加"));
   let addTimer = 0;
   const showAdd = (on) => {
     clearTimeout(addTimer);
