@@ -584,6 +584,9 @@ fire('touchend',x1,false);}"""
     tp = tc.new_page(); tp.clock.install(time=1790000000000); tp.goto(URL); tp.wait_for_selector(".fab")
     new_memo(tp, "時計のメモ")
     tp.clock.fast_forward(25 * 60 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
+    # 開き直した直後は時計の写し替えが間に合わないことがあるので、表示が落ち着くまで少し待って確かめる
+    try: tp.wait_for_function("(()=>{const d=document.querySelector('.memo-card .card-date');return !!d&&d.textContent==='25分前'})()", timeout=3000)
+    except Exception: pass
     check("作成25分後は「25分前」", tp.inner_text(".memo-card .card-date") == "25分前", tp.inner_text(".memo-card .card-date"))
     tp.clock.fast_forward(2 * 3600 * 1000); tp.reload(); tp.wait_for_selector(".memo-card")
     check("作成2時間半後は「2時間前」", tp.inner_text(".memo-card .card-date") == "2時間前", tp.inner_text(".memo-card .card-date"))
