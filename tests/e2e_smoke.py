@@ -715,6 +715,24 @@ fire('touchend',x1,false);}"""
     check("作品の一覧に話数・文字数", pg.locator(".work-card", has_text="剣の道").count() == 1 and "全1話" in pg.inner_text(".work-meta"))
     tab(pg, "最近"); time.sleep(0.2)
 
+    # メモが多くても軽く: 見える所のカードだけ先に作り、ほかは同じ高さの空きにして、あとから少しずつ作る（X のタイムラインと同じ考え方）
+    lc = b.new_context(viewport={"width": 390, "height": 844}, is_mobile=True, has_touch=True, reduced_motion="reduce")
+    lp = lc.new_page(); lp.on("pageerror", lambda e: errors.append(str(e))); lp.goto(URL); lp.wait_for_selector(".bottom-nav")
+    lp.evaluate("""() => new Promise(res => { const r = indexedDB.open('sosaku-memo'); r.onsuccess = () => { const tx = r.result.transaction('memos', 'readwrite'); const os = tx.objectStore('memos'); const t = Date.now() - 3 * 864e5;
+      for (let i = 0; i < 80; i++) { const b = '本文' + i + '。'.repeat(1 + i % 5); os.put({ id: 'm-many' + String(i).padStart(3, '0'), title: '多いメモ' + i, genres: ['学び'], bodyHtml: '<div>' + b + '</div>', bodyText: b, attachments: [], tags: [], parentId: null, listIds: [], links: [], createdAt: t - i * 36e5, updatedAt: t - i * 36e5 }); }
+      tx.oncomplete = () => res(); }; })""")
+    lp.add_init_script("window.__first = null; new MutationObserver((ms, o) => { const l = document.querySelector('.memo-list'); if (l && window.__first === null) { window.__first = { cards: l.querySelectorAll('.memo-card').length, ph: l.querySelectorAll('.card-ph').length }; o.disconnect(); } }).observe(document, { childList: true, subtree: true })")
+    lp.reload(); lp.wait_for_selector(".memo-card")
+    first = lp.evaluate("window.__first")
+    check("メモが多いときは、見える所のカードだけ先に作る", first and first["cards"] < 30 and first["ph"] > 40, str(first))
+    lp.wait_for_function("document.querySelectorAll('.card-ph').length === 0", timeout=15000)
+    check("残りのカードも手が空いたときに作り、すべてそろう", lp.locator(".memo-list > .memo-card").count() == 80)
+    lp.evaluate("window.scrollTo(0, 5000)"); time.sleep(0.3)
+    idv = lp.evaluate("(()=>{const c=[...document.querySelectorAll('.memo-card')].find(e=>e.getBoundingClientRect().top>70);return c.dataset.id})()")
+    lp.locator(f".memo-card[data-id='{idv}']").click(); lp.wait_for_selector(".view-title"); lp.go_back(); lp.wait_for_selector(".bottom-nav"); time.sleep(0.4)
+    check("多いときも閲覧画面から戻ると同じ位置（同じカード）から", lp.evaluate("(()=>{const c=[...document.querySelectorAll('.memo-card')].find(e=>e.getBoundingClientRect().top>70);return c.dataset.id})()") == idv and abs(lp.evaluate("scrollY") - 5000) < 5)
+    lc.close()
+
     # Googleドライブ同期（偽の接続先で確認）: オンにしたときだけ送る・別の端末で同期すると戻る・オフの間は送らない
     gas = FakeGas()
     def device():

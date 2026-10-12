@@ -1068,6 +1068,8 @@ html.no-card.has-bg .nv-card { background: transparent; text-shadow: 0 0 2px var
 /* 画面から離れたカードは描くのを省く（「最近」はメモが多いと重くなるため）。高さは前に描いたときのものを使う */
 .memo-list > .memo-card { content-visibility: auto; contain-intrinsic-size: auto 150px; }
 .memo-list > .memo-card.cv-on { content-visibility: visible; }
+/* まだ作っていないカードの場所（前に描いたときと同じ高さの空き） */
+.card-ph { contain: strict; }
 </style>
 </head>
 <body>
@@ -1898,6 +1900,7 @@ function render() {
   }
   if (anim) ghost = screenGhost(app.firstElementChild, /in$/.test(anim) ? "under" : "over");
   render.last = { name: cs.name, len, id: cs.id, slide: !!cs.slide };
+  if (len < (prev.len || 0) && cs.scrollY != null) UI.listY = cs.scrollY;   // 戻ったときは、読んでいた位置の付近から一覧を作る
   cleanupFns.forEach(f => { try { f(); } catch {} }); cleanupFns = [];
   app.replaceChildren();
   const s = current();
@@ -1910,6 +1913,7 @@ function render() {
   else if (s.name === "write") { const w = Manager.works.get(s.work); if (!w || !(w.episodes || []).some(e => e.id === s.ep)) return dropMissing(); app.append(renderWrite(s)); }
   // 戻ったときは、その画面で読んでいた位置から（閲覧画面などを開くと一番上に戻ってしまうため、開く前の位置を覚えておく）
   if (len < (prev.len || 0) && cs.scrollY != null) window.scrollTo(0, cs.scrollY);
+  UI.listY = null;
   if (anim === "in" && app.firstElementChild) zoomIn(app.firstElementChild, from, ghost);
   if (anim === "slide-in" && app.firstElementChild) slideIn(app.firstElementChild, ghost);
   if (anim === "out") zoomOut(ghost, app.querySelector(`.memo-card[data-id="${prev.id}"]`), 16);
@@ -1957,6 +1961,7 @@ function resetHome(st) {
   st.tab = baseTab(st); st.report = null;
   if (baseTab(st) === "memos") clearSearch(st);
   const y = (st.scrolls && st.scrolls[st.tab]) || 0;
+  UI.listY = y;   // 一覧はこの位置の付近から作る
   requestAnimationFrame(() => window.scrollTo(0, y));
 }
 function renderSearch(s) {
@@ -1974,7 +1979,7 @@ function renderSearch(s) {
     if (st.tab === "report" && t !== "report") st.report = null;
     if (t === "report" && (st.committed || st.genre)) st.report = { name: "report", q: st.committed, genre: st.genre };
     st.scrolls[st.tab] = window.scrollY;
-    st.tab = t; syncAux(st); render();
+    st.tab = t; syncAux(st); UI.listY = st.scrolls[t] || 0; render();
     window.scrollTo(0, st.scrolls[t] || 0);
     if (t === "search" && opt.focus && !st.committed) setTimeout(() => { const f = document.getElementById("q"); if (f) f.focus(); }, 60);
   }
@@ -2039,7 +2044,7 @@ function renderSearch(s) {
     const frag = document.createDocumentFragment();
     const sel = selecting ? { ids: UI.select.ids, toggle: (id) => { UI.select.ids.has(id) ? UI.select.ids.delete(id) : UI.select.ids.add(id); drawResults(); } } : null;
     const list = h("div", { class: "memo-list" + (selecting ? " with-bar" : "") });
-    items.forEach(m => list.append(memoCard(m, terms, sel, "search")));
+    lazyCards(list, items, (m) => memoCard(m, terms, sel, "search"));
     frag.append(list);
     if (selecting) frag.append(selectBar(items.map(m => m.id), [{ label: "まとめる", run: reportSelected }, { label: "削除", cls: "danger-solid", run: bulkDelete }], drawResults));
     return frag;
@@ -2308,6 +2313,55 @@ function measureCard(card, key) {
   const hh = card.offsetHeight - ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth"].reduce((n, k) => n + (parseFloat(cs[k]) || 0), 0);
   if (hh > 0) { cardH.set(key, Math.round(hh)); cardOH.set(key, card.offsetHeight); card.style.containIntrinsicSize = `auto ${Math.round(hh)}px`; }
 }
+/* カードの一覧は X（旧Twitter）のタイムラインと同じ考え方で作る:
+   見える高さ（と前後に少し）のカードだけすぐ作り、ほかは同じ高さの空き（前に描いたときの高さ）にしておく。
+   空きは画面に近づいたとき、または手が空いたとき（requestIdleCallback）に、少しずつ本物のカードに置き換える。
+   置き換えで上の高さが変わっても、ブラウザが見ている位置を保つ（スクロールの位置合わせ） */
+const CARD_EST = 170;
+const whenIdle = (f) => (window.requestIdleCallback ? requestIdleCallback(f, { timeout: 400 }) : setTimeout(() => f({ timeRemaining: () => 8, didTimeout: false }), 30));
+function lazyCards(list, items, make) {
+  const y = UI.listY != null ? UI.listY : window.scrollY, vh = window.innerHeight;
+  const y0 = y - vh, y1 = y + vh * 2, phs = [];
+  let top = 150;   // 一覧の上（上部バー・ふりかえり）のおおよその高さ
+  for (const m of items) {
+    const hh = cardOH.get(cardKey(m)) || CARD_EST;
+    if (items.length <= 24 || (top + hh > y0 && top < y1)) list.append(make(m));
+    else { const d = document.createElement("div"); d.className = "card-ph"; d.style.height = hh + "px"; d.__m = m; list.append(d); phs.push(d); }
+    top += hh;
+  }
+  if (!phs.length) return;
+  const fill = (d) => { const m = d.__m; if (!m || !d.isConnected) return; d.__m = null; io.unobserve(d); d.replaceWith(make(m)); };
+  // 画面に近づいた空きは、すぐ本物に
+  const io = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) fill(e.target); }, { rootMargin: "1200px 0px" });
+  requestAnimationFrame(() => phs.forEach(d => { if (d.__m && d.isConnected) io.observe(d); }));
+  // 残りは手が空いたときに少しずつ（すべてそろうと、ページ内の検索なども今までどおり使える）
+  let i = 0;
+  const step = (dl) => {
+    if (!list.isConnected) { io.disconnect(); return; }   // 画面が描き直されたら、やめる
+    while (i < phs.length && (dl.didTimeout ? i % 6 !== 5 : dl.timeRemaining() > 3)) fill(phs[i++]);
+    if (i < phs.length) whenIdle(step); else io.disconnect();
+  };
+  whenIdle(step);
+}
+/* カードの画像は小さく縮めた写しを使う（X と同じく、表示する大きさの画像で軽く）。写しは手が空いたときに作り、それまでは元の画像 */
+const thumbUrls = new Map(), thumbBusy = new Set();
+function thumbFor(a) {
+  const t = thumbUrls.get(a.fileId); if (t) return t;
+  if (!thumbBusy.has(a.fileId)) { thumbBusy.add(a.fileId); whenIdle(() => makeThumb(a)); }
+  return null;
+}
+async function makeThumb(a) {
+  try {
+    const url = attUrl(a); if (!url) { thumbBusy.delete(a.fileId); return; }
+    const bmp = await createImageBitmap(await (await fetch(url)).blob());
+    const W = 720;
+    if (bmp.width <= W * 1.25) { thumbUrls.set(a.fileId, url); if (bmp.close) bmp.close(); return; }
+    const c = document.createElement("canvas"); c.width = W; c.height = Math.max(1, Math.round(bmp.height * W / bmp.width));
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height); if (bmp.close) bmp.close();
+    const tb = await new Promise(r => c.toBlob(r, "image/webp", 0.85));
+    if (tb) thumbUrls.set(a.fileId, URL.createObjectURL(tb));
+  } catch { thumbBusy.delete(a.fileId); }
+}
 function memoCard(m, terms = [], sel, scope) {
   const card = memoCardBody(m, terms, sel, scope), key = cardKey(m);
   if (cardH.has(key)) card.style.containIntrinsicSize = `auto ${cardH.get(key)}px`;
@@ -2327,7 +2381,7 @@ function memoCardBody(m, terms = [], sel, scope) {
   if (ci) {
     const img = h("img", { alt: "", loading: "lazy", decoding: "async" });
     media = h("div", { class: "tw-media" }, img);
-    if (attUrl(ci)) img.src = attUrl(ci); else ensureFileUrls([ci]).then(() => { const u = attUrl(ci); if (u) img.src = u; else media.remove(); }, () => media.remove());
+    if (attUrl(ci)) img.src = thumbFor(ci) || attUrl(ci); else ensureFileUrls([ci]).then(() => { const u = attUrl(ci); if (u) { img.src = u; thumbFor(ci); } else media.remove(); }, () => media.remove());
   }
   const others = (m.attachments || []).filter(a => a !== ci).length;
   return h("button", { class: "memo-card tweet" + (sel ? " selecting" : "") + (picked ? " picked" : ""), "aria-pressed": sel ? String(!!picked) : null,
@@ -2475,7 +2529,7 @@ function renderListScreen(s) {
           : h("div", { class: "empty" }, h("b", {}, "このフォルダにはまだメモがありません"),
             "右下の「＋」から、保存済みのメモを選ぶか、新しく書くと、このフォルダに入ります。"))
         : !items.length ? h("div", { class: "empty" }, h("b", {}, "このジャンルのメモはありません"), "ジャンルを「全ジャンル」に戻してください。")
-        : h("div", { class: "memo-list" + (selecting ? " with-bar" : "") }, items.map(m => memoCard(m, [], sel, scope))),
+        : (() => { const l = h("div", { class: "memo-list" + (selecting ? " with-bar" : "") }); lazyCards(l, items, (m) => memoCard(m, [], sel, scope)); return l; })(),
       selecting ? selectBar(items.map(m => m.id), [
         l.auto ? null : { label: "フォルダから外す", run: async () => {
           const ids = [...UI.select.ids];
