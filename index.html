@@ -1056,6 +1056,8 @@ html.no-card .gf-sep { margin: 0; height: 2px; }
 /* 背景の画像を選んでいるときは、閲覧画面と同じく地を敷かず、文字を背景の色で縁取る */
 html.no-card.has-bg :is(.memo-list, .list-rows, .work-list) { background: transparent; }
 html.no-card.has-bg :is(.memo-card, .list-row, .work-card) { text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
+html.no-card .recall { border: 0; box-shadow: none; background: color-mix(in srgb, var(--bg) 86%, transparent); }
+html.no-card.has-bg .recall { background: transparent; text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
 </style>
 </head>
 <body>
@@ -2150,19 +2152,36 @@ function timelineMix(list) {
   return [...list].sort((a, b) => key(a.id) - key(b.id));
 }
 /* ふりかえり: 「n年前の今日」か、しばらく見ていない過去のメモを1件出す */
-let recallOffset = 0;
+/* ふりかえりは毎日別のメモを出す。その日に出したメモと、最近出したメモを覚えておく（`sm.recall`）。
+   同じ日は同じメモ（「別のメモ」を押したらそれ）。何年か前の同じ日のメモがあれば優先する */
+function recallPick(pool, onDay, exclude) {
+  const today = todayKey(), rec = lsGet("sm.recall", null) || {};
+  const seen = Array.isArray(rec.seen) ? rec.seen : [];
+  if (!exclude && rec.day === today && pool.some(m => m.id === rec.id)) return pool.find(m => m.id === rec.id);
+  // 最近出したもの（多くても メモの数−1 件分）と、今出しているものは避ける
+  const recent = new Set(seen.slice(-Math.max(0, Math.min(60, pool.length - 1))));
+  if (exclude) recent.add(exclude);
+  const fresh = (list) => list.filter(m => !recent.has(m.id));
+  let cands = fresh(onDay);
+  if (!cands.length) cands = fresh(pool);
+  if (!cands.length) cands = pool.filter(m => m.id !== exclude && m.id !== rec.id);
+  if (!cands.length) cands = pool;
+  const m = cands === onDay || onDay.includes(cands[0]) ? cands[0] : cands[Math.floor(Math.random() * cands.length)];
+  lsSet("sm.recall", { day: today, id: m.id, seen: [...seen.filter(x => x !== m.id), m.id].slice(-60) });
+  return m;
+}
 function recallCard(redraw) {
   if (lsGet("sm.recallHidden", "") === todayKey()) return null;
   const now = new Date();
   const all = [...Manager.memos.values()];
   const onDay = all.filter(m => { const d = new Date(m.createdAt); return d.getMonth() === now.getMonth() && d.getDate() === now.getDate() && d.getFullYear() < now.getFullYear(); })
     .sort((a, b) => b.createdAt - a.createdAt);
-  const older = all.filter(m => now - m.createdAt > 7 * 864e5).sort((a, b) => a.id < b.id ? -1 : 1);
+  // 1週間より前のメモから。少ないうちは前日までのメモも使う（毎日入れ替えられるように）
+  let older = all.filter(m => now - m.createdAt > 7 * 864e5);
+  if (older.length < 2) older = all.filter(m => new Date(m.createdAt).setHours(0, 0, 0, 0) < new Date(now).setHours(0, 0, 0, 0));
   const pool = [...onDay, ...older.filter(m => !onDay.includes(m))];
   if (!pool.length) return null;
-  const seed = [...todayKey()].reduce((a, c) => a * 31 + c.charCodeAt(0) >>> 0, 7);
-  const idx = recallOffset === 0 && onDay.length ? 0 : (onDay.length ? (recallOffset % pool.length) : ((seed + recallOffset) % pool.length));
-  const m = pool[idx];
+  const m = recallPick(pool, onDay, null);
   const isOnDay = onDay.includes(m);
   const years = now.getFullYear() - new Date(m.createdAt).getFullYear();
   const days = Math.floor((now - m.createdAt) / 864e5);
@@ -2170,7 +2189,7 @@ function recallCard(redraw) {
   const text = (m.bodyText || "").replace(/\s+/g, " ").trim();
   return h("div", { class: "recall" },
     h("div", { class: "recall-head" }, h("span", { class: "recall-label" }, "ふりかえり ・ " + label), h("span", { class: "spacer" }),
-      pool.length > 1 ? h("button", { class: "recall-btn", type: "button", onclick: () => { recallOffset++; redraw(); } }, "別のメモ") : null,
+      pool.length > 1 ? h("button", { class: "recall-btn", type: "button", onclick: () => { recallPick(pool, onDay, m.id); redraw(); } }, "別のメモ") : null,
       h("button", { class: "recall-btn", type: "button", "aria-label": "今日は表示しない", title: "今日は表示しない", onclick: () => { lsSet("sm.recallHidden", todayKey()); redraw(); } }, "✕")),
     h("button", { class: "recall-body", type: "button", onclick: () => go({ name: "view", id: m.id }) },
       h("span", { class: "recall-title" }, m.title || "無題のメモ"),

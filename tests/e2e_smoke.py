@@ -645,6 +645,24 @@ fire('touchend',x1,false);}"""
     check("オフの設定は開き直しても残る", pg.evaluate("document.documentElement.classList.contains('no-card')"))
     settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='カードの地を表示']"); pg.click(".modal .modal-x"); time.sleep(0.3)
 
+    # ふりかえり: 毎日別のメモ（同じ日は同じメモ）。カードの地をオフにすると、ふりかえりも地と枠を消す
+    pg.evaluate("""() => new Promise(res => { const r = indexedDB.open('sosaku-memo'); r.onsuccess = () => { const tx = r.result.transaction('memos', 'readwrite'); const os = tx.objectStore('memos'); const t = Date.now() - 40 * 864e5;
+      for (let i = 0; i < 4; i++) os.put({ id: 'm-old' + i, title: '昔のメモ' + i, genres: ['体験'], bodyHtml: '<div>昔の本文' + i + '</div>', bodyText: '昔の本文' + i, attachments: [], tags: [], parentId: null, listIds: [], links: [], createdAt: t - i * 864e5, updatedAt: t - i * 864e5 });
+      tx.oncomplete = () => res(); }; })""")
+    pg.reload(); pg.wait_for_selector(".bottom-nav"); time.sleep(0.4)
+    r1 = pg.inner_text(".recall-title")
+    pg.reload(); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
+    check("ふりかえりは同じ日なら同じメモ", pg.inner_text(".recall-title") == r1, r1)
+    days = []
+    for d in range(4):
+        pg.evaluate("(()=>{const r=JSON.parse(localStorage.getItem('sm.recall'));r.day='2000-1-'+(%d+1);localStorage.setItem('sm.recall',JSON.stringify(r))})()" % d)
+        pg.reload(); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3); days.append(pg.inner_text(".recall-title"))
+    seq = [r1] + days
+    check("ふりかえりは毎日別のメモ（続けて同じメモにならない）", all(seq[i] != seq[i + 1] for i in range(len(seq) - 1)) and len(set(seq[:4])) == 4, str(seq))
+    settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='カードの地を表示']"); pg.click(".modal .modal-x"); time.sleep(0.3)
+    check("カードの地をオフにすると、ふりかえりも枠を消して閲覧画面のような地に", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.recall'));return c.borderTopWidth==='0px'&&c.backgroundColor===getComputedStyle(document.querySelector('.memo-list')).backgroundColor})()"))
+    settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='カードの地を表示']"); pg.click(".modal .modal-x"); time.sleep(0.3)
+
     # 拡大表示: 開くと戻る履歴を1つ積み、戻る操作ではそれだけ閉じる（もう1回で前の画面へ）。画像が2枚以上なら横にはらって次へ
     new_screen(pg); pg.fill("#title", "二枚の写真"); pg.click(".genre-pick >> text=体験"); pg.click(".editor")
     attach_image(pg); pg.click(".editor"); pg.keyboard.press("Control+End"); attach_image(pg)
