@@ -846,6 +846,8 @@ body.editing-body .edit-main { padding-bottom: 70vh; }
 .nav-ghost.under { z-index: 30; }
 .nav-ghost.under::after { content: ""; position: absolute; inset: 0; background: #000; animation: nav-dim-in .34s ease both; }
 .nav-ghost.over { z-index: 60; }
+.nav-ghost.under.deep::after { animation: nav-dim-deep .3s ease both; }
+@keyframes nav-dim-deep { from { opacity: 0; } to { opacity: .5; } }
 /* 下のアイコンでの切り替え: 軽く消してから、ふわっと出す */
 .swipe-area.tab-out { animation: tab-out .11s ease forwards; }
 .swipe-area.tab-in { animation: tab-in .2s ease both; }
@@ -1063,6 +1065,9 @@ html.no-card .recall:has(+ .memo-list) { margin-bottom: 0; border-bottom: 1px so
 html.no-card .recall + .memo-list { border-radius: 0 0 var(--radius) var(--radius); }
 html.no-card .nv-card { border: 0; box-shadow: none; background: color-mix(in srgb, var(--bg) 86%, transparent); }
 html.no-card.has-bg .nv-card { background: transparent; text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
+/* 画面から離れたカードは描くのを省く（「最近」はメモが多いと重くなるため）。高さは前に描いたときのものを使う */
+.memo-list > .memo-card { content-visibility: auto; contain-intrinsic-size: auto 150px; }
+.memo-list > .memo-card.cv-on { content-visibility: visible; }
 </style>
 </head>
 <body>
@@ -1141,7 +1146,13 @@ const ICONS = {
 /* 選択のチェック印（太い線・角ばった形） */
 const checkMark = () => { const s = svgIcon('<path d="M5 12.5l4.5 4.5L19 7"/>'); s.setAttribute("stroke-width", "3.4"); s.setAttribute("stroke-linecap", "square"); s.setAttribute("stroke-linejoin", "miter"); return s; };
 const iconBtn = (name, label, onclick, cls) => h("button", { class: "icon-btn ico" + (cls ? " " + cls : ""), type: "button", "aria-label": label, title: label, onclick }, svgIcon(ICONS[name]));
-const svgIcon = (d) => { const s = document.createElementNS("http://www.w3.org/2000/svg", "svg"); s.setAttribute("viewBox", "0 0 24 24"); s.setAttribute("fill", "none"); s.setAttribute("stroke", "currentColor"); s.setAttribute("stroke-width", "2"); s.setAttribute("stroke-linecap", "round"); s.innerHTML = d; return s; };
+// アイコンは形ごとに1度だけ作り、あとは写しを使う（カードを多く並べるときに速くするため）
+const svgCache = new Map();
+const svgIcon = (d) => {
+  let t = svgCache.get(d);
+  if (!t) { t = document.createElementNS("http://www.w3.org/2000/svg", "svg"); t.setAttribute("viewBox", "0 0 24 24"); t.setAttribute("fill", "none"); t.setAttribute("stroke", "currentColor"); t.setAttribute("stroke-width", "2"); t.setAttribute("stroke-linecap", "round"); t.innerHTML = d; svgCache.set(d, t); }
+  return t.cloneNode(true);
+};
 
 /* =========================================================
    HTML sanitizer for rich-text body
@@ -1828,21 +1839,20 @@ function screenGhost(el, kind) {
   setTimeout(() => g.remove(), 700);
   return g;
 }
-const ZOOM_MS = 340, ZOOM_EASE = "cubic-bezier(.2,0,0,1)";
-const insetOf = (r, box, round) => `inset(${Math.max(0, r.top - box.top)}px ${Math.max(0, box.right - r.right)}px ${Math.max(0, box.bottom - r.bottom)}px ${Math.max(0, r.left - box.left)}px round ${round}px)`;
-/* 開く: 新しい画面を、押した場所の形から画面いっぱいまで広げる */
+/* 開く（X の Android 版と同じ動き）: 前の画面は暗くなり、新しい画面は少し小さいところから、ふわっと出ながら画面いっぱいに広がる */
+const FADE_IN_MS = 300, FADE_OUT_MS = 220, FADE_EASE = "cubic-bezier(.05,.7,.1,1)";
 function zoomIn(el, from, ghost) {
   const fixed = getComputedStyle(el).position === "fixed";
-  const er = el.getBoundingClientRect();
-  // 新しい画面は一番上から表示するので、そのときの位置で計算する
-  const box = fixed ? er : { top: er.top + window.scrollY, left: er.left, right: er.right, bottom: er.bottom + window.scrollY };
   el.classList.add("zooming", "pagebg");
+  // 拡大の中心は、見えている画面のまん中（新しい画面は一番上から表示する）
+  el.style.transformOrigin = fixed ? "50% 50%" : `50% ${Math.round(window.innerHeight / 2)}px`;
+  if (ghost) ghost.classList.add("deep");
   const anim = el.animate([
-    { clipPath: insetOf(from.rect, box, from.round), opacity: .55 },
-    { opacity: 1, offset: .45 },
-    { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 }], { duration: ZOOM_MS, easing: ZOOM_EASE });
+    { opacity: 0, transform: "scale(.9)" },
+    { opacity: 1, offset: .55 },
+    { opacity: 1, transform: "scale(1)" }], { duration: FADE_IN_MS, easing: FADE_EASE });
   // 終わったら、先に前の画面の写しを消してから下地を外す（逆だと、一瞬前の画面が透けて見える）
-  const end = () => { if (ghost) ghost.remove(); el.classList.remove("zooming", "pagebg"); };
+  const end = () => { if (ghost) ghost.remove(); el.classList.remove("zooming", "pagebg"); el.style.transformOrigin = ""; };
   anim.onfinish = end; anim.oncancel = end;
 }
 /* 横から入る（フォルダの中・「＋」からのメモ画面）: 新しい画面が右から入り、前の画面は少し左へずれて暗くなる */
@@ -1861,19 +1871,15 @@ function slideOut(ghost) {
   dim.animate([{ opacity: .2 }, { opacity: 0 }], { duration: SLIDE_MS, easing: "ease", fill: "forwards" }).onfinish = () => dim.remove();
   ghost.animate([{ transform: "translateX(0)" }, { transform: "translateX(100%)" }], { duration: SLIDE_MS - 20, easing: SLIDE_EASE, fill: "forwards" }).onfinish = () => ghost.remove();
 }
-/* 閉じる: 前の画面の写しを、戻り先（カード・「＋」）の形まで縮めて消す */
+/* 閉じる（X の Android 版と同じ動き）: 閲覧画面の写しが少し縮みながら消え、下の画面は暗いところから明るくなる */
 function zoomOut(ghost, target, round) {
   ghost.classList.add("pagebg");
-  const vw = window.innerWidth, vh = window.innerHeight;
-  let r = target && target.getBoundingClientRect();
-  if (!r || r.bottom < 0 || r.top > vh || !r.width) r = { top: vh * .3, bottom: vh * .7, left: vw * .2, right: vw * .8 };
-  const box = { top: 0, left: 0, right: vw, bottom: vh };
-  const anim = ghost.animate([
-    { clipPath: "inset(0px 0px 0px 0px round 0px)", opacity: 1 },
-    { opacity: 1, offset: .5 },
-    { clipPath: insetOf(r, box, round), opacity: 0 }], { duration: ZOOM_MS - 40, easing: ZOOM_EASE, fill: "forwards" });
-  anim.onfinish = () => ghost.remove();
-  if (target) target.animate([{ opacity: 0 }, { opacity: 0, offset: .35 }, { opacity: 1 }], { duration: ZOOM_MS });
+  ghost.style.transformOrigin = "50% 50%";
+  const dim = h("div", { class: "nav-dim", "aria-hidden": "true" }); document.body.append(dim);
+  dim.animate([{ opacity: .45 }, { opacity: 0 }], { duration: FADE_OUT_MS, easing: "ease-out", fill: "forwards" }).onfinish = () => dim.remove();
+  ghost.animate([
+    { opacity: 1, transform: "scale(1)" },
+    { opacity: 0, transform: "scale(.9)" }], { duration: FADE_OUT_MS, easing: FADE_EASE, fill: "forwards" }).onfinish = () => ghost.remove();
 }
 function render() {
   const cs = current();
@@ -1996,23 +2002,38 @@ function renderSearch(s) {
       } }, svgIcon(ic)))));
 
   /* タブの中身を作る（スライド中に隣のタブを先に見せるときにも使う） */
-  function buildTab(tab) {
+  function buildTab(tab, peerY) {
     if (tab === "lists") return renderLists(drawResults);
     if (tab === "report") { st.report = st.report || { name: "report" }; return h("div", { class: "rp-tab" }, ...reportBody(st.report, render)); }
     if (tab === "search") return searchResults();
     if (tab === "works") return renderWorks();
-    return memoResults();
+    return memoResults(peerY);
   }
   // 最近: 全部のメモを X のタイムラインのように（先頭は最後に保存・更新したメモ、2件目からは一定時間ごとに並びが変わる）
-  function memoResults() {
+  function memoResults(peerY) {
     const out = h("div");
     const selecting = UI.select.on && UI.select.scope === "search";
     let items = Manager.sorted;
     if (items.length > 2 && mixOn()) items = [items[0], ...timelineMix(items.slice(1))];   // オフなら新しい順のまま
     if (!selecting) { const rc = recallCard(drawResults); if (rc) out.append(rc); }
     if (!items.length) { out.append(h("div", { class: "empty" }, h("b", {}, "まだメモがありません"), "右下の「＋」から、行った場所や思いついたことを書き留めましょう。")); return out; }
+    // 横にスライドするときの隣の画面は、見える高さのカードだけ作り、ほかは同じ高さの空きにする（作るのに時間がかかるため）
+    if (peerY != null) { out.append(peerList(items, peerY)); return out; }
     out.append(cardList(items, [], selecting));
     return out;
+  }
+  function peerList(items, y) {
+    const gap = cardBgOn() ? 12 : 0, est = (m) => (cardOH.get(cardKey(m)) || 175) + gap;
+    const list = h("div", { class: "memo-list" }), y0 = y - 300, y1 = y + window.innerHeight + 300;
+    let top = 110, pad = 0;   // 上の「ふりかえり」の高さはおおよそ
+    for (const m of items) {
+      const hh = est(m);
+      if (top + hh > y0 && top < y1) { if (pad) { list.append(h("div", { style: `height:${pad - gap}px` })); pad = 0; } const c = memoCard(m, [], null, "search"); c.classList.add("cv-on"); list.append(c); }
+      else pad += hh;
+      top += hh;
+    }
+    if (pad) list.append(h("div", { style: `height:${pad}px` }));
+    return list;
   }
   function cardList(items, terms, selecting) {
     const frag = document.createDocumentFragment();
@@ -2112,8 +2133,11 @@ function renderSearch(s) {
     if (sw.peerDir === dir) return;
     dropPeer(); sw.peerDir = dir;
     const nb = neighborOf(dir);
-    sw.peer = h("div", { class: "swipe-peer", "aria-hidden": "true", style: `top:${window.scrollY - (st.scrolls[nb] || 0)}px;left:${dir < 0 ? "" : "-"}${peerGap()}px` }, buildTab(nb));
+    sw.peer = h("div", { class: "swipe-peer", "aria-hidden": "true", style: `top:${window.scrollY - (st.scrolls[nb] || 0)}px;left:${dir < 0 ? "" : "-"}${peerGap()}px` }, buildTab(nb, st.scrolls[nb] || 0));
     results.append(sw.peer);
+    // 横に置いた隣の画面は「画面の外」なので、見える高さにあるカードだけは先に描いておく（滑り込むときに空白にならないように）
+    const y0 = (st.scrolls[nb] || 0) - 200, y1 = (st.scrolls[nb] || 0) + window.innerHeight + 200, pt = sw.peer.getBoundingClientRect().top;
+    sw.peer.querySelectorAll(".memo-card").forEach(c => { const r = c.getBoundingClientRect(), t = r.top - pt; if (t + r.height > y0 && t < y1) c.classList.add("cv-on"); });
   }
   area.addEventListener("touchstart", (e) => {
     const t = e.touches[0];
@@ -2274,7 +2298,24 @@ function decorateText(text, terms) {
 }
 /* メモのカード: X（旧Twitter）の投稿のように「自分のアイコン／題名・日時・ジャンル／本文（長ければ一部）／画像」。
    押すと閲覧画面、長押しで選択。アイコンを押すとアイコンの画像を変えられる */
+/* メモのカードは、画面から離れている間は描くのを省く（content-visibility）。省いている間の高さは、前に描いたときの高さを
+   覚えておいて使う（読んでいた位置に戻ったとき・横にスライドしたときに位置がずれないように） */
+const cardH = new Map(), cardOH = new Map();   // 中身の高さ・枠を含めた高さ
+const cardKey = (m) => m.id + ":" + m.updatedAt + ":" + Math.round(window.innerWidth);
+function measureCard(card, key) {
+  if (!card.isConnected) return;
+  const cs = getComputedStyle(card);
+  const hh = card.offsetHeight - ["paddingTop", "paddingBottom", "borderTopWidth", "borderBottomWidth"].reduce((n, k) => n + (parseFloat(cs[k]) || 0), 0);
+  if (hh > 0) { cardH.set(key, Math.round(hh)); cardOH.set(key, card.offsetHeight); card.style.containIntrinsicSize = `auto ${Math.round(hh)}px`; }
+}
 function memoCard(m, terms = [], sel, scope) {
+  const card = memoCardBody(m, terms, sel, scope), key = cardKey(m);
+  if (cardH.has(key)) card.style.containIntrinsicSize = `auto ${cardH.get(key)}px`;
+  card.addEventListener("contentvisibilityautostatechange", (e) => { if (!e.skipped) requestAnimationFrame(() => measureCard(card, key)); });
+  const img = card.querySelector(".tw-media img"); if (img) img.addEventListener("load", () => measureCard(card, key));
+  return card;
+}
+function memoCardBody(m, terms = [], sel, scope) {
   const picked = sel && sel.ids.has(m.id);
   const gs = GENRES.filter(g => (m.genres || []).includes(g));
   const full = (m.bodyText || "").replace(/\n{3,}/g, "\n\n").trim();
