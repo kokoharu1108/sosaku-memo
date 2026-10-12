@@ -1058,6 +1058,11 @@ html.no-card.has-bg :is(.memo-list, .list-rows, .work-list) { background: transp
 html.no-card.has-bg :is(.memo-card, .list-row, .work-card) { text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
 html.no-card .recall { border: 0; box-shadow: none; background: color-mix(in srgb, var(--bg) 86%, transparent); }
 html.no-card.has-bg .recall { background: transparent; text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
+/* ふりかえりのすぐ下に一覧が続くときは、メモの間と同じ線でつなげる */
+html.no-card .recall:has(+ .memo-list) { margin-bottom: 0; border-bottom: 1px solid var(--line); border-radius: var(--radius) var(--radius) 0 0; }
+html.no-card .recall + .memo-list { border-radius: 0 0 var(--radius) var(--radius); }
+html.no-card .nv-card { border: 0; box-shadow: none; background: color-mix(in srgb, var(--bg) 86%, transparent); }
+html.no-card.has-bg .nv-card { background: transparent; text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
 </style>
 </head>
 <body>

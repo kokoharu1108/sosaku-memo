@@ -661,6 +661,7 @@ fire('touchend',x1,false);}"""
     check("ふりかえりは毎日別のメモ（続けて同じメモにならない）", all(seq[i] != seq[i + 1] for i in range(len(seq) - 1)) and len(set(seq[:4])) == 4, str(seq))
     settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='カードの地を表示']"); pg.click(".modal .modal-x"); time.sleep(0.3)
     check("カードの地をオフにすると、ふりかえりも枠を消して閲覧画面のような地に", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.recall'));return c.borderTopWidth==='0px'&&c.backgroundColor===getComputedStyle(document.querySelector('.memo-list')).backgroundColor})()"))
+    check("ふりかえりと一覧の間もメモの間と同じ線でつなぐ", pg.evaluate("(()=>{const r=document.querySelector('.recall'),l=r.nextElementSibling;return l.classList.contains('memo-list')&&getComputedStyle(r).borderBottomWidth==='1px'&&parseFloat(getComputedStyle(r).marginBottom)===0&&Math.abs(l.getBoundingClientRect().top-r.getBoundingClientRect().bottom)<1})()"))
     settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='カードの地を表示']"); pg.click(".modal .modal-x"); time.sleep(0.3)
 
     # 拡大表示: 開くと戻る履歴を1つ積み、戻る操作ではそれだけ閉じる（もう1回で前の画面へ）。画像が2枚以上なら横にはらって次へ
