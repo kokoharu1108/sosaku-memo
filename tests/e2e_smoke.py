@@ -634,6 +634,17 @@ fire('touchend',x1,false);}"""
     check("オフにすると「最近」は新しい順", shown == order[:len(shown)] and len(shown) >= 3, str((shown[:4], order[:4])))
     settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='「最近」をランダムに並べる']"); pg.click(".modal .modal-x"); time.sleep(0.3)
 
+    # カードの地は設定で消せる（はじめはオン。オフなら閲覧画面のように線で区切って並べる）
+    check("はじめはカードに地の色がある", pg.evaluate("getComputedStyle(document.querySelector('.memo-card')).backgroundColor") not in ("rgba(0, 0, 0, 0)", "transparent"))
+    settings(pg); time.sleep(0.3)
+    sw = pg.locator(".modal .switch[aria-label='カードの地を表示']")
+    check("設定に「カードの地を表示」がある（はじめはオン）", sw.count() == 1 and sw.get_attribute("aria-checked") == "true")
+    sw.click(); time.sleep(0.2); pg.click(".modal .modal-x"); time.sleep(0.3)
+    check("オフにするとカードの地と枠を消し、線で区切る", pg.evaluate("(()=>{const c=getComputedStyle(document.querySelector('.memo-card'));const l=getComputedStyle(document.querySelector('.memo-list'));return c.backgroundColor==='rgba(0, 0, 0, 0)'&&c.borderTopWidth==='0px'&&l.rowGap==='0px'})()"))
+    pg.reload(); pg.wait_for_selector(".bottom-nav"); time.sleep(0.3)
+    check("オフの設定は開き直しても残る", pg.evaluate("document.documentElement.classList.contains('no-card')"))
+    settings(pg); time.sleep(0.3); pg.click(".modal .switch[aria-label='カードの地を表示']"); pg.click(".modal .modal-x"); time.sleep(0.3)
+
     # 拡大表示: 開くと戻る履歴を1つ積み、戻る操作ではそれだけ閉じる（もう1回で前の画面へ）。画像が2枚以上なら横にはらって次へ
     new_screen(pg); pg.fill("#title", "二枚の写真"); pg.click(".genre-pick >> text=体験"); pg.click(".editor")
     attach_image(pg); pg.click(".editor"); pg.keyboard.press("Control+End"); attach_image(pg)
