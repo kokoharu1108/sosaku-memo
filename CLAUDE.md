@@ -58,7 +58,7 @@
 - `createdAt` は作成時から不変、`updatedAt` は保存のたびに更新。
 - 階層（ツリー）機能は**画面からは廃止**（v15）。`parentId` はデータとして残しており、索引・削除時の付け替え処理も残っている（復活させる場合に備えて消さない）。
 - 自分のアイコン画像は背景と同じく files ストアに保存（毎日の整理で消さない・同期しない）。
-- localStorage は端末ごとの小さな設定だけ: `sm.theme`、`sm.recallHidden`、同期の `sm.syncOn` / `sm.syncUrl` / `sm.syncKey`、上部バーの透過 `sm.clearBar`、最近のランダム表示 `sm.mix`。
+- localStorage は端末ごとの小さな設定だけ: `sm.theme`、`sm.recallHidden`、同期の `sm.syncOn` / `sm.syncUrl` / `sm.syncKey`、上部バーの透過 `sm.clearBar`、最近のランダム表示 `sm.mix`、カードの地 `sm.cardBg`（v51。オフで `html.no-card`: カード・フォルダの行・作品のカードの地と枠を消し、閲覧画面の本文の場所と同じ落ち着いた地の上に線で区切って並べる。背景画像のときは地を敷かず文字を縁取る）。
 - シナリオの作品（meta ストアの `work:作品id`）: `{ id, title, synopsis, episodes[{ id, title, fore, body, after, createdAt, updatedAt }], createdAt, updatedAt }`
 
 ## 本文エディタの注意点（不具合が出やすい箇所）

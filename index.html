@@ -1046,6 +1046,16 @@ details[open] > summary .rp-chev { transform: rotate(180deg); }
 .ref-row-b { color: var(--ink-3); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ref-genres { display: flex; gap: 6px; margin-bottom: 8px; }
 .ref-view { font-size: 15px; line-height: 1.7; }
+/* カードの地を表示しない（設定）: 閲覧画面の本文の場所と同じ落ち着いた地の上に、カードの枠を付けずに線で区切って並べる */
+html.no-card :is(.memo-list, .list-rows, .work-list) { gap: 0; background: color-mix(in srgb, var(--bg) 86%, transparent); border-radius: var(--radius); overflow: hidden; }
+html.no-card :is(.memo-card, .list-row, .work-card) { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; box-shadow: none; }
+html.no-card :is(.memo-card, .list-row, .work-card):last-child { border-bottom: 0; }
+html.no-card :is(.memo-card, .list-row).picked { background: var(--accent-soft); box-shadow: inset 0 0 0 2px var(--sel-bg); }
+html.no-card .tw-genres .tw-g + .tw-g { box-shadow: 0 0 0 2px var(--bg); }
+html.no-card .gf-sep { margin: 0; height: 2px; }
+/* 背景の画像を選んでいるときは、閲覧画面と同じく地を敷かず、文字を背景の色で縁取る */
+html.no-card.has-bg :is(.memo-list, .list-rows, .work-list) { background: transparent; }
+html.no-card.has-bg :is(.memo-card, .list-row, .work-card) { text-shadow: 0 0 2px var(--bg), 0 0 3px var(--bg), 0 0 6px var(--bg), 0 0 10px var(--bg); }
 </style>
 </head>
 <body>
@@ -1756,6 +1766,9 @@ function onOffSwitch(label, get, set) {
 const mixOn = () => lsGet("sm.mix", true) !== false;
 /* 検索画面の上部バーを透過するか（端末ごとの設定） */
 const clearBarOn = () => !!lsGet("sm.clearBar", false);
+/* 最近などのカードに地の色を敷くか（端末ごとの設定。オフなら閲覧画面のように、落ち着いた地の上に線で区切って並べる） */
+const cardBgOn = () => lsGet("sm.cardBg", true) !== false;
+function applyCardBg() { document.documentElement.classList.toggle("no-card", !cardBgOn()); }
 function applyClearBar() { document.documentElement.classList.toggle("clear-bar", clearBarOn()); syncThemeColor(); }
 function themeSwitch() {
   const btn = h("button", { class: "switch", role: "switch", "aria-checked": String(isDark()), title: "ダークモード",
@@ -4412,6 +4425,7 @@ function openSettings() {
         h("h4", {}, "表示"),
         h("div", { class: "row" }, h("span", { style: "flex:1" }, "ダークモード"), themeSwitch()),
         h("div", { class: "row" }, h("span", { style: "flex:1" }, "「最近」をランダムに並べる"), onOffSwitch("「最近」をランダムに並べる", mixOn, (v) => { lsSet("sm.mix", v); UI.mix = null; render(); })),
+        h("div", { class: "row" }, h("span", { style: "flex:1" }, "カードの地を表示"), onOffSwitch("カードの地を表示", cardBgOn, (v) => { lsSet("sm.cardBg", v); applyCardBg(); })),
         h("div", { class: "row" }, h("span", { style: "flex:1" }, "上部バーを透過"), onOffSwitch("上部バーを透過", clearBarOn, (v) => { lsSet("sm.clearBar", v); applyClearBar(); }))),
       avatarSection(),
       bgSection(),
@@ -4575,7 +4589,7 @@ function bakeCaustic() {
 }
 async function boot() {
   applyTheme(); setTimeout(bakeCaustic, 600);
-  document.documentElement.classList.toggle("clear-bar", clearBarOn());
+  document.documentElement.classList.toggle("clear-bar", clearBarOn()); applyCardBg();
   if (historyOk) try { history.replaceState({ depth: 1 }, ""); } catch {}
   // 戻る操作のときにブラウザが勝手に前のスクロール位置へ飛ばさないようにする（位置はアプリで覚えて戻す）
   try { history.scrollRestoration = "manual"; } catch {}
